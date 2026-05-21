@@ -1,0 +1,36 @@
+model:
+  name: qwen2.5:3b-instruct
+  endpoint: http://localhost:11434/api/generate
+  stream: false
+
+paths:
+  src: src/
+  data: data/
+  logs: logs/
+  snapshots: snapshots/
+  ui: ui/
+  db: data/graph.db
+
+embedding:
+  model: sentence-transformers/all-MiniLM-L6-v2
+  dim: 384
+  similarity_threshold_merge: 0.85  # merge concepts if closer than this
+  similarity_threshold_edge: 0.05   # floor weight for co-occurring concept edges (tune later)
+
+ambiguity:
+  low_max: 0.3
+  high_min: 0.6
+  weights:
+    variance: 0.10
+    cluster: 0.10
+    bridge: 0.80
+
+modulation:
+  medium_neighbors: 5
+  high_neighbors: 8
+
+decay:
+  daily_factor: 0.99
+  prune_weight_below: 0.1
+  orphan_days: 14
+  reinforce_factor: 1.1

@@ -1,0 +1,19 @@
+# Monday — Wikipedia articles (factual prose)
+# Phase 8 diet experiment · Day 1
+# One sentence or short paragraph per line.
+
+The transformer architecture introduced the self-attention mechanism as a replacement for recurrent networks in sequence modelling.
+Photosynthesis converts light energy into chemical energy stored in glucose, releasing oxygen as a byproduct.
+The French Revolution began in 1789 with the convocation of the Estates-General and ended with Napoleon Bonaparte's rise to power.
+Quantum entanglement is a phenomenon where two particles become correlated such that the state of one instantly influences the other.
+The human immune system distinguishes self from non-self through a process called clonal selection and antigen presentation.
+Continental drift describes the movement of the Earth's tectonic plates over geological time, reshaping the surface of the planet.
+The theory of general relativity describes gravity as the curvature of spacetime caused by mass and energy.
+RNA polymerase transcribes DNA into messenger RNA, which is then translated into protein by ribosomes.
+The Industrial Revolution shifted manufacturing from hand production to machine-based processes, beginning in Britain in the 1760s.
+Supply and demand is the economic model describing how the price of a good is determined by buyer willingness and seller availability.
+The speed of light in a vacuum is approximately 299,792 kilometres per second and is a fundamental constant of physics.
+Neurons communicate through electrochemical signals called action potentials, transmitted across synapses via neurotransmitters.
+The water cycle describes the continuous movement of water through evaporation, condensation, precipitation, and surface runoff.
+Natural selection is the mechanism by which heritable traits that increase reproductive success become more common over generations.
+The central limit theorem states that the sum of independent random variables tends toward a normal distribution as sample size grows.

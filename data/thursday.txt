@@ -1,0 +1,24 @@
+# Thursday — Technical docs / papers (tight, low-ambiguity clusters)
+# Phase 8 diet experiment · Day 4
+# Style: ML papers, API docs, engineering specs
+
+Attention mechanisms compute a weighted sum of values, where weights are derived from the compatibility of queries and keys.
+Backpropagation computes the gradient of the loss function with respect to each weight using the chain rule of calculus.
+A convolutional neural network applies learned filters across spatial dimensions to extract local features from input tensors.
+Dropout regularisation randomly sets activations to zero during training to prevent co-adaptation of neurons.
+Batch normalisation standardises layer inputs by re-centring and re-scaling activations using mini-batch statistics.
+The ADAM optimiser adapts learning rates for each parameter using estimates of first and second moments of the gradients.
+Tokenisation splits raw text into subword units using algorithms such as byte-pair encoding or unigram language modelling.
+A key-value store retrieves data in O(1) average time by hashing the key to an index in an underlying array.
+RESTful APIs communicate over HTTP using stateless requests, with resources identified by URIs and manipulated via standard verbs.
+A binary search tree maintains the invariant that each node's left subtree contains only keys less than the node's key.
+Gradient clipping caps the norm of the gradient vector to prevent exploding gradients during training of deep networks.
+Kubernetes orchestrates containerised workloads by scheduling pods onto nodes based on resource requests and availability.
+A transformer encoder stack applies self-attention and feed-forward sublayers alternately, with residual connections and layer normalisation.
+SQL transactions satisfy the ACID properties: atomicity, consistency, isolation, and durability.
+Precision measures the fraction of retrieved documents that are relevant; recall measures the fraction of relevant documents that are retrieved.
+The softmax function converts a vector of raw logits into a probability distribution by exponentiating and normalising.
+Cosine similarity measures the angle between two vectors and is commonly used to compare document or sentence embeddings.
+A recurrent neural network maintains a hidden state that is updated at each time step by combining the current input with the previous state.
+Database indexing trades write speed and storage for faster read access by maintaining a sorted auxiliary data structure.
+Model quantisation reduces the bit-width of weights and activations to decrease memory footprint and increase inference throughput.

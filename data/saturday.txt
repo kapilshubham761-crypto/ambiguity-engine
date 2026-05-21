@@ -1,0 +1,25 @@
+# Saturday — Your own writing / personal reflection (personal signature)
+# Phase 8 diet experiment · Day 6
+# Replace these with your own journal entries, notes, or chat logs for best results.
+# The lines below are placeholders in a personal-reflection register.
+
+I keep starting projects I don't finish and I'm not sure if that's a character flaw or just how I think.
+The thing I find most interesting about language models is not what they know — it's the shape of what they don't know.
+Some days I think I'm building something real. Other days I think I'm just filling time in an interesting way.
+I notice I work better when I don't tell anyone what I'm working on. Explaining it too early kills it.
+There's a version of this project that becomes something important. I don't know if I'm the one who builds it.
+The gap between how I imagine a piece of work and how it actually comes out used to bother me. Now I think the gap is the work.
+I've been thinking about attention a lot — not the machine learning kind, the human kind. They might be the same thing.
+Ambiguity feels like failure when you're young and feels like texture when you're older.
+I want to build systems that hesitate. Everything we build right now is too confident.
+The most interesting responses the model gives are always when I push it slightly past what it was trained for.
+Reading someone else's notes feels like archaeology — you find the structure of their mind preserved in what they chose to write down.
+I keep returning to the question of whether understanding and prediction are actually different things.
+The graph is growing. I don't know yet what it knows.
+If the model learns to pause on ambiguity, does it know something? Or does it just behave as if it does?
+Some things only become clear when you have to explain them to a machine.
+The scariest version of this project is the one that works exactly as intended.
+I think what I actually want is a collaborator, not a tool. I don't know if that distinction survives contact with reality.
+Curiosity is the only renewable resource I've found.
+There is something in between a question and an answer that most systems skip over. That's what I'm trying to build.
+The ambiguity engine doesn't know it's the subject of the experiment. Neither do I, probably.

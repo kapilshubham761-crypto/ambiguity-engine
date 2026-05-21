@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+
+# Logs (runtime output — excluded from version control)
+logs/
+
+# Snapshots (runtime graph history)
+snapshots/
+
+# SQLite database (runtime state)
+data/graph.db
+data/last_cleaned.txt
+
+# OS
+.DS_Store
+Thumbs.db

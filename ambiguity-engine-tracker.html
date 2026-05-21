@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambiguity Engine — Build Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Spectral:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4ede1;
+    --paper-deep: #ebe2d2;
+    --paper-edge: #d9cdb6;
+    --ink: #1c1917;
+    --ink-soft: #3d3935;
+    --ink-faint: #6b665e;
+    --ink-ghost: #a39d92;
+    --accent: #8b3a2b;
+    --accent-soft: #b8745f;
+    --teal: #2d4a3e;
+    --done: #4a6b54;
+    --rule: #c8bda6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Spectral', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(at 12% 8%, rgba(139, 58, 43, 0.04) 0%, transparent 40%),
+      radial-gradient(at 88% 92%, rgba(45, 74, 62, 0.04) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+  }
+
+  /* ============ MASTHEAD ============ */
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 32px;
+    margin-bottom: 64px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: end;
+  }
+
+  .masthead-left .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+
+  .masthead-left h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(48px, 6vw, 76px);
+    line-height: 0.96;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144;
+  }
+
+  .masthead-left h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+  }
+
+  .masthead-left .subtitle {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    max-width: 540px;
+    line-height: 1.4;
+  }
+
+  .masthead-right {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .masthead-right .line {
+    margin-bottom: 4px;
+  }
+
+  .masthead-right .progress-pct {
+    font-size: 38px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-top: 14px;
+    letter-spacing: 0;
+  }
+
+  .masthead-right .progress-pct sub {
+    font-size: 11px;
+    color: var(--ink-faint);
+    vertical-align: baseline;
+    letter-spacing: 0.08em;
+  }
+
+  /* ============ PROGRESS BAR ============ */
+  .progress-shell {
+    height: 2px;
+    background: var(--paper-edge);
+    margin-bottom: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  /* ============ SECTION HEADERS ============ */
+  .section-marker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .section-marker::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h2.section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    font-variation-settings: "opsz" 100;
+  }
+
+  h2.section-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* ============ PHILOSOPHY ============ */
+  .philosophy {
+    margin-bottom: 96px;
+  }
+
+  .philosophy-prose {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 720px;
+  }
+
+  .philosophy-prose p {
+    margin-bottom: 22px;
+  }
+
+  .philosophy-prose p:first-of-type::first-line {
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+
+  .pull-quote {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 48px 0 48px 32px;
+    padding-left: 28px;
+    border-left: 2px solid var(--accent);
+    max-width: 640px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  /* ============ THE THREE BETS ============ */
+  .bets {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+  }
+
+  .bet {
+    border-top: 1px solid var(--ink);
+    padding-top: 18px;
+  }
+
+  .bet-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+  }
+
+  .bet-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    font-weight: 500;
+    font-variation-settings: "opsz" 100;
+  }
+
+  .bet-body {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  /* ============ WORKING / PIPELINE ============ */
+  .working {
+    margin-bottom: 96px;
+  }
+
+  .pipeline {
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    padding: 42px;
+    margin: 36px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--ink-soft);
+    position: relative;
+  }
+
+  .pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 4px 0;
+  }
+
+  .pipeline-step .num {
+    color: var(--accent);
+    font-weight: 500;
+    width: 26px;
+  }
+
+  .pipeline-step .label {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .pipeline-step .note {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-family: 'Spectral', serif;
+    font-size: 13px;
+    margin-left: 8px;
+  }
+
+  .pipeline-arrow {
+    color: var(--accent-soft);
+    margin-left: 12px;
+    user-select: none;
+  }
+
+  .parts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 36px;
+  }
+
+  .part {
+    padding: 22px 24px;
+    background: var(--paper-deep);
+    border-left: 2px solid var(--accent);
+  }
+
+  .part-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .part-name {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .part-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ============ SCOPE BOX ============ */
+  .scope {
+    margin-top: 56px;
+    padding: 28px 32px;
+    border: 1px dashed var(--ink-ghost);
+    background: rgba(139, 58, 43, 0.02);
+  }
+
+  .scope h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .scope ul {
+    list-style: none;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+
+  .scope li {
+    padding: 4px 0;
+    padding-left: 22px;
+    position: relative;
+  }
+
+  .scope li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ============ BUILD PLAN ============ */
+  .build-plan {
+    margin-top: 32px;
+  }
+
+  .phase {
+    margin-bottom: 64px;
+    scroll-margin-top: 40px;
+  }
+
+  .phase-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 24px;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 28px;
+  }
+
+  .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .phase-title {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.1;
+    font-variation-settings: "opsz" 100;
+  }
+
+  .phase-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .phase-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .phase-intro {
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+    font-size: 16px;
+    max-width: 680px;
+    line-height: 1.5;
+  }
+
+  /* ============ TASKS (BRANCHED) ============ */
+  .task-group {
+    margin-bottom: 28px;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 22px 56px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--paper-edge);
+    transition: opacity 0.2s;
+  }
+
+  .task.parent {
+    padding-top: 14px;
+    margin-top: 8px;
+    border-bottom-color: var(--rule);
+  }
+
+  .task.parent .task-label {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 16px;
+  }
+
+  .task.child {
+    padding-left: 28px;
+    grid-template-columns: 22px 64px 1fr;
+  }
+
+  .task.child .task-id {
+    color: var(--accent-soft);
+  }
+
+  .task-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--ink-faint);
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+    border-radius: 1px;
+    margin-top: 4px;
+  }
+
+  .task-checkbox:hover {
+    border-color: var(--accent);
+  }
+
+  .task-checkbox:checked {
+    background: var(--done);
+    border-color: var(--done);
+  }
+
+  .task-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: solid var(--paper);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .task-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .task-label {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+
+  .task.done .task-label {
+    color: var(--ink-ghost);
+    text-decoration: line-through;
+    text-decoration-color: var(--ink-ghost);
+  }
+
+  .task code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: var(--paper-deep);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--accent);
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    margin-top: 120px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .footer .reset {
+    background: none;
+    border: 1px solid var(--ink-ghost);
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .footer .reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ============ TOC ============ */
+  .toc {
+    position: sticky;
+    top: 24px;
+    margin-bottom: 80px;
+    padding: 24px 28px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+  }
+
+  .toc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 24px;
+  }
+
+  .toc-list a {
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 4px 0;
+    border-bottom: 1px dotted transparent;
+    transition: all 0.2s;
+  }
+
+  .toc-list a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .toc-list a .toc-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 720px) {
+    .container { padding: 48px 24px 80px; }
+    .masthead { grid-template-columns: 1fr; }
+    .masthead-right { text-align: left; }
+    .bets { grid-template-columns: 1fr; }
+    .parts-grid { grid-template-columns: 1fr; }
+    .toc-list { grid-template-columns: 1fr; }
+    .pull-quote { margin-left: 0; }
+    .phase-header { grid-template-columns: 1fr; gap: 6px; }
+    .task { grid-template-columns: 22px 50px 1fr; gap: 10px; }
+    .task.child { padding-left: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="container">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="masthead-left">
+      <div class="eyebrow">Research Toy · v0.1 · Build Plan</div>
+      <h1>The Ambiguity <em>Engine</em></h1>
+      <p class="subtitle">A semantic graph that watches a small open-source LLM think, and quietly shapes what it thinks about.</p>
+    </div>
+    <div class="masthead-right">
+      <div class="line">SHUBHAM · 2026</div>
+      <div class="line">QWEN 2.5 · 3B</div>
+      <div class="line" id="task-counter">0 / 83 STEPS</div>
+      <div class="progress-pct"><span id="progress-num">0</span><sub>%</sub></div>
+    </div>
+  </header>
+
+  <div class="progress-shell">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- ============ PHILOSOPHY ============ -->
+  <section class="philosophy">
+    <div class="section-marker">01 — Philosophy</div>
+    <h2 class="section-title">Ambiguity is <em>signal</em>, not error.</h2>
+
+    <div class="philosophy-prose">
+      <p>Every standard language model is trained to do one thing well: pick the next most-probable token. When the input is ambiguous — when two interpretations are equally live, when concepts pull in opposing directions, when the territory is genuinely uncertain — the model still picks. It commits. It flattens. This is where hallucinations come from: confident wrong answers produced exactly where the model should have hesitated.</p>
+
+      <p>This project assumes a different stance: that ambiguity is the moment cognition actually starts. When the topology of meaning becomes unstable, the system should slow down, hold the tension, and explore — not collapse into the most popular interpretation. The whole engine is built around detecting that instability and using it as a trigger.</p>
+    </div>
+
+    <blockquote class="pull-quote">"Intelligence is not stored truth. It is the stabilization of unstable relational geometry into coherent structure."</blockquote>
+
+    <div class="bets">
+      <div class="bet">
+        <div class="bet-number">BET / 01</div>
+        <div class="bet-title">Tension as trigger</div>
+        <div class="bet-body">Detect semantic conflict <em>before</em> generation, not after. Use it to switch the model from fast pattern-matching into slower exploration — only when needed.</div>
+      </div>
+      <div class="bet">
+        <div class="bet-number">BET / 02</div>
+        <div class="bet-title">A graph that remembers</div>
+        <div class="bet-body">Concepts and their relationships persist across runs. Meanings drift, edges decay, useful structures reinforce. Legible, not buried in weights.</div>
+      </div>
+      <div class="bet">
+        <div class="bet-number">BET / 03</div>
+        <div class="bet-title">Modulation, not replacement</div>
+        <div class="bet-body">Don't fight the transformer. Shape what it flows toward — through prompt-level modulation signals derived from the graph's current state.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WORKING ============ -->
+  <section class="working">
+    <div class="section-marker">02 — Working</div>
+    <h2 class="section-title">The pipeline, at a <em>glance</em>.</h2>
+
+    <div class="pipeline">
+      <div class="pipeline-step"><span class="num">→</span><span class="label">USER INPUT</span><span class="note">a question, prompt, or fragment of text</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">CONCEPT EXTRACTION</span><span class="note">noun chunks + entities, embedded into vector space</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">GRAPH UPDATE</span><span class="note">new nodes added, edges reinforced or created</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">AMBIGUITY DETECTION</span><span class="note">measure tension across the input's concepts</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">MODULATION SIGNAL</span><span class="note">low / medium / high — shapes the system prompt</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">LLM CALL</span><span class="note">Qwen 2.5 3B, locally via Ollama</span></div>
+      <div class="pipeline-step"><span class="num">→</span><span class="label">OUTPUT + LOGS</span><span class="note">every decision recorded for later study</span></div>
+    </div>
+
+    <div class="parts-grid">
+      <div class="part">
+        <div class="part-label">Part 01</div>
+        <div class="part-name">Concept Extractor</div>
+        <div class="part-desc">spaCy noun chunks + MiniLM embeddings. Pulls 5–15 concepts per input and gives them vectors in 384-dimensional space.</div>
+      </div>
+      <div class="part">
+        <div class="part-label">Part 02</div>
+        <div class="part-name">Semantic Graph</div>
+        <div class="part-desc">NetworkX in memory, SQLite on disk. Nodes hold concept text + embeddings, edges hold weighted relationships that evolve.</div>
+      </div>
+      <div class="part">
+        <div class="part-label">Part 03</div>
+        <div class="part-name">Ambiguity Detector</div>
+        <div class="part-desc">Measures variance and cluster-split across the input's concepts in vector space. Outputs a single score from 0 to 1.</div>
+      </div>
+      <div class="part">
+        <div class="part-label">Part 04</div>
+        <div class="part-name">Modulation Layer</div>
+        <div class="part-desc">Builds the system prompt for the LLM based on the ambiguity score and the most relevant graph neighbors. The steering wheel.</div>
+      </div>
+    </div>
+
+    <div class="scope">
+      <h4>Out of scope for v0.1</h4>
+      <ul>
+        <li>Multi-agent cognitive fields — single engine first, see how it behaves</li>
+        <li>Emotional weight systems — interesting, but adds a dimension before we understand the first one</li>
+        <li>Autonomous cognitive loops — manual runs only; the goal is observation, not automation</li>
+        <li>Replacing the transformer with anything — modulation only, full stop</li>
+        <li>Production-grade performance — runs locally, latency is fine</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ TOC ============ -->
+  <nav class="toc">
+    <div class="toc-label">Table of contents · 08 phases</div>
+    <ul class="toc-list">
+      <li><a href="#phase-1"><span>Foundation</span><span class="toc-num">01</span></a></li>
+      <li><a href="#phase-2"><span>Concept Extraction</span><span class="toc-num">02</span></a></li>
+      <li><a href="#phase-3"><span>Graph Construction</span><span class="toc-num">03</span></a></li>
+      <li><a href="#phase-4"><span>Ambiguity Detection</span><span class="toc-num">04</span></a></li>
+      <li><a href="#phase-5"><span>Modulation Layer</span><span class="toc-num">05</span></a></li>
+      <li><a href="#phase-6"><span>Decay & Pruning</span><span class="toc-num">06</span></a></li>
+      <li><a href="#phase-7"><span>Observability</span><span class="toc-num">07</span></a></li>
+      <li><a href="#phase-8"><span>Daily Diet Experiments</span><span class="toc-num">08</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- ============ BUILD PLAN ============ -->
+  <section class="build-plan">
+    <div class="section-marker">03 — Build Plan</div>
+    <h2 class="section-title">Branched, in <em>order</em>.</h2>
+
+    <!-- ============ PHASE 1 ============ -->
+    <div class="phase" id="phase-1">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 01</div>
+        <div class="phase-title">Foundation</div>
+        <div class="phase-count">13 steps</div>
+      </div>
+      <p class="phase-intro">Get a local LLM speaking to a Python script. Nothing clever yet — just the floor we'll build everything else on.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-1.1"><span class="task-id">1.1</span><span class="task-label">Local LLM running</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.1a"><span class="task-id">1.1a</span><span class="task-label">Install Ollama from <code>ollama.com</code> and verify it runs</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.1b"><span class="task-id">1.1b</span><span class="task-label">Pull the model: <code>ollama pull qwen2.5:3b-instruct</code></span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.1c"><span class="task-id">1.1c</span><span class="task-label">Test from terminal: <code>curl localhost:11434/api/generate</code> with a prompt</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-1.2"><span class="task-id">1.2</span><span class="task-label">Python environment</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.2a"><span class="task-id">1.2a</span><span class="task-label">Python 3.11 venv created, activated</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.2b"><span class="task-id">1.2b</span><span class="task-label">Install: <code>sentence-transformers spacy networkx pyyaml requests streamlit</code></span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.2c"><span class="task-id">1.2c</span><span class="task-label">Download spaCy model: <code>python -m spacy download en_core_web_sm</code></span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-1.3"><span class="task-id">1.3</span><span class="task-label">Project scaffolding</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.3a"><span class="task-id">1.3a</span><span class="task-label">Folder structure: <code>src/ data/ logs/ snapshots/ ui/</code></span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.3b"><span class="task-id">1.3b</span><span class="task-label">Config file <code>config.yaml</code> with thresholds, paths, model name</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.3c"><span class="task-id">1.3c</span><span class="task-label">Smoke test: Python sends prompt to Ollama, prints response</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-1.3d"><span class="task-id">1.3d</span><span class="task-label">Logging setup — every run writes to a dated log file in <code>logs/</code></span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 2 ============ -->
+    <div class="phase" id="phase-2">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 02</div>
+        <div class="phase-title">Concept Extraction</div>
+        <div class="phase-count">10 steps</div>
+      </div>
+      <p class="phase-intro">Turn raw text into a clean list of concepts, each one carrying an embedding vector. This is the atom of everything that follows.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-2.1"><span class="task-id">2.1</span><span class="task-label">Extractor function</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.1a"><span class="task-id">2.1a</span><span class="task-label">Pull spaCy noun chunks from input text</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.1b"><span class="task-id">2.1b</span><span class="task-label">Add named entities (people, places, orgs)</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.1c"><span class="task-id">2.1c</span><span class="task-label">Normalize: lowercase, lemmatize, strip stopwords</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.1d"><span class="task-id">2.1d</span><span class="task-label">Filter overly generic terms ("thing", "way", "people")</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-2.2"><span class="task-id">2.2</span><span class="task-label">Embedding pipeline</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.2a"><span class="task-id">2.2a</span><span class="task-label">Load <code>sentence-transformers/all-MiniLM-L6-v2</code></span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.2b"><span class="task-id">2.2b</span><span class="task-label">Generate 384-dim embeddings for each concept</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-2.2c"><span class="task-id">2.2c</span><span class="task-label">In-memory cache so we don't re-embed seen concepts</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-2.3"><span class="task-id">2.3</span><span class="task-label">Eyeball validation across input types</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 3 ============ -->
+    <div class="phase" id="phase-3">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 03</div>
+        <div class="phase-title">Graph Construction & Persistence</div>
+        <div class="phase-count">16 steps</div>
+      </div>
+      <p class="phase-intro">The persistent semantic graph. Concepts become nodes, similarity becomes edges, and the whole thing survives across runs.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-3.1"><span class="task-id">3.1</span><span class="task-label">Schemas</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.1a"><span class="task-id">3.1a</span><span class="task-label">Node fields: id, text, embedding, first_seen, last_seen, activation_count</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.1b"><span class="task-id">3.1b</span><span class="task-label">Edge fields: source, target, weight, edge_type, last_updated</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-3.2"><span class="task-id">3.2</span><span class="task-label">Add nodes from input</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.2a"><span class="task-id">3.2a</span><span class="task-label">Match new concept against existing — string equality first, then embedding similarity > 0.85</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.2b"><span class="task-id">3.2b</span><span class="task-label">If match: increment activation_count, update last_seen</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.2c"><span class="task-id">3.2c</span><span class="task-label">If no match: create new node</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-3.3"><span class="task-id">3.3</span><span class="task-label">Add and reinforce edges</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.3a"><span class="task-id">3.3a</span><span class="task-label">Cosine similarity between all new concepts and recent neighbors</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.3b"><span class="task-id">3.3b</span><span class="task-label">Threshold for creating new edge — start at 0.5, tune later</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.3c"><span class="task-id">3.3c</span><span class="task-label">Existing edges: increment weight on re-co-occurrence</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-3.4"><span class="task-id">3.4</span><span class="task-label">Persistence layer</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.4a"><span class="task-id">3.4a</span><span class="task-label">SQLite schema for nodes and edges</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.4b"><span class="task-id">3.4b</span><span class="task-label">Save graph after every run; load on startup</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.4c"><span class="task-id">3.4c</span><span class="task-label">JSON snapshot per day in <code>snapshots/</code> for time-series replay</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-3.4d"><span class="task-id">3.4d</span><span class="task-label">Round-trip test: 5 inputs → restart → verify graph state intact</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 4 ============ -->
+    <div class="phase" id="phase-4">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 04</div>
+        <div class="phase-title">Ambiguity Detection</div>
+        <div class="phase-count">11 steps</div>
+      </div>
+      <p class="phase-intro">The heart. A single score from 0 to 1 that says how much semantic tension the current input contains. Everything downstream depends on this number being meaningful.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-4.1"><span class="task-id">4.1</span><span class="task-label">Metrics</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.1a"><span class="task-id">4.1a</span><span class="task-label">Variance metric — pairwise distances of input concept embeddings</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.1b"><span class="task-id">4.1b</span><span class="task-label">Cluster metric — k=2 means, distance between centroids</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.1c"><span class="task-id">4.1c</span><span class="task-label">Graph-bridge metric — do input concepts pull toward disconnected regions?</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.1d"><span class="task-id">4.1d</span><span class="task-label">Combine into one normalized score [0, 1] with tunable weights</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-4.2"><span class="task-id">4.2</span><span class="task-label">Calibration</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.2a"><span class="task-id">4.2a</span><span class="task-label">Run on 10 technical inputs — expect scores below 0.3</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.2b"><span class="task-id">4.2b</span><span class="task-label">Run on 10 poetic inputs — expect scores above 0.5</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.2c"><span class="task-id">4.2c</span><span class="task-label">Run on hand-crafted tension prompts (e.g. <em>"futuristic but warm"</em>) — expect high</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-4.2d"><span class="task-id">4.2d</span><span class="task-label">Lock thresholds: low &lt; 0.3, medium 0.3–0.6, high &gt; 0.6</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-4.3"><span class="task-id">4.3</span><span class="task-label">Log every score with its input for later analysis</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 5 ============ -->
+    <div class="phase" id="phase-5">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 05</div>
+        <div class="phase-title">Modulation Layer</div>
+        <div class="phase-count">8 steps</div>
+      </div>
+      <p class="phase-intro">Where the ambiguity score becomes a behavioral change in the LLM. Three regimes, each with a different system prompt and a different amount of graph context injected.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-5.1"><span class="task-id">5.1</span><span class="task-label">Prompt variants</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-5.1a"><span class="task-id">5.1a</span><span class="task-label">Low: clean, direct system prompt — answer normally</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-5.1b"><span class="task-id">5.1b</span><span class="task-label">Medium: inject 3–5 related graph neighbors as context</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-5.1c"><span class="task-id">5.1c</span><span class="task-label">High: explicit tension framing — <em>"these concepts pull in different directions, explore the bridge first"</em></span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-5.2"><span class="task-id">5.2</span><span class="task-label">Graph neighbor retrieval</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-5.2a"><span class="task-id">5.2a</span><span class="task-label">For each input concept, pull top-k highest-weighted graph neighbors</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-5.2b"><span class="task-id">5.2b</span><span class="task-label">Deduplicate, rank by combined edge weight</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-5.3"><span class="task-id">5.3</span><span class="task-label">A/B logging — run same input with and without modulation; store both outputs side-by-side</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 6 ============ -->
+    <div class="phase" id="phase-6">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 06</div>
+        <div class="phase-title">Decay & Pruning</div>
+        <div class="phase-count">6 steps</div>
+      </div>
+      <p class="phase-intro">Without cleaning, the graph turns into noise. Edges fade if unused, weak ones get pruned, orphan nodes eventually drop. Useful structures reinforce themselves.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.1"><span class="task-id">6.1</span><span class="task-label">Temporal decay — edge weights ×0.99 per day untouched</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.2"><span class="task-id">6.2</span><span class="task-label">Weak edge pruning — drop edges below 0.1 weight</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.3"><span class="task-id">6.3</span><span class="task-label">Orphan node pruning — nodes with no edges after 14 days removed</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.4"><span class="task-id">6.4</span><span class="task-label">Reinforcement — repeated co-occurrence multiplies weight by 1.1</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.5"><span class="task-id">6.5</span><span class="task-label">Daily maintenance job — runs on startup, checks last-cleaned date</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-6.6"><span class="task-id">6.6</span><span class="task-label">Stress test — artificially age graph by 30 days, run cleaning, verify size drop</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 7 ============ -->
+    <div class="phase" id="phase-7">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 07</div>
+        <div class="phase-title">Observability</div>
+        <div class="phase-count">9 steps</div>
+      </div>
+      <p class="phase-intro">The research interface. Without it, this is just an LLM with extra steps — with it, you can actually study how the system thinks.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.1"><span class="task-id">7.1</span><span class="task-label">Streamlit skeleton — multi-page app</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.2"><span class="task-id">7.2</span><span class="task-label">Page · State</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-7.2a"><span class="task-id">7.2a</span><span class="task-label">Counters: total nodes, edges, average degree, last cleaned</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-7.2b"><span class="task-id">7.2b</span><span class="task-label">Recent ambiguity score chart</span></div>
+        <div class="task child"><input type="checkbox" class="task-checkbox" id="t-7.2c"><span class="task-id">7.2c</span><span class="task-label">Most-activated concepts list</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.3"><span class="task-id">7.3</span><span class="task-label">Page · Graph view (pyvis or plotly force-directed)</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.4"><span class="task-id">7.4</span><span class="task-label">Page · Runner — type a prompt, see ambiguity, modulation prompt, output</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.5"><span class="task-id">7.5</span><span class="task-label">Page · Timeline — flip through daily graph snapshots</span></div>
+
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-7.6"><span class="task-id">7.6</span><span class="task-label">Page · A/B — modulated vs unmodulated outputs side-by-side, with deltas</span></div>
+      </div>
+    </div>
+
+    <!-- ============ PHASE 8 ============ -->
+    <div class="phase" id="phase-8">
+      <div class="phase-header">
+        <div class="phase-num">PHASE 08</div>
+        <div class="phase-title">Daily Diet Experiments</div>
+        <div class="phase-count">10 steps</div>
+      </div>
+      <p class="phase-intro">The actual research phase. Different data types each day, then read the graph and the logs and look for behavior that surprised you.</p>
+
+      <div class="task-group">
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.1"><span class="task-id">8.1</span><span class="task-label">Curate daily corpora — one folder per day</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.2"><span class="task-id">8.2</span><span class="task-label">Mon — Wikipedia articles (factual prose)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.3"><span class="task-id">8.3</span><span class="task-label">Tue — Reddit / forum threads (conversational, opinion clusters)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.4"><span class="task-id">8.4</span><span class="task-label">Wed — Poetry (high-ambiguity, metaphor bridges)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.5"><span class="task-id">8.5</span><span class="task-label">Thu — Technical docs / papers (tight, low-ambiguity clusters)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.6"><span class="task-id">8.6</span><span class="task-label">Fri — News (temporal, event-based)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.7"><span class="task-id">8.7</span><span class="task-label">Sat — Your own writing / chat logs (personal signature)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.8"><span class="task-id">8.8</span><span class="task-label">Sun — No new input, decay only (test the cleaning operators)</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.9"><span class="task-id">8.9</span><span class="task-label">Per day: snapshot graph, screenshot UI, log ambiguity distribution</span></div>
+        <div class="task parent"><input type="checkbox" class="task-checkbox" id="t-8.10"><span class="task-id">8.10</span><span class="task-label">Weekly write-up — what surprised you, what to investigate next</span></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div>Progress saves locally · clear browser data to reset</div>
+    <button class="reset" id="reset-btn">Reset progress</button>
+  </footer>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'ambiguity-engine-tracker-v1';
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function updateProgress() {
+    const boxes = document.querySelectorAll('.task-checkbox');
+    const checked = document.querySelectorAll('.task-checkbox:checked');
+    const total = boxes.length;
+    const done = checked.length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('progress-num').textContent = pct;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('task-counter').textContent = done + ' / ' + total + ' STEPS';
+
+    // strike-through on done labels
+    boxes.forEach(box => {
+      const task = box.closest('.task');
+      if (box.checked) task.classList.add('done');
+      else task.classList.remove('done');
+    });
+  }
+
+  function init() {
+    const state = loadState();
+    const boxes = document.querySelectorAll('.task-checkbox');
+
+    boxes.forEach(box => {
+      if (state[box.id]) box.checked = true;
+      box.addEventListener('change', () => {
+        const s = loadState();
+        if (box.checked) s[box.id] = true;
+        else delete s[box.id];
+        saveState(s);
+        updateProgress();
+      });
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm('Reset all progress? This cannot be undone.')) {
+        localStorage.removeItem(STORAGE_KEY);
+        boxes.forEach(b => b.checked = false);
+        updateProgress();
+      }
+    });
+
+    updateProgress();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
