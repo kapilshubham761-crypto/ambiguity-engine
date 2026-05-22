@@ -89,6 +89,7 @@ class Teacher:
         self._stats        = self._load_stats()
         self._last_checkin = self._load_last_checkin()
         self._homework     = self._load_homework()
+        self._paused       = self._load_paused()
 
         from report_card import ensure_birthdate
         ensure_birthdate()
@@ -106,9 +107,8 @@ class Teacher:
             return []
 
     def _save_queue(self) -> None:
-        slim = [{k: v for k, v in l.items() if k != 'sentences'} for l in self._queue]
         with open(_LESSON_PATH, 'w', encoding='utf-8') as f:
-            json.dump(slim, f, ensure_ascii=False, indent=2)
+            json.dump(self._queue, f, ensure_ascii=False, indent=2)
 
     def _load_stats(self) -> dict:
         try:
@@ -128,6 +128,36 @@ class Teacher:
                 return json.load(f)
         except Exception:
             return []
+
+    def _load_paused(self) -> bool:
+        try:
+            p = os.path.join(_ROOT, 'data', 'paused.txt')
+            return open(p).read().strip() == '1'
+        except Exception:
+            return False
+
+    def _save_paused(self) -> None:
+        p = os.path.join(_ROOT, 'data', 'paused.txt')
+        with open(p, 'w') as f:
+            f.write('1' if self._paused else '0')
+
+    # ------------------------------------------------------------------ #
+    # Pause / Resume                                                       #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def is_paused(self) -> bool:
+        return self._paused
+
+    def pause(self) -> None:
+        self._paused = True
+        self._status = 'paused'
+        self._save_paused()
+
+    def resume(self) -> None:
+        self._paused = False
+        self._status = 'idle'
+        self._save_paused()
 
     def _load_last_checkin(self) -> float:
         """Restore last check-in time from saved report cards so countdown survives restart."""
@@ -342,6 +372,13 @@ class Teacher:
             return 0
 
         self._status = 'fetching lessons…'
+        _fetch_status_path = os.path.join(_ROOT, 'data', 'fetch_status.json')
+        try:
+            with open(_fetch_status_path, 'w', encoding='utf-8') as _f:
+                json.dump({'fetching': True, 'started_at': datetime.now(tz=timezone.utc).isoformat(),
+                           'needed': needed}, _f)
+        except Exception:
+            pass
         stage  = self._current_stage()
         cfg    = STAGE_CONFIG[min(stage, len(STAGE_CONFIG) - 1)]
         stage_sources = cfg['sources']
@@ -426,6 +463,12 @@ class Teacher:
                 added += 1
 
         self._status = 'idle'
+        _fetch_status_path = os.path.join(_ROOT, 'data', 'fetch_status.json')
+        try:
+            with open(_fetch_status_path, 'w', encoding='utf-8') as _f:
+                json.dump({'fetching': False, 'started_at': None, 'needed': 0}, _f)
+        except Exception:
+            pass
         return added
 
     # ------------------------------------------------------------------ #
@@ -439,18 +482,23 @@ class Teacher:
         def _worker():
             while True:
                 try:
-                    # Refill if low
-                    with self._lock:
-                        size = len(self._queue)
-                    if size < MIN_LESSONS:
-                        self._refill()
+                    # Sync paused state from file each cycle (allows sidebar button to work)
+                    self._paused = self._load_paused()
+                    if self._paused:
+                        self._status = 'paused'
+                    else:
+                        # Refill if low
+                        with self._lock:
+                            size = len(self._queue)
+                        if size < MIN_LESSONS:
+                            self._refill()
 
-                    # Check-in if due
-                    if graph is not None:
-                        if time.time() - self._last_checkin >= CHECKIN_EVERY:
-                            self._status = 'running check-in…'
-                            self.check_in(graph)
-                            self._status = 'idle'
+                        # Check-in if due
+                        if graph is not None:
+                            if time.time() - self._last_checkin >= CHECKIN_EVERY:
+                                self._status = 'running check-in…'
+                                self.check_in(graph)
+                                self._status = 'idle'
 
                 except Exception:
                     self._status = 'idle'

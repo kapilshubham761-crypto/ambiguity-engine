@@ -24,6 +24,8 @@ data/report_cards.json
 data/homework.json
 data/discovery_stage.json
 data/search_prefs.json
+data/paused.txt
+data/fetch_status.json
 
 # OS
 .DS_Store

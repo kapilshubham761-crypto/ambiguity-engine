@@ -196,11 +196,15 @@ c6.metric("Graph nodes",     g.node_count)
 with c7:
     st.write("")
     if st.button("🔀 Refill now", use_container_width=True,
+                 disabled=t.is_paused,
                  help="Fetch a fresh batch of lessons immediately"):
         with st.spinner("Fetching lessons…"):
             t._refill()
         st.rerun()
     st.caption(f"Status: **{t.status}**")
+
+if t.is_paused:
+    st.warning("⏹ **Learning paused** — use ▶️ Resume in the sidebar to continue.")
 
 st.divider()
 
@@ -220,24 +224,97 @@ if not queue:
             t._refill()
         st.rerun()
 else:
+    # ------------------------------------------------------------------ #
+    # Batch selection toolbar                                              #
+    # ------------------------------------------------------------------ #
+    sel_key = 'selected_lessons'
+    if sel_key not in st.session_state:
+        st.session_state[sel_key] = set()
+
+    all_ids = {l['id'] for l in queue}
+    # Clean up stale ids
+    st.session_state[sel_key] &= all_ids
+    selected = st.session_state[sel_key]
+
+    tb1, tb2, tb3, tb4, tb5 = st.columns([1, 1, 1, 1, 3])
+
+    if tb1.button("☑ All", use_container_width=True):
+        st.session_state[sel_key] = set(all_ids)
+        st.rerun()
+
+    if tb2.button("☐ None", use_container_width=True):
+        st.session_state[sel_key] = set()
+        st.rerun()
+
+    n_sel = len(selected)
+    sel_sentences = sum(l['sentence_count'] for l in queue if l['id'] in selected)
+
+    if n_sel > 0:
+        if tb3.button(
+            f"✅ Accept {n_sel}",
+            use_container_width=True, type="primary",
+        ):
+            total = 0
+            with st.spinner(f"Feeding {n_sel} lessons into graph…"):
+                for lid in list(selected):
+                    total += t.accept(lid, g)
+            st.session_state[sel_key] = set()
+            st.cache_resource.clear()
+            st.success(f"Fed {total} sentences → graph now {g.node_count} nodes")
+            st.rerun()
+
+        if tb4.button(
+            f"❌ Reject {n_sel}",
+            use_container_width=True,
+        ):
+            for lid in list(selected):
+                t.reject(lid)
+            st.session_state[sel_key] = set()
+            st.rerun()
+
+        tb5.caption(f"**{n_sel} selected** · {sel_sentences} sentences")
+    else:
+        tb3.button("✅ Accept", use_container_width=True, disabled=True)
+        tb4.button("❌ Reject", use_container_width=True, disabled=True)
+        tb5.caption("Select lessons below or use ☑ All")
+
+    st.divider()
+
+    # ------------------------------------------------------------------ #
+    # Cards                                                                #
+    # ------------------------------------------------------------------ #
     COLS = 2
     for row_start in range(0, len(queue), COLS):
         row_items = queue[row_start:row_start + COLS]
         cols = st.columns(COLS)
 
         for col, lesson in zip(cols, row_items):
+            lid       = lesson['id']
             badge     = SOURCE_COLOURS.get(lesson['source'], '⚪')
             stage_lbl = lesson.get('stage_label', '')
             hw_tag    = " 📝" if lesson.get('is_homework') else ""
+            is_sel    = lid in st.session_state[sel_key]
 
             with col:
                 with st.container(border=True):
-                    h1, h2 = st.columns([5, 1])
-                    h1.markdown(
-                        f"**{lesson['title'][:80]}{'…' if len(lesson['title'])>80 else ''}**"
+                    # Checkbox + title row
+                    chk_col, title_col, badge_col = st.columns([1, 8, 1])
+                    checked = chk_col.checkbox(
+                        "", value=is_sel, key=f"chk_{lid}",
+                        label_visibility="collapsed",
+                    )
+                    if checked != is_sel:
+                        if checked:
+                            st.session_state[sel_key].add(lid)
+                        else:
+                            st.session_state[sel_key].discard(lid)
+                        st.rerun()
+
+                    title_col.markdown(
+                        f"**{lesson['title'][:75]}{'…' if len(lesson['title'])>75 else ''}**"
                         f"{hw_tag}"
                     )
-                    h2.markdown(f"{badge}")
+                    badge_col.markdown(badge)
 
                     st.caption(
                         f"📚 `{stage_lbl}` &nbsp;·&nbsp; "
@@ -245,37 +322,40 @@ else:
                         f"{lesson['sentence_count']} sentences"
                     )
 
-                    with st.expander("Preview", expanded=True):
-                        for sent in lesson['sentences'][:5]:
-                            st.markdown(f"› {sent}")
-                        if lesson['sentence_count'] > 5:
-                            st.caption(f"… and {lesson['sentence_count'] - 5} more")
+                    with st.expander("Preview", expanded=False):
+                        sentences = lesson.get('sentences', [])
+                        if sentences:
+                            for sent in sentences[:5]:
+                                st.markdown(f"› {sent}")
+                            if len(sentences) > 5:
+                                st.caption(f"… and {len(sentences) - 5} more")
+                        else:
+                            st.caption("_sentences loading…_")
 
                     if lesson.get('url'):
                         st.caption(lesson['url'])
 
                     a_col, r_col = st.columns(2)
-                    accept = a_col.button(
+                    if a_col.button(
                         f"✅ Accept ({lesson['sentence_count']})",
-                        key=f"acc_{lesson['id']}",
+                        key=f"acc_{lid}",
                         use_container_width=True,
                         type="primary",
-                    )
-                    reject = r_col.button(
-                        "❌ Reject",
-                        key=f"rej_{lesson['id']}",
-                        use_container_width=True,
-                    )
-
-                    if accept:
+                    ):
                         with st.spinner("Feeding into graph…"):
-                            n_sent = t.accept(lesson['id'], g)
+                            n_sent = t.accept(lid, g)
+                        st.session_state[sel_key].discard(lid)
                         st.cache_resource.clear()
                         st.success(f"Fed {n_sent} sentences → graph now {g.node_count} nodes")
                         st.rerun()
 
-                    if reject:
-                        t.reject(lesson['id'])
+                    if r_col.button(
+                        "❌ Reject",
+                        key=f"rej_{lid}",
+                        use_container_width=True,
+                    ):
+                        t.reject(lid)
+                        st.session_state[sel_key].discard(lid)
                         st.rerun()
 
 # ------------------------------------------------------------------ #
