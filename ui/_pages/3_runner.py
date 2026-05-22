@@ -1,12 +1,22 @@
-"""7.4 — Runner: type a prompt, see ambiguity breakdown, modulation, LLM output."""
+"""
+Runner — manual pipeline driver.
+
+Sends a user prompt through the full pipeline in sequence:
+    ① Extract concepts      (spaCy + MiniLM)
+    ② Detect ambiguity      (variance + cluster + bridge metrics)
+    ③ Build modulation      (select system prompt based on level)
+    ④ Call LLM              (Ollama / Qwen)
+    ⑤ Update graph          (save new concepts + edges)
+
+Optional: Run A/B mode — fires modulated + control call side-by-side.
+"""
+
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 
 import yaml
 import streamlit as st
-
-CFG = yaml.safe_load(open(os.path.join(ROOT, 'config.yaml')))
 
 from graph import SemanticGraph
 from extractor import extract
@@ -16,31 +26,42 @@ from modulator import build_prompt, call_llm
 st.title("▶️ Runner")
 st.caption("Send a prompt through the full pipeline and watch the engine think.")
 
+CFG = yaml.safe_load(open(os.path.join(ROOT, 'config.yaml')))
+
+
+# ======================================================================== #
+# Graph load (cached singleton)                                             #
+# ======================================================================== #
+
 @st.cache_resource(show_spinner="Loading graph…")
-def load_graph():
+def _load_graph():
     return SemanticGraph()
 
-g = load_graph()
+g = _load_graph()
 
-# ------------------------------------------------------------------ #
-# Input                                                                #
-# ------------------------------------------------------------------ #
+
+# ======================================================================== #
+# Input                                                                     #
+# ======================================================================== #
+
 user_input = st.text_area(
     "Prompt",
     placeholder="Type anything — a question, a fragment, a tension…",
     height=100,
 )
 
-run_col, ab_col = st.columns([1, 1])
-run_btn = run_col.button("Run", type="primary", use_container_width=True)
-ab_btn  = ab_col.button("Run A/B (also logs to ab_log)", use_container_width=True)
+run_col, ab_col = st.columns(2)
+run_btn = run_col.button("Run",                           type="primary", use_container_width=True)
+ab_btn  = ab_col.button("Run A/B (also logs to ab_log)",                 use_container_width=True)
 
 if not (run_btn or ab_btn) or not user_input.strip():
     st.stop()
 
-# ------------------------------------------------------------------ #
-# Pipeline                                                             #
-# ------------------------------------------------------------------ #
+
+# ======================================================================== #
+# Pipeline execution                                                        #
+# ======================================================================== #
+
 with st.spinner("Extracting concepts…"):
     concepts = extract(user_input)
 
@@ -50,16 +71,17 @@ with st.spinner("Detecting ambiguity…"):
 with st.spinner("Building modulation prompt…"):
     mod = build_prompt(concepts, result, graph=g)
 
-# Update graph and save
+# Update graph and invalidate cache so State page sees the new data
 node_ids = g.update(concepts)
 g.save()
-# Invalidate cache so State page reflects update
 st.cache_resource.clear()
 
-# ------------------------------------------------------------------ #
-# Display pipeline stages                                              #
-# ------------------------------------------------------------------ #
 st.divider()
+
+
+# ======================================================================== #
+# ① Concepts extracted                                                      #
+# ======================================================================== #
 
 st.subheader("① Concepts extracted")
 if concepts:
@@ -70,17 +92,32 @@ else:
     st.warning("No concepts extracted.")
 
 st.divider()
+
+
+# ======================================================================== #
+# ② Ambiguity                                                               #
+# ======================================================================== #
+
 st.subheader("② Ambiguity")
 
 LEVEL_COLOUR = {'low': '🟢', 'medium': '🟡', 'high': '🔴'}
-st.markdown(f"**Score: {result.score:.3f}** &nbsp; {LEVEL_COLOUR.get(result.level,'')} `{result.level.upper()}`")
+st.markdown(
+    f"**Score: {result.score:.3f}** &nbsp; "
+    f"{LEVEL_COLOUR.get(result.level, '')} `{result.level.upper()}`"
+)
 
 m1, m2, m3 = st.columns(3)
-m1.metric("Variance",  f"{result.variance:.3f}")
-m2.metric("Cluster",   f"{result.cluster:.3f}")
-m3.metric("Bridge",    f"{result.bridge:.3f}")
+m1.metric("Variance", f"{result.variance:.3f}")
+m2.metric("Cluster",  f"{result.cluster:.3f}")
+m3.metric("Bridge",   f"{result.bridge:.3f}")
 
 st.divider()
+
+
+# ======================================================================== #
+# ③ Modulation                                                              #
+# ======================================================================== #
+
 st.subheader("③ Modulation")
 
 st.markdown(f"**Level:** `{mod.level}`")
@@ -90,10 +127,16 @@ with st.expander("System prompt sent to LLM"):
     st.code(mod.system_prompt, language=None)
 
 st.divider()
+
+
+# ======================================================================== #
+# ④ LLM output                                                              #
+# ======================================================================== #
+
 st.subheader("④ LLM output")
 
 if ab_btn:
-    from modulator import run_ab, _LOW_PROMPT, call_llm as _call
+    from modulator import run_ab
     with st.spinner("Running A/B (two LLM calls)…"):
         entry = run_ab(user_input, concepts, result, g, CFG)
 

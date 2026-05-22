@@ -1,6 +1,22 @@
-"""9 — Report Card: track the AGI's cognitive development over time."""
+"""
+Report Card — cognitive development tracker.
+
+Sections:
+    Birth certificate   age in days, total concepts & connections
+    Current grade       6 metrics (breadth, depth, activation, calibration, velocity, overall)
+    Teacher's comment   one-line narrative
+Tabs:
+    📈 Progress         node/edge growth + GPA chart
+    📚 Syllabus         curriculum milestones with progress bars
+    📝 Homework         pending & completed topic assignments
+    🗂  History          full card ledger table
+"""
+
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+
+import sys, os as _os
+sys.path.insert(0, _os.join(_os.path.dirname(__file__), '..', 'components'))
 
 import json
 from datetime import datetime, date, timezone
@@ -8,8 +24,9 @@ import streamlit as st
 import pandas as pd
 
 from graph import SemanticGraph
-from report_card import load_cards, assess, save_card, BIRTHDATE, STAGE_TARGETS
+from assessor import load_cards, assess, save_card, BIRTHDATE, STAGE_TARGETS
 from teacher import Teacher
+from grade_card import render_grade_row, render_syllabus, render_homework_board
 
 st.title("📊 Report Card")
 st.caption("Ambiguity Engine's academic record — assessed every 3 hours by the Teacher.")
@@ -76,22 +93,8 @@ if not cards:
 
 latest = cards[-1]
 
-GRADE_COLOUR = {
-    'A+': '#00ff88', 'A': '#44ff88',
-    'B+': '#88ffaa', 'B': '#aaffcc',
-    'C+': '#ffee44', 'C': '#ffcc44',
-    'D':  '#ff8844', 'F': '#ff4444',
-}
-
 with col_grade:
-    g_colour = GRADE_COLOUR.get(latest['overall_grade'], '#aaa')
-    m1, m2, m3, m4, m5, m6 = st.columns(6)
-    m1.metric("Overall", latest['overall_grade'])
-    m2.metric("Breadth",    latest['grade_breadth'])
-    m3.metric("Depth",      latest['grade_depth'])
-    m4.metric("Activation", latest['grade_activation'])
-    m5.metric("Calibration",latest['grade_calibration'])
-    m6.metric("Velocity",   latest['grade_velocity'])
+    render_grade_row(latest)
 
 st.markdown(f"> 🎓 **Teacher's comment:** *{latest['narrative']}*")
 
@@ -135,61 +138,13 @@ with tab_progress:
 # ------------------------------------------------------------------ #
 with tab_syllabus:
     st.subheader("Curriculum milestones")
-    current_stage = t._current_stage()
-
-    for idx, (stage_i, target) in enumerate(STAGE_TARGETS.items()):
-        node_pct  = min(g.node_count / target['nodes'], 1.0) if stage_i == current_stage else (
-            1.0 if stage_i < current_stage else 0.0)
-        done      = stage_i < current_stage
-        current   = stage_i == current_stage
-
-        icon = "✅" if done else ("📖" if current else "🔒")
-        colour = "#4a9eff" if current else ("#44ff88" if done else "#555")
-
-        st.markdown(
-            f"<div style='padding:10px 16px; margin:4px 0; border-radius:8px; "
-            f"border:1px solid {colour}44; background:{colour}11;'>"
-            f"<b style='color:{colour};'>{icon} {target['label']}</b>"
-            f"{'  <span style=\"background:#4a9eff22; padding:2px 8px; border-radius:4px; font-size:0.8em;\">CURRENT</span>' if current else ''}"
-            f"<br><span style='color:#aaa; font-size:0.85em;'>"
-            f"Target: {target['nodes']} concepts · {target['edges']} connections"
-            f"{'  —  You have: ' + str(g.node_count) + ' / ' + str(g.edge_count) if current else ''}"
-            f"</span></div>",
-            unsafe_allow_html=True,
-        )
-        if current:
-            st.progress(min(g.node_count / target['nodes'], 1.0),
-                        text=f"{g.node_count}/{target['nodes']} concepts")
+    render_syllabus(g, t)
 
 # ------------------------------------------------------------------ #
 # Tab 3 — Homework board                                               #
 # ------------------------------------------------------------------ #
 with tab_homework:
-    hw = t.homework
-    if not hw:
-        st.info("No homework yet — run an assessment to generate assignments.")
-    else:
-        done_hw    = [h for h in hw if h['status'] == 'done']
-        pending_hw = [h for h in hw if h['status'] == 'pending']
-
-        p1, p2 = st.columns(2)
-        p1.metric("Pending", len(pending_hw))
-        p2.metric("Completed", len(done_hw))
-
-        st.subheader("Pending assignments")
-        for hw_item in pending_hw:
-            cov = hw_item.get('coverage', 0)
-            st.markdown(
-                f"📝 **{hw_item['topic']}** &nbsp; "
-                f"coverage: `{cov:.0%}` &nbsp; "
-                f"<span style='color:#ff8844;'>{'⚠ weak' if cov < 0.2 else ''}</span>",
-                unsafe_allow_html=True,
-            )
-
-        if done_hw:
-            st.subheader("Completed ✅")
-            for hw_item in done_hw:
-                st.markdown(f"✅ ~~{hw_item['topic']}~~ &nbsp; `{hw_item.get('coverage',0):.0%}`")
+    render_homework_board(t)
 
 # ------------------------------------------------------------------ #
 # Tab 4 — Full history                                                 #

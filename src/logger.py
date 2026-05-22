@@ -1,3 +1,10 @@
+"""
+Node [L] — Logger
+==================
+Shared structured logger. One log file per calendar day in logs/.
+Used by nodes E, F, G, I, J.
+See ARCHITECTURE.md for full tree.
+"""
 import logging
 import os
 from datetime import date

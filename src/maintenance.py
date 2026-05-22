@@ -1,5 +1,7 @@
 """
-Phase 6: Decay & Pruning.
+Node [J] — Maintenance
+=======================
+Decay & pruning (daily gate).
 
 6.1  Temporal decay   — edge weights × 0.99 per day since last_updated
 6.2  Weak edge pruning — drop edges whose weight has fallen below 0.1

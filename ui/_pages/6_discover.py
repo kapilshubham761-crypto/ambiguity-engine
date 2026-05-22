@@ -1,4 +1,15 @@
-"""6 — Learn: unified lesson intake. Curriculum stage + pre-fetched queue."""
+"""
+Learn — lesson intake page.
+
+Sections:
+    Curriculum stage    select / advance through 8 developmental stages
+    Location & Time     region grid + year filter (biases search queries)
+    Auto-accept toggle  on = graph grows autonomously; off = manual review
+    Stats row           queue size, today's counts, graph node count
+    Lesson queue        card grid — select, preview, accept/reject
+    Manual search       query any source and pre-fetch into queue
+    Teaching log        recent accept/reject history
+"""
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
@@ -8,8 +19,8 @@ from datetime import datetime, timezone
 
 from graph import SemanticGraph
 from teacher import Teacher, REGIONS, _GRID, load_prefs, save_prefs
-from auto_discover import CURRICULUM
-from discover import search_sources, fetch_content, SOURCE_LABELS, SOURCE_DESCRIPTIONS, SOURCES
+from curriculum import CURRICULUM
+from sources import search_sources, fetch_content, SOURCE_LABELS, SOURCE_DESCRIPTIONS, SOURCES
 
 st.title("📚 Learn")
 st.caption("Pre-fetched lessons matched to the curriculum stage. Accept to teach, Reject to skip.")
@@ -240,6 +251,15 @@ with c7:
         st.rerun()
     st.caption(f"Status: **{t.status}**")
 
+# Restart engine button — clears Streamlit's cache so new Teacher (with auto-accept) starts fresh
+with st.expander("⚙️ Engine controls", expanded=False):
+    st.caption("Use **Restart Engine** if auto-accept appears stuck or nodes aren't growing. "
+               "This clears the in-memory cache and reinitialises the teacher thread.")
+    if st.button("🔄 Restart engine", type="secondary", use_container_width=True):
+        st.cache_resource.clear()
+        st.success("Cache cleared — engine will reinitialise on next page load.")
+        st.rerun()
+
 if t.is_paused:
     st.warning("⏹ **Learning paused** — use ▶️ Resume in the sidebar to continue.")
 elif _auto_on:
@@ -311,7 +331,7 @@ else:
             st.session_state[sel_key] = set()
             st.rerun()
 
-        tb5.caption(f"**{n_sel} selected** · {sel_sentences} sentences")
+        tb5.caption(f"**{n_sel} selected**")
     else:
         tb3.button("✅ Accept", use_container_width=True, disabled=True)
         tb4.button("❌ Reject", use_container_width=True, disabled=True)
@@ -339,7 +359,7 @@ else:
                     # Checkbox + title row
                     chk_col, title_col, badge_col = st.columns([1, 8, 1])
                     checked = chk_col.checkbox(
-                        "", value=is_sel, key=f"chk_{lid}",
+                        "Select", value=is_sel, key=f"chk_{lid}",
                         label_visibility="collapsed",
                     )
                     if checked != is_sel:
@@ -355,10 +375,12 @@ else:
                     )
                     badge_col.markdown(badge)
 
+                    _scount = lesson['sentence_count']
+                    _count_str = f"{_scount} sentences" if _scount else "preview only"
                     st.caption(
                         f"📚 `{stage_lbl}` &nbsp;·&nbsp; "
                         f"*{lesson['topic']}* &nbsp;·&nbsp; "
-                        f"{lesson['sentence_count']} sentences"
+                        f"{_count_str}"
                     )
 
                     with st.expander("Preview", expanded=False):
@@ -369,14 +391,18 @@ else:
                             if len(sentences) > 5:
                                 st.caption(f"… and {len(sentences) - 5} more")
                         else:
-                            st.caption("_sentences loading…_")
+                            preview = lesson.get('preview', '')
+                            if preview:
+                                st.markdown(preview)
+                            else:
+                                st.caption("_full text fetched on accept_")
 
                     if lesson.get('url'):
                         st.caption(lesson['url'])
 
                     a_col, r_col = st.columns(2)
                     if a_col.button(
-                        f"✅ Accept ({lesson['sentence_count']})",
+                        f"✅ Accept",
                         key=f"acc_{lid}",
                         use_container_width=True,
                         type="primary",
@@ -407,11 +433,8 @@ with st.expander("🔍 Manual search", expanded=False):
     st.markdown("**Sources**")
     source_cols = st.columns(len(SOURCES))
     selected_sources = []
-    stage_defaults = set(
-        __import__('auto_discover').STAGE_CONFIG[
-            min(stage, len(__import__('auto_discover').STAGE_CONFIG) - 1)
-        ]['sources']
-    )
+    from curriculum import STAGE_CONFIG
+    stage_defaults = set(STAGE_CONFIG[min(stage, len(STAGE_CONFIG) - 1)]['sources'])
     for col, (src_key, label) in zip(source_cols, SOURCE_LABELS.items()):
         if col.checkbox(label, value=(src_key in stage_defaults), key=f'src_{src_key}'):
             selected_sources.append(src_key)
@@ -426,7 +449,7 @@ with st.expander("🔍 Manual search", expanded=False):
         with st.spinner(f"Searching and pre-fetching content…"):
             raw = search_sources(query.strip(), selected_sources, max_per_source=max_per)
             added = 0
-            existing_urls = {l['url'] for l in t.queue if l.get('url')}
+            existing_urls = t._q.known_urls()
             for item in raw:
                 if item.get('_error') or not item.get('url'):
                     continue
@@ -452,9 +475,7 @@ with st.expander("🔍 Manual search", expanded=False):
                     'fetched_at':     datetime.now(tz=timezone.utc).isoformat(),
                     'is_homework':    False,
                 }
-                with t._lock:
-                    t._queue.append(lesson)
-                    t._save_queue()
+                t._q.add(lesson)
                 existing_urls.add(item['url'])
                 added += 1
 

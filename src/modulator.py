@@ -1,6 +1,6 @@
 """
-Phase 5: Modulation Layer.
-
+Node [K] — Modulator
+====================
 Translates an AmbiguityResult + SemanticGraph into a system prompt that
 shapes how the LLM responds. Three regimes:
 

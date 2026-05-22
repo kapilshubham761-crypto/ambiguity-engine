@@ -1,5 +1,7 @@
 """
-Phase 2: Concept Extraction + Embedding Pipeline.
+Node [E] — Extractor
+=====================
+Concept extraction + embedding pipeline.
 
 Extracts concepts from raw text via spaCy (noun chunks + named entities),
 normalises them, and attaches 384-dim MiniLM embeddings. An in-memory cache

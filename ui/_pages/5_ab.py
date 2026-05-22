@@ -17,12 +17,26 @@ os.makedirs(os.path.join(ROOT, 'logs'), exist_ok=True)
 def _load_log():
     if not os.path.exists(LOG_PATH):
         return []
-    return [json.loads(l) for l in open(LOG_PATH, encoding='utf-8') if l.strip()]
+    out = []
+    for l in open(LOG_PATH, encoding='utf-8'):
+        try:
+            if l.strip():
+                out.append(json.loads(l))
+        except Exception:
+            pass
+    return out
 
 def _load_judgments():
     if not os.path.exists(JDG_PATH):
         return []
-    return [json.loads(l) for l in open(JDG_PATH, encoding='utf-8') if l.strip()]
+    out = []
+    for l in open(JDG_PATH, encoding='utf-8'):
+        try:
+            if l.strip():
+                out.append(json.loads(l))
+        except Exception:
+            pass
+    return out
 
 tab_suite, tab_judge, tab_results, tab_log = st.tabs([
     "🧪 Run Suite", "🙈 Blind Judge", "📊 Results", "📋 Log"
@@ -51,47 +65,53 @@ with tab_suite:
 
     if not remaining:
         st.success("All 30 prompts have been run. Head to **Blind Judge** to evaluate.")
-        st.stop()
+        st.divider()
+        col_reset, _ = st.columns([1, 2])
+        with col_reset:
+            if st.button("🔄 Reset — re-run all 30 prompts", use_container_width=True):
+                if os.path.exists(LOG_PATH):
+                    os.remove(LOG_PATH)
+                st.rerun()
+    else:
+        # Show next prompt
+        next_p = remaining[0]
+        st.markdown(f"**Next prompt** &nbsp; `{next_p['id']}` &nbsp; expected: `{next_p['expected'].upper()}`")
+        st.info(f"\"{next_p['prompt']}\"")
 
-    # Show next prompt
-    next_p = remaining[0]
-    st.markdown(f"**Next prompt** &nbsp; `{next_p['id']}` &nbsp; expected: `{next_p['expected'].upper()}`")
-    st.info(f""{next_p['prompt']}"")
+        run_next = st.button("▶ Run next prompt", type="primary", use_container_width=True)
+        run_all  = st.button(
+            f"⚡ Run all {len(remaining)} remaining",
+            use_container_width=True,
+            disabled=len(remaining) > 15,
+            help="Only enabled when ≤15 remain to avoid long waits"
+        )
 
-    run_next = st.button("▶ Run next prompt", type="primary", use_container_width=True)
-    run_all  = st.button(
-        f"⚡ Run all {len(remaining)} remaining",
-        use_container_width=True,
-        disabled=len(remaining) > 15,
-        help="Only enabled when ≤15 remain to avoid long waits"
-    )
+        if run_next or run_all:
+            to_run = remaining if run_all else [next_p]
 
-    if run_next or run_all:
-        to_run = remaining if run_all else [next_p]
+            from graph import SemanticGraph
+            from extractor import extract
+            from detector import detect_and_log
+            from modulator import build_prompt, run_ab
 
-        from graph import SemanticGraph
-        from extractor import extract
-        from detector import detect_and_log
-        from modulator import build_prompt, run_ab
+            @st.cache_resource(show_spinner=False)
+            def _graph():
+                return SemanticGraph()
+            g = _graph()
 
-        @st.cache_resource(show_spinner=False)
-        def _graph():
-            return SemanticGraph()
-        g = _graph()
+            bar = st.progress(0, text="Starting…")
+            for i, p in enumerate(to_run):
+                bar.progress((i) / len(to_run), text=f"Running {p['id']}: {p['prompt'][:50]}…")
+                try:
+                    concepts = extract(p['prompt'])
+                    result   = detect_and_log(p['prompt'], concepts, graph=g)
+                    run_ab(p['prompt'], concepts, result, g, CFG)
+                except Exception as ex:
+                    st.warning(f"{p['id']} failed: {ex}")
 
-        bar = st.progress(0, text="Starting…")
-        for i, p in enumerate(to_run):
-            bar.progress((i) / len(to_run), text=f"Running {p['id']}: {p['prompt'][:50]}…")
-            try:
-                concepts = extract(p['prompt'])
-                result   = detect_and_log(p['prompt'], concepts, graph=g)
-                run_ab(p['prompt'], concepts, result, g, CFG)
-            except Exception as ex:
-                st.warning(f"{p['id']} failed: {ex}")
-
-        bar.progress(1.0, text="Done!")
-        st.success(f"Ran {len(to_run)} prompt(s). Refresh to see updated count.")
-        st.rerun()
+            bar.progress(1.0, text="Done!")
+            st.success(f"Ran {len(to_run)} prompt(s). Refresh to see updated count.")
+            st.rerun()
 
 # ================================================================== #
 # TAB 2 — Blind Judge                                                 #
@@ -191,7 +211,6 @@ with tab_results:
 
     if len(judgments) < 3:
         st.info("Need at least 3 judgments to show results. Go to Blind Judge.")
-        st.stop()
 
     decided  = [j for j in judgments if j['choice'] != 'tie']
     ties     = [j for j in judgments if j['choice'] == 'tie']
@@ -254,7 +273,6 @@ with tab_log:
     entries = _load_log()
     if not entries:
         st.info("No A/B log yet — run prompts in the Suite tab.")
-        st.stop()
 
     summary = pd.DataFrame([{
         'id':    e['timestamp'][:16].replace('T', ' '),

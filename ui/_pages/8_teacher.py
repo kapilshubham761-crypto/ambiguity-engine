@@ -1,4 +1,7 @@
-"""8 — Teacher: 24-hour autonomous teaching pipeline."""
+"""
+UI Page [8] — Teacher  (legacy view — primary lesson UI is 6_discover.py)
+Node position: ui/_pages/8_teacher.py  →  see ARCHITECTURE.md
+"""
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
@@ -7,7 +10,7 @@ from datetime import datetime, timezone
 
 from graph import SemanticGraph
 from teacher import Teacher
-from auto_discover import CURRICULUM
+from curriculum import CURRICULUM
 
 st.title("🎓 Teacher")
 st.caption("Pre-fetched lessons, ready to feed instantly. Accept to teach, Reject to skip.")

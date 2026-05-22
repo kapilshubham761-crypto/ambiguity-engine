@@ -1,5 +1,7 @@
 """
-Phase 4: Ambiguity Detection.
+Node [G] — Detector
+====================
+Ambiguity detection: variance + cluster + bridge.
 
 Three metrics combined into a single normalised score in [0, 1]:
   - Variance  : mean pairwise cosine *distance* of input concept embeddings

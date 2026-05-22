@@ -1,5 +1,8 @@
 """
+CLI Tool — feed.py
+==================
 Batch feeder — push a text file through the full pipeline.
+Node position: cli/feed.py  →  see ARCHITECTURE.md
 
 Usage:
     python src/feed.py data/monday.txt

@@ -1,4 +1,13 @@
-"""7 — Learnings: browse what the engine has learned in plain language."""
+"""
+Learnings — browse what the engine has absorbed.
+
+Tabs:
+    🧠 Concepts         searchable table of all known concepts
+    🔗 Connections      weighted edge list + strongest pairs
+    🫧 Clusters         greedy modularity communities (emerging topics)
+    ⚡ Ambiguity moments every scored input with variance/cluster/bridge
+"""
+
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')

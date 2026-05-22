@@ -1,5 +1,7 @@
 """
-Phase 3: Semantic Graph Construction & Persistence.
+Node [F] — Graph
+=================
+Semantic graph construction & persistence.
 
 Nodes  — concepts with embeddings, seen-timestamps, activation counts.
 Edges  — weighted co-occurrence links that reinforce on repetition.

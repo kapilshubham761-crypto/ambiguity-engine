@@ -1,4 +1,13 @@
-"""7.2 — State page: counters, ambiguity chart, most-activated concepts."""
+"""
+State — live snapshot of the semantic graph.
+
+Sections:
+    ① Counters          node count, edge count, avg degree, last cleaned
+    ② Ambiguity chart   last 60 scores (variance / cluster / bridge)
+    ③ Maintenance       decay/prune controls with dry-run preview
+    ④ Top concepts      most-activated nodes table
+"""
+
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
@@ -7,43 +16,50 @@ import json
 import streamlit as st
 import pandas as pd
 
+from graph import SemanticGraph
+from maintenance import run_maintenance, preview_maintenance, DECAY_FACTOR, PRUNE_WEIGHT, ORPHAN_DAYS
+
 st.title("🔮 State")
 st.caption("Live snapshot of the semantic graph and recent activity.")
 
-# ------------------------------------------------------------------ #
-# Load graph                                                           #
-# ------------------------------------------------------------------ #
-from graph import SemanticGraph
+
+# ======================================================================== #
+# Graph load (cached singleton)                                             #
+# ======================================================================== #
 
 @st.cache_resource(show_spinner="Loading graph…")
-def load_graph():
+def _load_graph():
     return SemanticGraph()
 
-g = load_graph()
+g = _load_graph()
 
-# ------------------------------------------------------------------ #
-# 7.2a — Counters                                                      #
-# ------------------------------------------------------------------ #
-degrees = [d for _, d in g._g.degree()]
-avg_deg = sum(degrees) / len(degrees) if degrees else 0.0
 
-stamp_path = os.path.join(ROOT, 'data', 'last_cleaned.txt')
+# ======================================================================== #
+# ① Counters                                                                #
+# ======================================================================== #
+
+degrees      = [d for _, d in g._g.degree()]
+avg_deg      = sum(degrees) / len(degrees) if degrees else 0.0
+stamp_path   = os.path.join(ROOT, 'data', 'last_cleaned.txt')
 try:
     last_cleaned = open(stamp_path).read().strip()
 except Exception:
     last_cleaned = "never"
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Nodes", g.node_count)
-c2.metric("Edges", g.edge_count)
-c3.metric("Avg degree", f"{avg_deg:.2f}")
+c1.metric("Nodes",        g.node_count)
+c2.metric("Edges",        g.edge_count)
+c3.metric("Avg degree",   f"{avg_deg:.2f}")
 c4.metric("Last cleaned", last_cleaned)
 
 st.divider()
 
-# ------------------------------------------------------------------ #
-# 7.2b — Ambiguity score chart                                         #
-# ------------------------------------------------------------------ #
+
+# ======================================================================== #
+# ② Ambiguity score chart                                                   #
+# Last 60 inputs — score + all three sub-metrics                           #
+# ======================================================================== #
+
 st.subheader("Recent ambiguity scores")
 
 score_log = os.path.join(ROOT, 'logs', 'ambiguity_scores.jsonl')
@@ -71,26 +87,25 @@ else:
 
 st.divider()
 
-# ------------------------------------------------------------------ #
-# Maintenance controls                                                 #
-# ------------------------------------------------------------------ #
+
+# ======================================================================== #
+# ③ Maintenance controls                                                    #
+# Adjust thresholds → preview affected edges/nodes → apply                 #
+# ======================================================================== #
+
 st.subheader("Maintenance")
-
-from maintenance import run_maintenance, preview_maintenance, DECAY_FACTOR, PRUNE_WEIGHT, ORPHAN_DAYS
-
 st.markdown("Adjust thresholds, preview what will be affected, then apply.")
 
 t1, t2, t3 = st.columns(3)
 decay_factor = t1.slider(
     "Decay factor (per day)",
     min_value=0.80, max_value=1.00, value=DECAY_FACTOR, step=0.01,
-    help="Edge weight is multiplied by this value for each day since last update. "
-         "0.99 = slow fade, 0.90 = aggressive.",
+    help="Edge weight multiplied by this value per day since last update. 0.99 = slow fade.",
 )
 prune_weight = t2.slider(
     "Prune threshold (min edge weight)",
     min_value=0.00, max_value=0.50, value=PRUNE_WEIGHT, step=0.01,
-    help="Edges below this weight are deleted after decay is applied.",
+    help="Edges below this weight are deleted after decay.",
 )
 orphan_days = t3.slider(
     "Orphan cutoff (days)",
@@ -98,8 +113,8 @@ orphan_days = t3.slider(
     help="Nodes with no edges for this many days are removed.",
 )
 
-# Preview
-preview = preview_maintenance(g, decay_factor, prune_weight, orphan_days)
+# Dry-run preview
+preview     = preview_maintenance(g, decay_factor, prune_weight, orphan_days)
 decay_rows  = preview['edges_to_decay']
 prune_edges = [r for r in decay_rows if r['will_prune']] + preview['edges_to_prune']
 prune_nodes = preview['nodes_to_prune']
@@ -113,7 +128,9 @@ with st.expander(
     if decay_rows:
         st.markdown("**Edges decaying** (weight before → after)")
         st.dataframe(
-            pd.DataFrame(decay_rows)[['concept_a', 'concept_b', 'weight_before', 'weight_after', 'days_old', 'will_prune']],
+            pd.DataFrame(decay_rows)[
+                ['concept_a', 'concept_b', 'weight_before', 'weight_after', 'days_old', 'will_prune']
+            ],
             use_container_width=True, hide_index=True,
         )
     if prune_nodes:
@@ -122,7 +139,7 @@ with st.expander(
     if not decay_rows and not prune_nodes:
         st.info("Nothing will be changed with current thresholds.")
 
-btn1, btn2 = st.columns([1, 1])
+btn1, btn2 = st.columns(2)
 if btn1.button("Apply cleaning now", type="primary", use_container_width=True):
     result = run_maintenance(g, force=True,
                              decay_factor=decay_factor,
@@ -145,24 +162,23 @@ if btn2.button("Skip today's auto-clean", use_container_width=True):
 
 st.divider()
 
-# ------------------------------------------------------------------ #
-# 7.2c — Most-activated concepts                                       #
-# ------------------------------------------------------------------ #
+
+# ======================================================================== #
+# ④ Most-activated concepts                                                 #
+# Top 20 nodes by activation count                                          #
+# ======================================================================== #
+
 st.subheader("Most-activated concepts")
 
 if g.node_count > 0:
-    nodes = sorted(
-        g.all_nodes(),
-        key=lambda n: n['activation_count'],
-        reverse=True,
-    )[:20]
+    nodes = sorted(g.all_nodes(), key=lambda n: n['activation_count'], reverse=True)[:20]
     df_nodes = pd.DataFrame([
         {
-            'concept':          n['text'],
-            'activations':      n['activation_count'],
-            'degree':           g._g.degree(n['node_id']),
-            'first_seen':       n['first_seen'][:10],
-            'last_seen':        n['last_seen'][:10],
+            'concept':     n['text'],
+            'activations': n['activation_count'],
+            'degree':      g._g.degree(n['node_id']),
+            'first_seen':  n['first_seen'][:10],
+            'last_seen':   n['last_seen'][:10],
         }
         for n in nodes
     ])
