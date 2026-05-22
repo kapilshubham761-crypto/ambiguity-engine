@@ -9,26 +9,36 @@ echo  ============================================
 echo.
 
 :: Kill any existing instance
-echo  [1/4] Stopping old instance...
+echo  [1/5] Stopping old instances...
 taskkill /F /IM python.exe 2>nul && echo        Killed. || echo        Nothing running.
 timeout /t 1 /nobreak >nul
 
 :: Wipe stale caches
-echo  [2/4] Clearing caches...
+echo  [2/5] Clearing caches...
 rd /s /q "%~dp0src\__pycache__" 2>nul
 rd /s /q "%~dp0ui\__pycache__" 2>nul
-rd /s /q "%~dp0ui\pages\__pycache__" 2>nul
+rd /s /q "%~dp0ui\_pages\__pycache__" 2>nul
 echo        Done.
 
-:: Open tracker
-echo  [3/4] Opening tracker...
-start "" "%~dp0ambiguity-engine-tracker.html"
+:: Suppress Streamlit email prompt
+echo  [3/5] Configuring Streamlit...
+if not exist "%USERPROFILE%\.streamlit" mkdir "%USERPROFILE%\.streamlit"
+echo [general]> "%USERPROFILE%\.streamlit\credentials.toml"
+echo email = "">> "%USERPROFILE%\.streamlit\credentials.toml"
 echo        Done.
+
+:: Start overlay (silent — no console window)
+echo  [4/5] Starting stats overlay...
+start "" "%~dp0.venv\Scripts\pythonw.exe" "%~dp0overlay.py"
+echo        Done.
+
+:: Open tracker HTML
+start "" "%~dp0ambiguity-engine-tracker.html"
 
 :: Start Streamlit
-echo  [4/4] Starting engine...
+echo  [5/5] Starting engine...
 set PYTHONDONTWRITEBYTECODE=1
-start "" cmd /k "cd /d "%~dp0ui" && ..\\.venv\Scripts\streamlit run app.py --server.runOnSave true --server.port 8501 --server.headless true"
+start "" cmd /k "cd /d "%~dp0ui" && ..\.venv\Scripts\streamlit run app.py --server.runOnSave true --server.port 8501 --server.headless true"
 
 echo.
 echo  Waiting for engine to come online...
@@ -46,7 +56,6 @@ if %tries% GTR 30 (
     exit /b 1
 )
 
-:: Use curl to check health (curl ships with Windows 10+)
 curl -s --max-time 2 http://localhost:8501/_stcore/health >nul 2>&1
 if %errorlevel% EQU 0 goto ONLINE
 
@@ -58,11 +67,11 @@ goto POLL
 :ONLINE
 echo.
 echo  ============================================
-echo   ENGINE IS ONLINE  ^<^<  http://localhost:8501
+echo   ENGINE IS ONLINE  << http://localhost:8501
 echo  ============================================
 echo.
 start "" "http://localhost:8501"
-echo  Browser opened. This window can stay open.
-echo  Close it to keep the engine running in background.
+echo  Browser opened.  Overlay running.
+echo  Close this window to keep everything running.
 echo.
 pause
