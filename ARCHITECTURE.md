@@ -184,6 +184,27 @@ AMBIGUITY ENGINE
 │   │       preview_maintenance(graph) → dry-run dict (no changes)
 │   │       └──► called by [F] graph.__init__() (daily gate via stamp file)
 │   │
+│   ├── modulator.py         [K]        ← prompt modulation  (low/medium/high)
+│   │       modulate(result, graph, user_prompt) → system_prompt str
+│   │       └──► reads [F] graph neighbours; reads [M] meta_state (mood/tension)
+│   │
+│   ├── meta_state.py        [M]        ← meta-state dynamics  (ephemeral layer)
+│   │       MetaStateEngine.get()       singleton
+│   │         .on_accept(texts, graph) → MetaState   (called by [D] after each accept)
+│   │         .current()              → MetaState | None
+│   │         .snapshot()             → dict
+│   │       MetaState  dataclass
+│   │         .mood              curious | conflicted | focused | drifting |
+│   │                            saturated | exploring
+│   │         .mood_intensity    float 0–1
+│   │         .tensions          top-5 concept pairs in structural conflict
+│   │         .attractors        top-5 high-momentum hubs
+│   │         .context_window    last 60 activated concept texts
+│   │         .drift_in/out      concepts entering/leaving focus
+│   │         .momentum          {concept_text: float}  decays ×0.82 per accept
+│   │       └──► updated by [D] teacher.accept() after every graph.update()
+│   │             persisted → data/meta_state.json
+│   │
 │   ├── ── CLI tools ──────────────────────────────────────────────────────────
 │   │   └── feed.py                     ← batch feeder: text file → pipeline
 │   │         feed(path, label)
@@ -233,6 +254,10 @@ AMBIGUITY ENGINE
 │   │         render_homework_board(t)  pending + done assignments
 │   │
 │   └── _pages/
+│         │
+│         ├── 0_meta_state.py 🧠 Meta-State
+│         │     mood banner · tensions · attractors · drift · momentum
+│         │     auto-refresh 30s · reads [M] MetaStateEngine.current()
 │         │
 │         ├── 1_state.py     🔮 State
 │         │     ① counters          nodes, edges, avg degree, last cleaned
@@ -308,6 +333,7 @@ AMBIGUITY ENGINE
         growth_log.jsonl       append-only node/edge count snapshots
         search_prefs.json      {region, year_from, year_to}
         last_cleaned.txt       date stamp for daily maintenance gate
+        meta_state.json        MetaState snapshot — mood, tensions, attractors, drift, momentum
       logs/
         ambiguity_scores.jsonl  every detect_and_log() output
         ab_log.jsonl            modulated vs control response pairs

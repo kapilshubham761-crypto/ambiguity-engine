@@ -343,15 +343,22 @@ class Teacher:
             return 0
 
         n_concepts = 0
+        all_texts: list[str] = []
         for sent in sentences:
             concepts = extract(sent)
             if concepts:
                 detect_and_log(sent, concepts, graph=graph)
                 graph.update(concepts)
                 n_concepts += len(concepts)
+                all_texts.extend(c.text for c in concepts)
 
         if sentences:
             graph.save()
+            try:
+                from meta_state import MetaStateEngine
+                MetaStateEngine.get().on_accept(all_texts, graph)
+            except Exception as _e:
+                log.debug('meta_state update skipped: %s', _e)
 
         self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
