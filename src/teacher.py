@@ -15,14 +15,15 @@ import time
 import uuid
 from datetime import datetime, date, timezone
 
-from discover import search_sources, fetch_content, SOURCES
-from auto_discover import CURRICULUM
+from discover import search_sources, fetch_content, SOURCES, _flesch_score
+from auto_discover import CURRICULUM, STAGE_CONFIG
 
 _ROOT         = os.path.join(os.path.dirname(__file__), '..')
 _LESSON_PATH  = os.path.join(_ROOT, 'data', 'teacher_queue.json')
 _STATS_PATH   = os.path.join(_ROOT, 'data', 'teacher_stats.json')
 _STAGE_PATH   = os.path.join(_ROOT, 'data', 'discovery_stage.json')
 _HW_PATH      = os.path.join(_ROOT, 'data', 'homework.json')
+_PREFS_PATH   = os.path.join(_ROOT, 'data', 'search_prefs.json')
 
 MIN_LESSONS   = 5
 MAX_LESSONS   = 10
@@ -31,6 +32,49 @@ CHECKIN_EVERY = 3 * 3600     # report card interval (3 hours)
 MIN_SENTENCES = 3
 
 ALL_SOURCES   = list(SOURCES.keys())
+
+# --------------------------------------------------------------------------- #
+# World regions — spherical grid (lat band × lon sector)                       #
+# Each entry: display label + search terms to append to queries                #
+# --------------------------------------------------------------------------- #
+REGIONS = {
+    'global':      {'label': '🌐 Global',        'terms': []},
+    # Northern band
+    'n_america':   {'label': '🌎 N. America',    'terms': ['North America', 'United States', 'Canada']},
+    'w_europe':    {'label': '🌍 W. Europe',     'terms': ['Western Europe', 'United Kingdom', 'France', 'Germany']},
+    'e_europe':    {'label': '🌍 E. Europe',     'terms': ['Eastern Europe', 'Russia', 'Poland', 'Ukraine']},
+    'n_asia':      {'label': '🌏 N./C. Asia',    'terms': ['Central Asia', 'Siberia', 'Kazakhstan']},
+    # Middle band
+    'c_america':   {'label': '🌎 C. America',    'terms': ['Latin America', 'Mexico', 'Caribbean', 'Central America']},
+    'n_africa_me': {'label': '🌍 N. Africa/ME',  'terms': ['North Africa', 'Middle East', 'Arab world']},
+    'e_asia':      {'label': '🌏 E. Asia',       'terms': ['China', 'Japan', 'Korea', 'East Asia']},
+    'se_asia':     {'label': '🌏 S.E. Asia',     'terms': ['Southeast Asia', 'India', 'Thailand', 'Vietnam']},
+    # Southern band
+    's_america':   {'label': '🌎 S. America',    'terms': ['South America', 'Brazil', 'Argentina']},
+    'sub_africa':  {'label': '🌍 Sub-Saharan',   'terms': ['Sub-Saharan Africa', 'West Africa', 'East Africa']},
+    'oceania':     {'label': '🌏 Oceania',        'terms': ['Australia', 'New Zealand', 'Pacific Islands']},
+}
+
+_GRID = [
+    # Each row: list of region keys (left→right = west→east)
+    ['n_america',  'w_europe',    'e_europe',  'n_asia'],
+    ['c_america',  'n_africa_me', 'e_asia',    'se_asia'],
+    ['s_america',  'sub_africa',  'oceania',   None],
+]
+
+
+def load_prefs() -> dict:
+    try:
+        with open(_PREFS_PATH, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {'region': 'global', 'year_from': None, 'year_to': None}
+
+
+def save_prefs(prefs: dict) -> None:
+    os.makedirs(os.path.dirname(_PREFS_PATH), exist_ok=True)
+    with open(_PREFS_PATH, 'w', encoding='utf-8') as f:
+        json.dump(prefs, f)
 
 
 class Teacher:
@@ -43,7 +87,7 @@ class Teacher:
         self._thread: threading.Thread | None = None
         self._status       = 'idle'
         self._stats        = self._load_stats()
-        self._last_checkin = 0.0
+        self._last_checkin = self._load_last_checkin()
         self._homework     = self._load_homework()
 
         from report_card import ensure_birthdate
@@ -85,6 +129,22 @@ class Teacher:
         except Exception:
             return []
 
+    def _load_last_checkin(self) -> float:
+        """Restore last check-in time from saved report cards so countdown survives restart."""
+        try:
+            from report_card import load_cards
+            cards = load_cards()
+            if cards:
+                from datetime import datetime, timezone
+                ts = cards[-1]['timestamp']
+                dt = datetime.fromisoformat(ts)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.timestamp()
+        except Exception:
+            pass
+        return 0.0
+
     def _save_homework(self) -> None:
         with open(_HW_PATH, 'w', encoding='utf-8') as f:
             json.dump(self._homework, f, ensure_ascii=False, indent=2)
@@ -95,6 +155,21 @@ class Teacher:
                 return int(json.load(f).get('stage', 0))
         except Exception:
             return 0
+
+    def set_stage(self, index: int) -> None:
+        index = max(0, min(index, len(CURRICULUM) - 1))
+        with open(_STAGE_PATH, 'w', encoding='utf-8') as f:
+            json.dump({'stage': index}, f)
+        with self._lock:
+            self._queue = []
+            self._save_queue()
+
+    def advance_stage(self) -> bool:
+        stage = self._current_stage()
+        if stage >= len(CURRICULUM) - 1:
+            return False
+        self.set_stage(stage + 1)
+        return True
 
     # ------------------------------------------------------------------ #
     # Public interface                                                      #
@@ -245,12 +320,14 @@ class Teacher:
 
     def next_checkin_in(self) -> str:
         """Human-readable time until next check-in."""
+        if self._last_checkin == 0.0:
+            return 'never run yet — will run shortly'
         remaining = CHECKIN_EVERY - (time.time() - self._last_checkin)
         if remaining <= 0:
-            return 'now'
+            return 'due now'
         h = int(remaining // 3600)
         m = int((remaining % 3600) // 60)
-        return f"{h}h {m}m"
+        return f"in {h}h {m}m"
 
     # ------------------------------------------------------------------ #
     # Refill lessons                                                       #
@@ -266,19 +343,44 @@ class Teacher:
 
         self._status = 'fetching lessons…'
         stage  = self._current_stage()
+        cfg    = STAGE_CONFIG[min(stage, len(STAGE_CONFIG) - 1)]
+        stage_sources = cfg['sources']
+        min_read      = cfg['min_readability']
+        modifiers     = cfg['modifiers']
+
+        # Load location + time prefs
+        prefs      = load_prefs()
+        region_key = prefs.get('region', 'global')
+        region_terms = REGIONS.get(region_key, REGIONS['global'])['terms']
+        year_from  = prefs.get('year_from')
+        year_to    = prefs.get('year_to')
 
         # Prioritise pending homework topics
-        pending = [hw['topic'] for hw in self._homework if hw.get('status') == 'pending']
+        pending    = [hw['topic'] for hw in self._homework if hw.get('status') == 'pending']
         all_topics = pending + list(CURRICULUM[stage]['topics'])
         random.shuffle(all_topics)
 
-        added = 0
+        # Apply age-appropriate query framing + location + year
+        framed_topics = []
         for topic in all_topics:
+            parts = [topic]
+            if modifiers:
+                parts.append(random.choice(modifiers))
+            if region_terms:
+                parts.append(random.choice(region_terms))
+            if year_from and year_to:
+                parts.append(f"{random.randint(year_from, year_to)}")
+            elif year_from:
+                parts.append(str(year_from))
+            framed_topics.append(' '.join(parts))
+
+        added = 0
+        for framed_topic, raw_topic in zip(framed_topics, all_topics):
             if added >= needed:
                 break
-            sources = random.sample(ALL_SOURCES, min(2, len(ALL_SOURCES)))
+            sources = stage_sources[:min(2, len(stage_sources))]
             try:
-                results = search_sources(topic, sources, max_per_source=3)
+                results = search_sources(framed_topic, sources, max_per_source=3)
             except Exception:
                 continue
 
@@ -289,6 +391,10 @@ class Teacher:
                     continue
                 if item['url'] in existing_urls:
                     continue
+                # Readability pre-filter on snippet
+                if min_read > 0:
+                    if _flesch_score(item.get('snippet', '')) < min_read:
+                        continue
                 try:
                     sentences = fetch_content(item)
                 except Exception:
@@ -296,20 +402,20 @@ class Teacher:
                 if len(sentences) < MIN_SENTENCES:
                     continue
 
-                is_hw = topic in pending
+                is_hw = raw_topic in pending
                 lesson = {
-                    'id':           str(uuid.uuid4()),
-                    'title':        item.get('title', topic),
-                    'url':          item['url'],
-                    'source':       item.get('source', 'web'),
-                    'topic':        topic,
-                    'stage':        stage,
-                    'stage_label':  CURRICULUM[stage]['label'],
-                    'sentences':    sentences,
-                    'preview':      ' '.join(sentences[:3]),
+                    'id':             str(uuid.uuid4()),
+                    'title':          item.get('title', raw_topic),
+                    'url':            item['url'],
+                    'source':         item.get('source', 'web'),
+                    'topic':          raw_topic,
+                    'stage':          stage,
+                    'stage_label':    CURRICULUM[stage]['label'],
+                    'sentences':      sentences,
+                    'preview':        ' '.join(sentences[:3]),
                     'sentence_count': len(sentences),
-                    'fetched_at':   datetime.now(tz=timezone.utc).isoformat(),
-                    'is_homework':  is_hw,
+                    'fetched_at':     datetime.now(tz=timezone.utc).isoformat(),
+                    'is_homework':    is_hw,
                 }
 
                 with self._lock:

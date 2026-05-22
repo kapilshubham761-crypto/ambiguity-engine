@@ -23,6 +23,7 @@ data/teacher_stats.json
 data/report_cards.json
 data/homework.json
 data/discovery_stage.json
+data/search_prefs.json
 
 # OS
 .DS_Store

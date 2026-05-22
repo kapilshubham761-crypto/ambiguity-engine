@@ -201,6 +201,82 @@ CURRICULUM = [
     },
 ]
 
+# --------------------------------------------------------------------------- #
+# Per-stage configuration: sources, query modifiers, readability gate          #
+# --------------------------------------------------------------------------- #
+# min_readability: Flesch Reading Ease floor (0-100). 100=Dick & Jane, 0=PhD.
+# sources: which sources to draw from for this stage (in priority order).
+# modifiers: appended to the query to bias search toward age-appropriate results.
+# gutenberg_topic: Gutendex topic filter (empty = no filter).
+# reddit_time: reddit time window — 'all' for timeless, 'year' for recent.
+
+STAGE_CONFIG = [
+    # Stage 0 — Ages 1-5 (Foundations)
+    {
+        'sources':        ['simple_wiki', 'gutenberg', 'web'],
+        'modifiers':      ['children story', 'for kids', 'toddler', 'preschool', 'nursery'],
+        'gutenberg_topic': 'children',
+        'min_readability': 75,
+        'reddit_time':     'all',
+    },
+    # Stage 1 — Year 1 (Early School)
+    {
+        'sources':        ['simple_wiki', 'gutenberg', 'wikipedia', 'web'],
+        'modifiers':      ['for kids', 'elementary school', 'easy explanation', 'children'],
+        'gutenberg_topic': 'juvenile',
+        'min_readability': 65,
+        'reddit_time':     'all',
+    },
+    # Stage 2 — Year 2 (Building Blocks)
+    {
+        'sources':        ['wikipedia', 'simple_wiki', 'gutenberg', 'web'],
+        'modifiers':      ['explained for kids', 'middle school', 'introduction'],
+        'gutenberg_topic': '',
+        'min_readability': 52,
+        'reddit_time':     'all',
+    },
+    # Stage 3 — Year 3 (Expanding World)
+    {
+        'sources':        ['wikipedia', 'web', 'reddit', 'gutenberg'],
+        'modifiers':      ['explained', 'overview', 'introduction to'],
+        'gutenberg_topic': '',
+        'min_readability': 42,
+        'reddit_time':     'year',
+    },
+    # Stage 4 — Year 4 (Systems Thinking)
+    {
+        'sources':        ['wikipedia', 'reddit', 'web', 'gutenberg'],
+        'modifiers':      ['overview', 'explained'],
+        'gutenberg_topic': '',
+        'min_readability': 32,
+        'reddit_time':     'year',
+    },
+    # Stage 5 — Year 5 (Analytical Depth)
+    {
+        'sources':        ['wikipedia', 'web', 'reddit', 'arxiv', 'openalex'],
+        'modifiers':      [],
+        'gutenberg_topic': '',
+        'min_readability': 20,
+        'reddit_time':     'year',
+    },
+    # Stage 6 — Year 6 (Specialist Knowledge)
+    {
+        'sources':        ['wikipedia', 'arxiv', 'openalex', 'web'],
+        'modifiers':      [],
+        'gutenberg_topic': '',
+        'min_readability': 0,
+        'reddit_time':     'year',
+    },
+    # Stage 7 — Graduate (Frontier)
+    {
+        'sources':        ['arxiv', 'openalex', 'wikipedia', 'web'],
+        'modifiers':      [],
+        'gutenberg_topic': '',
+        'min_readability': 0,
+        'reddit_time':     'year',
+    },
+]
+
 ALL_SOURCES = list(SOURCES.keys())
 
 
@@ -312,14 +388,27 @@ class AutoDiscovery:
     # ------------------------------------------------------------------ #
 
     def _build_queries(self, graph=None) -> list[str]:
+        from discover import _flesch_score  # noqa: F401 (used in _refill)
+        cfg = STAGE_CONFIG[min(self._stage, len(STAGE_CONFIG) - 1)]
+        modifiers = cfg['modifiers']
+
         stage_topics = list(CURRICULUM[self._stage]['topics'])
         random.shuffle(stage_topics)
 
-        # Occasionally mix in one level below for reinforcement
+        # Mix in a few topics from the previous stage for reinforcement
         if self._stage > 0:
             prev = list(CURRICULUM[self._stage - 1]['topics'])
             random.shuffle(prev)
             stage_topics = stage_topics + prev[:3]
+
+        # Apply age-appropriate query modifiers
+        framed: list[str] = []
+        for topic in stage_topics:
+            if modifiers:
+                mod = random.choice(modifiers)
+                framed.append(f"{topic} {mod}")
+            else:
+                framed.append(topic)
 
         # Top graph concepts as additional queries (graph feeds itself)
         if graph is not None:
@@ -332,17 +421,22 @@ class AutoDiscovery:
                 concepts = [n['text'] for n in top]
                 random.shuffle(concepts)
                 for i in range(0, len(concepts) - 1, 2):
-                    stage_topics.insert(0, f"{concepts[i]} {concepts[i+1]}")
+                    pair = f"{concepts[i]} {concepts[i+1]}"
+                    if modifiers:
+                        pair += f" {random.choice(modifiers)}"
+                    framed.insert(0, pair)
             except Exception:
                 pass
 
-        return stage_topics
+        return framed
 
     # ------------------------------------------------------------------ #
     # Refill                                                               #
     # ------------------------------------------------------------------ #
 
     def _refill(self, graph=None) -> int:
+        from discover import _flesch_score, search_gutenberg, fetch_gutenberg
+
         with self._lock:
             existing_urls = {i['url'] for i in self._queue}
             needed = MAX_QUEUE - len(self._queue)
@@ -351,29 +445,62 @@ class AutoDiscovery:
             return 0
 
         self._status = 'searching…'
-        queries   = self._build_queries(graph)
-        added     = 0
+        cfg           = STAGE_CONFIG[min(self._stage, len(STAGE_CONFIG) - 1)]
+        stage_sources = cfg['sources']
+        min_read      = cfg['min_readability']
+        gut_topic     = cfg['gutenberg_topic']
+        queries       = self._build_queries(graph)
+        added         = 0
         new_items: list[dict] = []
 
         for query in queries:
             if added >= needed:
                 break
-            sources = random.sample(ALL_SOURCES, min(3, len(ALL_SOURCES)))
+
+            # Pick sources appropriate for this stage (weighted toward front of list)
+            n_pick = min(3, len(stage_sources))
+            sources = stage_sources[:n_pick]
+
+            # Special handling: pass topic filter to Gutenberg searches
+            if 'gutenberg' in sources and gut_topic:
+                try:
+                    gut_results = search_gutenberg(
+                        query.split()[0],  # simpler query for book search
+                        max_results=4,
+                        topic=gut_topic,
+                    )
+                    for r in gut_results:
+                        r['_query'] = query
+                        r['_stage'] = self._stage
+                        if r.get('url') and r['url'] not in existing_urls:
+                            new_items.append(r)
+                            existing_urls.add(r['url'])
+                            added += 1
+                except Exception:
+                    pass
+                sources = [s for s in sources if s != 'gutenberg']
+
             try:
                 results = search_sources(query, sources, max_per_source=4)
                 for r in results:
+                    if added >= needed:
+                        break
                     if r.get('_error') or not r.get('url'):
                         continue
                     if r['url'] in existing_urls:
                         continue
+                    # Readability gate: filter on snippet text
+                    if min_read > 0:
+                        snippet = r.get('snippet', '')
+                        score   = _flesch_score(snippet)
+                        if score < min_read:
+                            continue
                     r['_queued_at'] = datetime.now(tz=timezone.utc).isoformat()
                     r['_query']     = query
                     r['_stage']     = self._stage
                     new_items.append(r)
                     existing_urls.add(r['url'])
                     added += 1
-                    if added >= needed:
-                        break
             except Exception:
                 pass
 

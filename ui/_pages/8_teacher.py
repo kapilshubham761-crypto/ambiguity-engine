@@ -68,7 +68,7 @@ st.divider()
 # Lesson queue                                                         #
 # ------------------------------------------------------------------ #
 SOURCE_COLOURS = {
-    'wikipedia': '🔵', 'arxiv': '🟣', 'gutenberg': '🟤',
+    'wikipedia': '🔵', 'simple_wiki': '🟦', 'arxiv': '🟣', 'gutenberg': '🟤',
     'reddit': '🟠', 'openalex': '🟢', 'web': '⚪',
 }
 

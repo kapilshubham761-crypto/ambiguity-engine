@@ -46,13 +46,28 @@ def _sentences(text: str, min_len: int = 40, max_len: int = 400) -> list[str]:
     global _nlp
     if _nlp is None:
         _nlp = spacy.load('en_core_web_sm')
-    doc = nlp(text[:60_000])
+    doc = _nlp(text[:60_000])
     out = []
     for sent in doc.sents:
         s = re.sub(r'\s+', ' ', sent.text.strip())
         if min_len <= len(s) <= max_len and s.count(' ') >= 4:
             out.append(s)
     return out
+
+
+def _flesch_score(text: str) -> float:
+    """Flesch Reading Ease approximation. 100=very easy, 0=very hard."""
+    if not text:
+        return 50.0
+    sentences = [s for s in re.split(r'[.!?]+', text) if s.strip()]
+    words = text.split()
+    if not sentences or not words:
+        return 50.0
+    syllables = sum(max(1, len(re.findall(r'[aeiouAEIOU]+', w))) for w in words)
+    asl = len(words) / len(sentences)     # avg sentence length
+    asw = syllables / len(words)          # avg syllables per word
+    score = 206.835 - 1.015 * asl - 84.6 * asw
+    return max(0.0, min(100.0, score))
 
 
 # --------------------------------------------------------------------------- #
@@ -94,13 +109,57 @@ def fetch_wikipedia(url: str) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
+# Simple English Wikipedia (children / ESL audience)                           #
+# --------------------------------------------------------------------------- #
+
+def search_simple_wikipedia(query: str, max_results: int = 10) -> list[dict]:
+    url = 'https://simple.wikipedia.org/w/api.php'
+    params = {
+        'action': 'query', 'list': 'search',
+        'srsearch': query, 'srlimit': max_results,
+        'utf8': 1, 'format': 'json',
+    }
+    r = _get(url, params=params)
+    results = []
+    for item in r.json().get('query', {}).get('search', []):
+        snippet = re.sub(r'<[^>]+>', '', item.get('snippet', ''))
+        results.append({
+            'title':   item['title'],
+            'url':     f"https://simple.wikipedia.org/wiki/{item['title'].replace(' ', '_')}",
+            'snippet': snippet,
+            'source':  'simple_wiki',
+        })
+    return results
+
+
+def fetch_simple_wikipedia(url: str) -> list[str]:
+    title = url.split('/wiki/')[-1].replace('_', ' ')
+    api = 'https://simple.wikipedia.org/w/api.php'
+    params = {
+        'action': 'query', 'prop': 'extracts',
+        'exintro': False, 'explaintext': True,
+        'titles': title, 'format': 'json',
+    }
+    r = _get(api, params=params)
+    pages = r.json().get('query', {}).get('pages', {})
+    text  = next(iter(pages.values()), {}).get('extract', '')
+    return _sentences(text, min_len=20)
+
+
+# --------------------------------------------------------------------------- #
 # arXiv                                                                        #
 # --------------------------------------------------------------------------- #
 
-def search_arxiv(query: str, max_results: int = 10) -> list[dict]:
+def search_arxiv(query: str, max_results: int = 10,
+                 year_from: int | None = None, year_to: int | None = None) -> list[dict]:
     url = 'https://export.arxiv.org/api/query'
+    q = f'all:{query}'
+    if year_from or year_to:
+        y0 = f'{year_from or 1990}0101'
+        y1 = f'{year_to or 2099}1231'
+        q += f' AND submittedDate:[{y0} TO {y1}]'
     params = {
-        'search_query': f'all:{query}',
+        'search_query': q,
         'start': 0, 'max_results': max_results,
         'sortBy': 'relevance',
     }
@@ -141,10 +200,18 @@ def fetch_arxiv(url: str) -> list[str]:
 # Project Gutenberg (via Gutendex)                                             #
 # --------------------------------------------------------------------------- #
 
-def search_gutenberg(query: str, max_results: int = 10) -> list[dict]:
-    r = _get('https://gutendex.com/books/', params={'search': query})
+def search_gutenberg(query: str, max_results: int = 10, topic: str = '') -> list[dict]:
+    params: dict = {'search': query, 'languages': 'en'}
+    if topic:
+        params['topic'] = topic
+    r = _get('https://gutendex.com/books/', params=params)
+    books = sorted(
+        r.json().get('results', []),
+        key=lambda b: b.get('download_count', 0),
+        reverse=True,
+    )
     results = []
-    for book in r.json().get('results', [])[:max_results]:
+    for book in books[:max_results]:
         book_id = book['id']
         title   = book.get('title', 'Unknown')
         authors = ', '.join(a['name'] for a in book.get('authors', []))
@@ -299,30 +366,33 @@ def fetch_web(url: str, item: dict | None = None) -> list[str]:
 # --------------------------------------------------------------------------- #
 
 SOURCES = {
-    'wikipedia': (search_wikipedia, fetch_wikipedia),
-    'arxiv':     (search_arxiv,     fetch_arxiv),
-    'gutenberg': (search_gutenberg, fetch_gutenberg),
-    'reddit':    (search_reddit,    fetch_reddit),
-    'openalex':  (search_openalex,  fetch_openalex),
-    'web':       (search_web,       fetch_web),
+    'wikipedia':    (search_wikipedia,        fetch_wikipedia),
+    'simple_wiki':  (search_simple_wikipedia, fetch_simple_wikipedia),
+    'arxiv':        (search_arxiv,            fetch_arxiv),
+    'gutenberg':    (search_gutenberg,        fetch_gutenberg),
+    'reddit':       (search_reddit,           fetch_reddit),
+    'openalex':     (search_openalex,         fetch_openalex),
+    'web':          (search_web,              fetch_web),
 }
 
 SOURCE_LABELS = {
-    'wikipedia': '📖 Wikipedia',
-    'arxiv':     '🔬 arXiv',
-    'gutenberg': '📚 Gutenberg',
-    'reddit':    '💬 Reddit',
-    'openalex':  '🎓 OpenAlex',
-    'web':       '🌐 Web',
+    'wikipedia':   '📖 Wikipedia',
+    'simple_wiki': '🟦 Simple Wiki',
+    'arxiv':       '🔬 arXiv',
+    'gutenberg':   '📚 Gutenberg',
+    'reddit':      '💬 Reddit',
+    'openalex':    '🎓 OpenAlex',
+    'web':         '🌐 Web',
 }
 
 SOURCE_DESCRIPTIONS = {
-    'wikipedia': 'Encyclopaedic articles — factual, structured prose',
-    'arxiv':     'Academic preprints — CS, physics, biology, economics',
-    'gutenberg': 'Public-domain books — literature, poetry, philosophy',
-    'reddit':    'Forum posts — conversational, opinion-heavy',
-    'openalex':  'Academic abstracts from 200M+ open-access papers',
-    'web':       'General web pages via DuckDuckGo',
+    'wikipedia':   'Encyclopaedic articles — factual, structured prose',
+    'simple_wiki': 'Simple English Wikipedia — written for children and ESL readers',
+    'arxiv':       'Academic preprints — CS, physics, biology, economics',
+    'gutenberg':   'Public-domain books — literature, poetry, philosophy',
+    'reddit':      'Forum posts — conversational, opinion-heavy',
+    'openalex':    'Academic abstracts from 200M+ open-access papers',
+    'web':         'General web pages via DuckDuckGo',
 }
 
 

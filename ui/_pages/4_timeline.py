@@ -46,7 +46,11 @@ st.divider()
 # Single-snapshot inspector                                            #
 # ------------------------------------------------------------------ #
 st.subheader("Snapshot inspector")
-selected = st.select_slider("Date", options=snap_files, value=snap_files[-1])
+if len(snap_files) > 1:
+    selected = st.select_slider("Date", options=snap_files, value=snap_files[-1])
+else:
+    selected = snap_files[-1]
+    st.caption(f"Only one snapshot: **{selected}**")
 
 snap = json.load(open(os.path.join(snap_dir, selected), encoding='utf-8'))
 
