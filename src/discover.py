@@ -40,8 +40,12 @@ def _get(url: str, params: dict | None = None, retries: int = 3, timeout: int = 
 # Sentence cleaner (shared)                                                    #
 # --------------------------------------------------------------------------- #
 
+_nlp = None
+
 def _sentences(text: str, min_len: int = 40, max_len: int = 400) -> list[str]:
-    nlp = spacy.load('en_core_web_sm')
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load('en_core_web_sm')
     doc = nlp(text[:60_000])
     out = []
     for sent in doc.sents:

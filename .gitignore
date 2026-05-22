@@ -17,6 +17,12 @@ snapshots/
 # SQLite database (runtime state)
 data/graph.db
 data/last_cleaned.txt
+data/discovery_queue.json
+data/teacher_queue.json
+data/teacher_stats.json
+data/report_cards.json
+data/homework.json
+data/discovery_stage.json
 
 # OS
 .DS_Store

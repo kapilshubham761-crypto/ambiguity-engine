@@ -1,0 +1,68 @@
+@echo off
+title Ambiguity Engine
+color 0A
+
+echo.
+echo  ============================================
+echo   AMBIGUITY ENGINE - LAUNCHER
+echo  ============================================
+echo.
+
+:: Kill any existing instance
+echo  [1/4] Stopping old instance...
+taskkill /F /IM python.exe 2>nul && echo        Killed. || echo        Nothing running.
+timeout /t 1 /nobreak >nul
+
+:: Wipe stale caches
+echo  [2/4] Clearing caches...
+rd /s /q "%~dp0src\__pycache__" 2>nul
+rd /s /q "%~dp0ui\__pycache__" 2>nul
+rd /s /q "%~dp0ui\pages\__pycache__" 2>nul
+echo        Done.
+
+:: Open tracker
+echo  [3/4] Opening tracker...
+start "" "%~dp0ambiguity-engine-tracker.html"
+echo        Done.
+
+:: Start Streamlit
+echo  [4/4] Starting engine...
+set PYTHONDONTWRITEBYTECODE=1
+start "" cmd /k "cd /d "%~dp0ui" && ..\\.venv\Scripts\streamlit run app.py --server.runOnSave true --server.port 8501 --server.headless true"
+
+echo.
+echo  Waiting for engine to come online...
+echo  (polling every 2 seconds, timeout 60s)
+echo.
+
+:: Poll until healthy or timeout
+set /a tries=0
+:POLL
+set /a tries+=1
+if %tries% GTR 30 (
+    echo  [FAILED] Engine did not start after 60 seconds.
+    echo  Check the Streamlit terminal window for errors.
+    pause
+    exit /b 1
+)
+
+:: Use curl to check health (curl ships with Windows 10+)
+curl -s --max-time 2 http://localhost:8501/_stcore/health >nul 2>&1
+if %errorlevel% EQU 0 goto ONLINE
+
+set /a elapsed=%tries%*2
+echo  [%tries%/30] Still starting... (%elapsed%s elapsed)
+timeout /t 2 /nobreak >nul
+goto POLL
+
+:ONLINE
+echo.
+echo  ============================================
+echo   ENGINE IS ONLINE  ^<^<  http://localhost:8501
+echo  ============================================
+echo.
+start "" "http://localhost:8501"
+echo  Browser opened. This window can stay open.
+echo  Close it to keep the engine running in background.
+echo.
+pause

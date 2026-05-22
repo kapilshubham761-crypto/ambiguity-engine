@@ -58,9 +58,9 @@ def _mark_cleaned() -> None:
 # Core routines                                                                #
 # --------------------------------------------------------------------------- #
 
-def apply_decay(graph) -> int:
+def apply_decay(graph, decay_factor: float = DECAY_FACTOR) -> int:
     """
-    6.1 — Multiply each edge weight by DECAY_FACTOR ^ days_since_last_update.
+    6.1 — Multiply each edge weight by decay_factor ^ days_since_last_update.
     Returns the number of edges that were decayed.
     """
     decayed = 0
@@ -68,7 +68,7 @@ def apply_decay(graph) -> int:
         days = _days_since(data.get('last_updated', datetime.utcnow().isoformat()))
         if days < 1:
             continue
-        factor = DECAY_FACTOR ** days
+        factor = decay_factor ** days
         old_w  = data['weight']
         new_w  = old_w * factor
         graph._g[u][v]['weight'] = new_w
@@ -77,15 +77,15 @@ def apply_decay(graph) -> int:
     return decayed
 
 
-def prune_weak_edges(graph) -> int:
+def prune_weak_edges(graph, prune_weight: float = PRUNE_WEIGHT) -> int:
     """
-    6.2 — Remove edges whose weight is below PRUNE_WEIGHT.
+    6.2 — Remove edges whose weight is below prune_weight.
     Returns the number of edges removed.
     """
     to_remove = [
         (u, v)
         for u, v, data in graph._g.edges(data=True)
-        if data['weight'] < PRUNE_WEIGHT
+        if data['weight'] < prune_weight
     ]
     for u, v in to_remove:
         graph._g.remove_edge(u, v)
@@ -93,10 +93,10 @@ def prune_weak_edges(graph) -> int:
     return len(to_remove)
 
 
-def prune_orphan_nodes(graph) -> int:
+def prune_orphan_nodes(graph, orphan_days: int = ORPHAN_DAYS) -> int:
     """
     6.3 — Remove nodes that currently have no edges AND whose last_seen
-    timestamp is more than ORPHAN_DAYS old.
+    timestamp is more than orphan_days old.
     Returns the number of nodes removed.
     """
     to_remove = []
@@ -104,7 +104,7 @@ def prune_orphan_nodes(graph) -> int:
         if graph._g.degree(nid) > 0:
             continue
         days = _days_since(data.get('last_seen', datetime.utcnow().isoformat()))
-        if days >= ORPHAN_DAYS:
+        if days >= orphan_days:
             to_remove.append(nid)
             log.debug('Orphan node "%s" last seen %.1f days ago — removing', data['text'], days)
 
@@ -117,7 +117,61 @@ def prune_orphan_nodes(graph) -> int:
 # Daily gate (6.5)                                                             #
 # --------------------------------------------------------------------------- #
 
-def run_maintenance(graph, force: bool = False) -> dict:
+def preview_maintenance(graph, decay_factor: float = DECAY_FACTOR,
+                        prune_weight: float = PRUNE_WEIGHT,
+                        orphan_days: int = ORPHAN_DAYS) -> dict:
+    """
+    Dry-run: return what *would* be deleted/decayed without modifying the graph.
+    Returns dict with lists of affected edges and nodes.
+    """
+    edges_to_decay = []
+    edges_to_prune = []
+    nodes_to_prune = []
+
+    for u, v, data in graph._g.edges(data=True):
+        days  = _days_since(data.get('last_updated', datetime.utcnow().isoformat()))
+        old_w = data['weight']
+        if days >= 1:
+            new_w = old_w * (decay_factor ** days)
+            edges_to_decay.append({
+                'concept_a': graph._g.nodes[u].get('text', u),
+                'concept_b': graph._g.nodes[v].get('text', v),
+                'weight_before': round(old_w, 4),
+                'weight_after':  round(new_w, 4),
+                'days_old':      round(days, 1),
+                'will_prune':    new_w < prune_weight,
+            })
+        else:
+            if old_w < prune_weight:
+                edges_to_prune.append({
+                    'concept_a': graph._g.nodes[u].get('text', u),
+                    'concept_b': graph._g.nodes[v].get('text', v),
+                    'weight': round(old_w, 4),
+                    'days_old': round(days, 1),
+                })
+
+    for nid, data in graph._g.nodes(data=True):
+        if graph._g.degree(nid) > 0:
+            continue
+        days = _days_since(data.get('last_seen', datetime.utcnow().isoformat()))
+        if days >= orphan_days:
+            nodes_to_prune.append({
+                'concept':  data.get('text', nid),
+                'last_seen': data.get('last_seen', '')[:10],
+                'days_idle': round(days, 1),
+            })
+
+    return {
+        'edges_to_decay': edges_to_decay,
+        'edges_to_prune': edges_to_prune,
+        'nodes_to_prune': nodes_to_prune,
+    }
+
+
+def run_maintenance(graph, force: bool = False,
+                    decay_factor: float = DECAY_FACTOR,
+                    prune_weight: float = PRUNE_WEIGHT,
+                    orphan_days:  int   = ORPHAN_DAYS) -> dict:
     """
     6.5 — Run the full maintenance cycle at most once per calendar day.
     Pass force=True to bypass the daily gate (used in tests).
@@ -134,9 +188,9 @@ def run_maintenance(graph, force: bool = False) -> dict:
     nodes_before = graph.node_count
     edges_before = graph.edge_count
 
-    decayed  = apply_decay(graph)
-    pruned_e = prune_weak_edges(graph)
-    pruned_n = prune_orphan_nodes(graph)
+    decayed  = apply_decay(graph, decay_factor)
+    pruned_e = prune_weak_edges(graph, prune_weight)
+    pruned_n = prune_orphan_nodes(graph, orphan_days)
 
     nodes_after = graph.node_count
     edges_after = graph.edge_count
