@@ -25,7 +25,8 @@ def load_graph():
 
 @st.cache_resource(show_spinner=False)
 def load_teacher() -> Teacher:
-    t = Teacher()
+    from meta_state import MetaState
+    t = Teacher(meta=MetaState.get())
     t.start(graph=load_graph())
     return t
 

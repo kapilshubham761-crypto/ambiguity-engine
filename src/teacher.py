@@ -35,7 +35,7 @@ from datetime import datetime, timezone
 
 from sources import SOURCES, _flesch_score, fetch_content
 from curriculum import CURRICULUM, STAGE_CONFIG
-from protocols import IQueue, IHomework
+from protocols import IQueue, IHomework, IMetaState
 
 
 # ======================================================================== #
@@ -131,15 +131,18 @@ class Teacher:
 
     def __init__(self,
                  queue:    IQueue    | None = None,
-                 homework: IHomework | None = None) -> None:
+                 homework: IHomework | None = None,
+                 meta:     IMetaState | None = None) -> None:
         # Late import to avoid circular dependency at module load
         from queue_mgr import LessonQueue
         from homework import HomeworkTracker
+        from meta_state import MetaState
 
         os.makedirs(os.path.join(_ROOT, 'data'), exist_ok=True)
 
-        self._q:  IQueue    = queue    or LessonQueue()
-        self._hw: IHomework = homework or HomeworkTracker()
+        self._q:    IQueue     = queue    or LessonQueue()
+        self._hw:   IHomework  = homework or HomeworkTracker()
+        self._meta: IMetaState = meta     or MetaState.get()
 
         self._thread: threading.Thread | None = None
         self._status       = 'idle'
@@ -355,10 +358,9 @@ class Teacher:
         if sentences:
             graph.save()
             try:
-                from meta_state import MetaState
-                MetaState.get().reinforce(all_texts)
+                self._meta.reinforce(all_texts)
             except Exception as _e:
-                log.debug('meta_state update skipped: %s', _e)
+                log.debug('meta_state reinforce skipped: %s', _e)
 
         self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
@@ -584,6 +586,12 @@ class Teacher:
                                 self._status = 'running check-in…'
                                 self.check_in(graph)
                                 self._status = 'idle'
+
+                        # Keep meta_state.json fresh — write-back decayed values
+                        try:
+                            self._meta.decay_to()
+                        except Exception:
+                            pass
 
                 except Exception:
                     self._status = 'idle'
