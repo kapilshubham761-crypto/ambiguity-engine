@@ -84,7 +84,7 @@ _thinking_line     = ''
 
 try:
     _fs = json.load(open(_fetch_status_path, encoding='utf-8'))
-    if _fs.get('fetching') and _fs.get('started_at'):
+    if _fs.get('fetching') and _fs.get('started_at') and not _paused:
         _started = datetime.fromisoformat(_fs['started_at'])
         if _started.tzinfo is None:
             _started = _started.replace(tzinfo=timezone.utc)

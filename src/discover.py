@@ -23,7 +23,7 @@ import trafilatura
 HEADERS = {'User-Agent': 'AmbiguityEngine/0.1 (research toy; contact: local)'}
 
 
-def _get(url: str, params: dict | None = None, retries: int = 3, timeout: int = 20) -> requests.Response:
+def _get(url: str, params: dict | None = None, retries: int = 2, timeout: int = 12) -> requests.Response:
     """GET with simple exponential backoff on 429 / 5xx."""
     for attempt in range(retries):
         r = requests.get(url, params=params, headers=HEADERS, timeout=timeout)
@@ -163,7 +163,7 @@ def search_arxiv(query: str, max_results: int = 10,
         'start': 0, 'max_results': max_results,
         'sortBy': 'relevance',
     }
-    r = _get(url, params=params, timeout=45)
+    r = _get(url, params=params, timeout=15)
     # Strip any leading whitespace/BOM that breaks the XML parser
     text = r.text.strip().lstrip('﻿')
     ns   = {'atom': 'http://www.w3.org/2005/Atom'}

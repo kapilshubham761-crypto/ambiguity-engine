@@ -13,6 +13,7 @@ import random
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from datetime import datetime, date, timezone
 
 from discover import search_sources, fetch_content, SOURCES, _flesch_score
@@ -25,11 +26,12 @@ _STAGE_PATH   = os.path.join(_ROOT, 'data', 'discovery_stage.json')
 _HW_PATH      = os.path.join(_ROOT, 'data', 'homework.json')
 _PREFS_PATH   = os.path.join(_ROOT, 'data', 'search_prefs.json')
 
-MIN_LESSONS   = 5
-MAX_LESSONS   = 10
-CHECK_EVERY   = 120          # refill check interval (seconds)
-CHECKIN_EVERY = 3 * 3600     # report card interval (3 hours)
-MIN_SENTENCES = 3
+MIN_LESSONS    = 5
+MAX_LESSONS    = 10
+CHECK_EVERY    = 120          # refill check interval (seconds)
+CHECKIN_EVERY  = 3 * 3600     # report card interval (3 hours)
+MIN_SENTENCES  = 3
+FETCH_TIMEOUT  = 20           # seconds per source fetch before skipping
 
 ALL_SOURCES   = list(SOURCES.keys())
 
@@ -147,6 +149,8 @@ class Teacher:
 
     @property
     def is_paused(self) -> bool:
+        # Always read from file so all pages see the live state instantly
+        self._paused = self._load_paused()
         return self._paused
 
     def pause(self) -> None:
@@ -432,9 +436,14 @@ class Teacher:
                 if min_read > 0:
                     if _flesch_score(item.get('snippet', '')) < min_read:
                         continue
+                # Bail out early if paused mid-fetch
+                if self._load_paused():
+                    break
                 try:
-                    sentences = fetch_content(item)
-                except Exception:
+                    with ThreadPoolExecutor(max_workers=1) as ex:
+                        fut = ex.submit(fetch_content, item)
+                        sentences = fut.result(timeout=FETCH_TIMEOUT)
+                except (FuturesTimeout, Exception):
                     continue
                 if len(sentences) < MIN_SENTENCES:
                     continue
@@ -486,6 +495,13 @@ class Teacher:
                     self._paused = self._load_paused()
                     if self._paused:
                         self._status = 'paused'
+                        # Clear any stale fetch_status so UI shows paused cleanly
+                        try:
+                            _fsp = os.path.join(_ROOT, 'data', 'fetch_status.json')
+                            with open(_fsp, 'w', encoding='utf-8') as _f:
+                                json.dump({'fetching': False, 'started_at': None, 'needed': 0}, _f)
+                        except Exception:
+                            pass
                     else:
                         # Refill if low
                         with self._lock:
