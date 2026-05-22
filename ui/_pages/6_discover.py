@@ -185,6 +185,43 @@ today_sessions = [s for s in stats.get('sessions', []) if s['ts'][:10] == today_
 today_accepted  = sum(1 for s in today_sessions if s['action'] == 'accept')
 today_sentences = sum(s['sentences'] for s in today_sessions if s['action'] == 'accept')
 
+# ------------------------------------------------------------------ #
+# Auto-accept toggle + graph size warning                              #
+# ------------------------------------------------------------------ #
+
+_auto_accept_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'auto_accept.txt')
+_auto_on = True
+try:
+    _auto_on = open(_auto_accept_path).read().strip() == '1'
+except Exception:
+    pass
+
+_aa_col, _warn_col = st.columns([2, 5])
+with _aa_col:
+    _new_aa = st.toggle(
+        "⚡ Auto-accept lessons",
+        value=_auto_on,
+        help="When ON the teacher feeds lessons into the graph automatically — no manual review needed."
+    )
+    if _new_aa != _auto_on:
+        t.set_auto_accept(_new_aa)
+        st.rerun()
+
+with _warn_col:
+    _nodes = g.node_count
+    if _nodes >= 150_000:
+        st.error(f"🚨 Graph has {_nodes:,} nodes — your PC may struggle. Increase decay or pause learning.")
+    elif _nodes >= 50_000:
+        st.warning(f"⚠️ Graph has {_nodes:,} nodes — getting large. Monitor RAM in the overlay.")
+    elif _nodes >= 10_000:
+        st.info(f"📈 Graph has {_nodes:,} nodes — growing well.")
+    else:
+        st.caption(f"Graph: {_nodes:,} nodes · keep learning to grow it")
+
+# ------------------------------------------------------------------ #
+# Stats row                                                            #
+# ------------------------------------------------------------------ #
+
 c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 c1.metric("Ready",           len(queue))
 c2.metric("Accepted today",  today_accepted)
@@ -205,6 +242,8 @@ with c7:
 
 if t.is_paused:
     st.warning("⏹ **Learning paused** — use ▶️ Resume in the sidebar to continue.")
+elif _auto_on:
+    st.success("⚡ Auto-accept ON — graph grows automatically every cycle.")
 
 st.divider()
 

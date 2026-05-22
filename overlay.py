@@ -162,9 +162,9 @@ def _stats():
 # ------------------------------------------------------------------ #
 
 class Overlay:
-    FULL_H    = 195
+    FULL_H    = 225
     COMPACT_H = 54
-    WIDTH     = 210
+    WIDTH     = 220
 
     def __init__(self):
         self.root = tk.Tk()
@@ -257,6 +257,11 @@ class Overlay:
         row('accepted', '_accepted_lbl')
         row('sentences', '_sentences_lbl')
         row('stage', '_stage_lbl')
+        row('growth', '_growth_lbl')
+
+        self._warn_lbl = tk.Label(self._body, text='', font=FONT_SM,
+                                  bg=BG, fg=RED, wraplength=190, justify='left')
+        self._warn_lbl.pack(anchor='w', pady=(2, 0))
 
     # -------------------------------------------------------------- #
     # Drag to reposition                                               #
@@ -331,6 +336,29 @@ class Overlay:
                 from auto_discover import CURRICULUM
                 stage_label = CURRICULUM[s['stage']]['label'] if s['stage'] < len(CURRICULUM) else str(s['stage'])
                 self._stage_lbl.config(text=stage_label[:18])
+
+                # Growth rate from log
+                growth_str = '—'
+                try:
+                    glog = os.path.join(_DATA, 'growth_log.jsonl')
+                    lines = open(glog, encoding='utf-8').readlines()
+                    if len(lines) >= 2:
+                        first = json.loads(lines[0])
+                        last  = json.loads(lines[-1])
+                        delta_nodes = last['nodes'] - first['nodes']
+                        growth_str  = f"+{delta_nodes:,} total"
+                except Exception:
+                    pass
+                self._growth_lbl.config(text=growth_str)
+
+                # Graph size warning
+                warn = ''
+                if isinstance(s['nodes'], int):
+                    if s['nodes'] >= 150_000:
+                        warn = f"CRITICAL: {s['nodes']:,} nodes — pause learning!"
+                    elif s['nodes'] >= 50_000:
+                        warn = f"Large: {s['nodes']:,} nodes — monitor RAM"
+                self._warn_lbl.config(text=warn)
 
         except Exception:
             pass

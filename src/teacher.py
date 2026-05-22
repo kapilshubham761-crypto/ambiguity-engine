@@ -27,11 +27,15 @@ _HW_PATH      = os.path.join(_ROOT, 'data', 'homework.json')
 _PREFS_PATH   = os.path.join(_ROOT, 'data', 'search_prefs.json')
 
 MIN_LESSONS    = 5
-MAX_LESSONS    = 10
-CHECK_EVERY    = 120          # refill check interval (seconds)
+MAX_LESSONS    = 15
+CHECK_EVERY    = 60           # refill check interval (seconds) — faster cycle
 CHECKIN_EVERY  = 3 * 3600     # report card interval (3 hours)
 MIN_SENTENCES  = 3
 FETCH_TIMEOUT  = 20           # seconds per source fetch before skipping
+
+# Graph size thresholds for warnings
+GRAPH_WARN_NODES  = 50_000
+GRAPH_LIMIT_NODES = 150_000
 
 ALL_SOURCES   = list(SOURCES.keys())
 
@@ -41,6 +45,7 @@ ALL_SOURCES   = list(SOURCES.keys())
 # --------------------------------------------------------------------------- #
 REGIONS = {
     'global':      {'label': '🌐 Global',        'terms': []},
+    'mohali':      {'label': '📍 Mohali',         'terms': ['Mohali', 'Punjab India', 'Chandigarh', 'Tricity']},
     # Northern band
     'n_america':   {'label': '🌎 N. America',    'terms': ['North America', 'United States', 'Canada']},
     'w_europe':    {'label': '🌍 W. Europe',     'terms': ['Western Europe', 'United Kingdom', 'France', 'Germany']},
@@ -50,7 +55,7 @@ REGIONS = {
     'c_america':   {'label': '🌎 C. America',    'terms': ['Latin America', 'Mexico', 'Caribbean', 'Central America']},
     'n_africa_me': {'label': '🌍 N. Africa/ME',  'terms': ['North Africa', 'Middle East', 'Arab world']},
     'e_asia':      {'label': '🌏 E. Asia',       'terms': ['China', 'Japan', 'Korea', 'East Asia']},
-    'se_asia':     {'label': '🌏 S.E. Asia',     'terms': ['Southeast Asia', 'India', 'Thailand', 'Vietnam']},
+    'india':       {'label': '🌏 India',          'terms': ['India', 'South Asia', 'Hindi', 'Punjabi']},
     # Southern band
     's_america':   {'label': '🌎 S. America',    'terms': ['South America', 'Brazil', 'Argentina']},
     'sub_africa':  {'label': '🌍 Sub-Saharan',   'terms': ['Sub-Saharan Africa', 'West Africa', 'East Africa']},
@@ -58,10 +63,9 @@ REGIONS = {
 }
 
 _GRID = [
-    # Each row: list of region keys (left→right = west→east)
-    ['n_america',  'w_europe',    'e_europe',  'n_asia'],
-    ['c_america',  'n_africa_me', 'e_asia',    'se_asia'],
-    ['s_america',  'sub_africa',  'oceania',   None],
+    ['mohali',     'n_america',   'w_europe',   'e_europe'],
+    ['n_asia',     'c_america',   'n_africa_me','e_asia'],
+    ['india',      's_america',   'sub_africa', 'oceania'],
 ]
 
 
@@ -70,7 +74,7 @@ def load_prefs() -> dict:
         with open(_PREFS_PATH, encoding='utf-8') as f:
             return json.load(f)
     except Exception:
-        return {'region': 'global', 'year_from': None, 'year_to': None}
+        return {'region': 'mohali', 'year_from': None, 'year_to': None}  # Mohali default
 
 
 def save_prefs(prefs: dict) -> None:
@@ -142,6 +146,39 @@ class Teacher:
         p = os.path.join(_ROOT, 'data', 'paused.txt')
         with open(p, 'w') as f:
             f.write('1' if self._paused else '0')
+
+    def _load_auto_accept(self) -> bool:
+        try:
+            p = os.path.join(_ROOT, 'data', 'auto_accept.txt')
+            return open(p).read().strip() == '1'
+        except Exception:
+            return True  # default on
+
+    def set_auto_accept(self, enabled: bool) -> None:
+        p = os.path.join(_ROOT, 'data', 'auto_accept.txt')
+        with open(p, 'w') as f:
+            f.write('1' if enabled else '0')
+
+    def _write_growth(self, graph) -> None:
+        """Append node/edge count snapshot for growth tracking."""
+        try:
+            p = os.path.join(_ROOT, 'data', 'growth_log.jsonl')
+            entry = {
+                'ts':    datetime.now(tz=timezone.utc).isoformat(timespec='minutes'),
+                'nodes': graph.node_count,
+                'edges': graph.edge_count,
+            }
+            # Only write if changed since last entry
+            try:
+                last = json.loads(open(p, encoding='utf-8').readlines()[-1])
+                if last['nodes'] == entry['nodes']:
+                    return
+            except Exception:
+                pass
+            with open(p, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry) + '\n')
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------ #
     # Pause / Resume                                                       #
@@ -503,11 +540,34 @@ class Teacher:
                         except Exception:
                             pass
                     else:
+                        # Graph size gate — stop learning if graph is too large
+                        node_count = graph.node_count if graph else 0
+                        if node_count >= GRAPH_LIMIT_NODES:
+                            self._status = 'graph full — pruning recommended'
+                            time.sleep(CHECK_EVERY)
+                            continue
+
                         # Refill if low
                         with self._lock:
                             size = len(self._queue)
                         if size < MIN_LESSONS:
                             self._refill()
+
+                        # Auto-accept: feed all queued lessons into graph immediately
+                        if graph is not None and self._load_auto_accept():
+                            self._status = 'auto-accepting…'
+                            for lesson in list(self.queue):
+                                if self._load_paused():
+                                    break
+                                try:
+                                    self.accept(lesson['id'], graph)
+                                except Exception:
+                                    pass
+                            self._status = 'idle'
+
+                        # Write growth snapshot (nodes/edges over time)
+                        if graph is not None:
+                            self._write_growth(graph)
 
                         # Check-in if due
                         if graph is not None:

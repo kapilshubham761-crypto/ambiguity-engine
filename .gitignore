@@ -26,6 +26,8 @@ data/discovery_stage.json
 data/search_prefs.json
 data/paused.txt
 data/fetch_status.json
+data/auto_accept.txt
+data/growth_log.jsonl
 
 # OS
 .DS_Store
