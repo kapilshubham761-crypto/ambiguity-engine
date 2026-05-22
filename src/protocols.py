@@ -78,3 +78,52 @@ class IHomework(Protocol):
 class ILessonSource(Protocol):
     def search(self, query: str, max_results: int = 10) -> list[dict]: ...
     def fetch(self, item: dict) -> list[str]: ...
+
+
+# ======================================================================== #
+# IMetaState — temporary concept activation layer                          #
+# Components: meta_state.py (MetaState)                                    #
+# ======================================================================== #
+
+@runtime_checkable
+class IMetaState(Protocol):
+    def reinforce(self, texts: list[str], gain: float | None = None) -> None: ...
+    def decay_to(self, now: object | None = None) -> None: ...
+    def active(self, threshold: float | None = None) -> dict: ...
+    def top(self, n: int = 10) -> list: ...
+    def snapshot(self) -> dict: ...
+
+
+# ======================================================================== #
+# IAttention — activation-weighted candidate reranking                     #
+# Components: attention.py (AttentionBias)  — built in Step 04             #
+# ======================================================================== #
+
+@runtime_checkable
+class IAttention(Protocol):
+    def bias(self, candidates: list, scores: list[float],
+             meta: IMetaState, strength: float) -> list: ...
+
+
+# ======================================================================== #
+# ITension — rolling-window ambiguity tension tracker                      #
+# Components: tension.py (TensionTracker)  — built in Step 05              #
+# ======================================================================== #
+
+@runtime_checkable
+class ITension(Protocol):
+    def observe(self, concept: str, score: float) -> None: ...
+    def hot(self, n: int = 5) -> list: ...
+    def is_hot(self, concept: str) -> bool: ...
+
+
+# ======================================================================== #
+# IRegions — graph region index (stub until ~50k nodes)                   #
+# Components: regions.py (RegionIndex)     — built in Step 06              #
+# ======================================================================== #
+
+@runtime_checkable
+class IRegions(Protocol):
+    def assign(self) -> None: ...
+    def active_region(self) -> object: ...
+    def nodes_in(self, region: object) -> list: ...

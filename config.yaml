@@ -34,3 +34,17 @@ decay:
   prune_weight_below: 0.1
   orphan_days: 14
   reinforce_factor: 1.1
+
+meta_state:
+  decay_rate: 0.97          # activation multiplier per minute elapsed
+  reinforce_gain: 0.25      # boost added per accepted lesson
+  active_threshold: 0.20    # cutoff for "currently active" concept
+  max_concepts: 500         # hard cap — drop weakest when exceeded
+
+attention:
+  bias_strength: 0.0        # start OFF; ramp slowly after Pause II eval
+
+tension:
+  window_size: 50           # ambiguity observations retained per concept
+  hot_threshold: 0.60       # mean ambiguity score to count as hot
+  hot_min_observations: 5   # ignore one-off spikes below this count

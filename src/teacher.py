@@ -355,8 +355,8 @@ class Teacher:
         if sentences:
             graph.save()
             try:
-                from meta_state import MetaStateEngine
-                MetaStateEngine.get().on_accept(all_texts, graph)
+                from meta_state import MetaState
+                MetaState.get().reinforce(all_texts)
             except Exception as _e:
                 log.debug('meta_state update skipped: %s', _e)
 
