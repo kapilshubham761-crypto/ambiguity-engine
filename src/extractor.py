@@ -141,7 +141,20 @@ def extract(text: str) -> list[Concept]:
             if norm and len(norm) >= 2:
                 raw.append((norm, 'entity'))
 
-    # 2.1c / 2.1d — deduplicate and filter generics
+    # 2.1c — fallback for short/abstract inputs: individual content tokens
+    # Fires when noun chunks + entities gave fewer than 2 candidates
+    if len(raw) < 2:
+        _CONTENT_POS = {'NOUN', 'PROPN', 'ADJ', 'VERB'}
+        for tok in doc:
+            if tok.pos_ not in _CONTENT_POS:
+                continue
+            if tok.is_stop or tok.is_punct or tok.is_space:
+                continue
+            lemma = tok.lemma_.lower().strip()
+            if lemma and re.match(r'^[a-z][a-z0-9 _-]*$', lemma) and len(lemma) >= 3:
+                raw.append((lemma, 'token'))
+
+    # 2.1d — deduplicate and filter generics
     seen: set[str] = set()
     unique: list[tuple[str, str]] = []
     for text_norm, src in raw:

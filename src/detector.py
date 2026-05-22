@@ -29,7 +29,15 @@ log = get_logger('detector')
 # Config defaults (overridden by the SemanticGraph instance if passed)         #
 # --------------------------------------------------------------------------- #
 
-_WEIGHTS = {'variance': 0.10, 'cluster': 0.10, 'bridge': 0.80}
+def _load_weights():
+    try:
+        import yaml, os
+        cfg = yaml.safe_load(open(os.path.join(os.path.dirname(__file__), '..', 'config.yaml')))
+        return cfg['ambiguity']['weights']
+    except Exception:
+        return {'variance': 0.45, 'cluster': 0.45, 'bridge': 0.10}
+
+_WEIGHTS  = _load_weights()
 _LOW_MAX  = 0.3
 _HIGH_MIN = 0.6
 
@@ -196,6 +204,11 @@ def detect(concepts: list, graph=None,
         w['bridge']   * brdg_score
     )
     combined = float(np.clip(combined, 0.0, 1.0))
+
+    # With only 2 concepts the variance signal is unreliable (one pair, no triangulation).
+    # Cap at medium so a simple factual question with 2 dissimilar words can't score high.
+    if len(concepts) < 3:
+        combined = min(combined, _HIGH_MIN - 0.01)
 
     result = AmbiguityResult(
         score         = round(combined, 4),

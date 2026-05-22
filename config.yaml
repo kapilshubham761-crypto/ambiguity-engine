@@ -21,9 +21,9 @@ ambiguity:
   low_max: 0.3
   high_min: 0.6
   weights:
-    variance: 0.10
-    cluster: 0.10
-    bridge: 0.80
+    variance: 0.45  # input-concept spread — graph-independent signal
+    cluster: 0.45   # bimodality of concept cloud — graph-independent signal
+    bridge: 0.10    # graph topology — grows more meaningful as graph fills
 
 modulation:
   medium_neighbors: 5
