@@ -135,9 +135,9 @@ def _stability():
 
 
 # ── tab layout ────────────────────────────────────────────────────────────────
-tab_live, tab_mem, tab_ep, tab_pred, tab_contra, tab_abs, tab_sim = st.tabs([
+tab_live, tab_mem, tab_ep, tab_pred, tab_contra, tab_abs, tab_sim, tab_wv = st.tabs([
     "🌡 Live", "🧩 Memory", "🔗 Episodes",
-    "⚡ Predictions", "💬 Contradictions", "🔷 Abstractions", "🔮 Simulate"
+    "⚡ Predictions", "💬 Contradictions", "🔷 Abstractions", "🔮 Simulate", "🪞 Worldview"
 ])
 
 
@@ -529,3 +529,133 @@ with tab_sim:
 
     else:
         st.info("Simulation runs in a read-only scratchpad — no concepts are stored, no memory is changed.")
+
+
+# ── 🪞 Worldview ──────────────────────────────────────────────────────────────
+with tab_wv:
+    st.caption("What has survived. The engine's accumulated cognitive identity.")
+
+    @st.cache_resource(show_spinner=False)
+    def _worldview():
+        from worldview import Worldview
+        return Worldview.get()
+
+    wv = _worldview()
+    snap = wv.snapshot()
+
+    # Summary banner
+    summary = snap.get('identity_summary', '')
+    if summary:
+        st.markdown(f"""
+        <div class="cog-card" style="border-color:#4a9eff;margin-bottom:1.2rem">
+          <div style="font-size:0.72rem;color:#555;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">Identity Summary</div>
+          <div style="color:#ccc;font-size:0.92rem;line-height:1.6">{summary}</div>
+        </div>""", unsafe_allow_html=True)
+
+    col_upd, col_btn = st.columns([3, 1])
+    col_upd.caption(f"Last updated: {snap.get('last_updated', 'never')}  ·  Update #{snap.get('update_count', 0)}")
+    if col_btn.button("Refresh worldview", use_container_width=True):
+        wv.update()
+        st.rerun()
+
+    st.divider()
+
+    # ── Persistent concepts ────────────────────────────────────────────────
+    st.subheader("Persistent Concepts")
+    st.caption("Durably encoded in semantic memory — what the engine has truly learned.")
+    pc = snap.get('persistent_concepts', [])
+    if pc:
+        df_pc = pd.DataFrame(pc).rename(columns={'concept': 'Concept', 'semantic_value': 'Semantic Value'})
+        st.dataframe(df_pc.head(30), use_container_width=True, hide_index=True)
+    else:
+        st.info("No persistent concepts yet — semantic memory needs more time.")
+
+    st.divider()
+
+    # ── Chronic contradictions ─────────────────────────────────────────────
+    st.subheader("Chronic Contradictions")
+    st.caption("Open tensions older than 24 hours — structural questions the engine lives with.")
+    cc = snap.get('chronic_contradictions', [])
+    if cc:
+        for c in cc:
+            st.markdown(f"""
+            <div class="cog-card" style="border-color:#ff4444">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <span class="ep-concept">{c['concept_a']}</span>
+                  <span class="ep-arrow" style="margin:0 8px">⟷</span>
+                  <span class="ep-concept">{c['concept_b']}</span>
+                </div>
+                <div style="font-family:monospace;font-size:0.75rem;color:#777">{c['age_hours']:.0f}h open</div>
+              </div>
+              <div style="margin-top:6px;font-size:0.78rem;color:#888">
+                tension A={c['tension_a']} · tension B={c['tension_b']} · type: {c['conflict_type']}
+              </div>
+            </div>""", unsafe_allow_html=True)
+    else:
+        st.info("No chronic contradictions — all tensions are recent or resolved.")
+
+    st.divider()
+
+    # ── Surviving goals ────────────────────────────────────────────────────
+    st.subheader("Surviving Goals")
+    st.caption("Goals that fire across multiple cognitive modes — stable intrinsic drives.")
+    sg = snap.get('surviving_goals', [])
+    if sg:
+        for g_item in sg:
+            modes_str = ' · '.join(g_item['distinct_modes'])
+            bar_w = int(g_item['stability_score'] * 100)
+            st.markdown(f"""
+            <div class="cog-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="color:#a78bfa;font-weight:600">{g_item['goal'].replace('_',' ')}</div>
+                <div style="font-family:monospace;font-size:0.75rem;color:#777">{g_item['recurrence']}× fired</div>
+              </div>
+              <div style="font-size:0.78rem;color:#888;margin-bottom:8px">modes: {modes_str}</div>
+              <div style="height:3px;background:#1e2130;border-radius:2px">
+                <div style="height:100%;width:{bar_w}%;background:#a78bfa;border-radius:2px"></div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+    else:
+        st.info("Goals haven't survived across modes yet — more training needed.")
+
+    st.divider()
+
+    # ── Home regions ───────────────────────────────────────────────────────
+    st.subheader("Home Territories")
+    st.caption("Regions the engine returns to most — its knowledge domains.")
+    hr = snap.get('home_regions', [])
+    if hr:
+        cols = st.columns(min(len(hr), 4))
+        for i, r in enumerate(hr[:4]):
+            with cols[i]:
+                st.metric(r['region_id'], f"{r['visit_count']} visits", f"{r['dominance_pct']}% of all visits")
+    else:
+        st.info("No home territories yet — need more region-tagged episodes.")
+
+    st.divider()
+
+    # ── Foundational abstractions ──────────────────────────────────────────
+    st.subheader("Foundational Abstractions")
+    st.caption("High-stability abstract concepts that anchor the engine's reasoning.")
+    fa = snap.get('foundational_abstractions', [])
+    if fa:
+        df_fa = pd.DataFrame(fa).rename(columns={
+            'name': 'Abstract Concept', 'stability': 'Stability',
+            'reuse_frequency': 'Reuse', 'member_count': 'Members',
+            'emergence_score': 'Emergence',
+        })
+        st.dataframe(df_fa, use_container_width=True, hide_index=True)
+    else:
+        st.info("No foundational abstractions yet — abstractions need more reuse cycles.")
+
+    # ── Semantic biases ────────────────────────────────────────────────────
+    sb = snap.get('semantic_biases', {})
+    if sb:
+        st.divider()
+        st.subheader("Semantic Biases")
+        st.caption("Fraction of deep memory devoted to each region — where knowledge has accumulated.")
+        df_sb = pd.DataFrame([
+            {'Region': k, 'Semantic weight': v} for k, v in sb.items()
+        ])
+        st.dataframe(df_sb, use_container_width=True, hide_index=True)

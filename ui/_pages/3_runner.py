@@ -156,3 +156,56 @@ else:
     with st.spinner("Calling LLM…"):
         response = call_llm(user_input, mod.system_prompt, CFG)
     st.write(response)
+
+# ======================================================================== #
+# ⑤ Feed LLM response back into the learning system                        #
+# The engine learns from its own answers, not just external content.        #
+# ======================================================================== #
+
+if response and response.strip():
+    resp_concepts = extract(response)
+    if resp_concepts:
+        resp_texts = [c.text for c in resp_concepts]
+        detect_and_log(response, resp_concepts, graph=g)
+        g.update(resp_concepts)
+        g.save()
+
+        try:
+            from meta_state import MetaState
+            MetaState.get().reinforce(resp_texts)
+        except Exception:
+            pass
+        try:
+            from memory import TemporalMemory
+            TemporalMemory.get().reinforce(resp_texts)
+        except Exception:
+            pass
+        try:
+            from episodes import EpisodeStore
+            from predictor import Predictor
+            from memory import TemporalMemory as _TM
+            EpisodeStore.get().record(resp_texts, ambiguity=result.score, region='runner')
+            Predictor.get().pre_activate(resp_texts, _TM.get())
+        except Exception:
+            pass
+        try:
+            from contradiction import ContradictionRegistry
+            ContradictionRegistry.get().observe(resp_texts)
+        except Exception:
+            pass
+        try:
+            from world_model import WorldModel
+            WorldModel.get().infer_from_context(resp_texts)
+        except Exception:
+            pass
+        try:
+            from ecology import CognitiveEcology
+            CognitiveEcology.get().tick(resp_texts)
+        except Exception:
+            pass
+
+        with st.expander(f"⑤ Response absorbed — {len(resp_concepts)} concepts learned", expanded=False):
+            st.caption("The engine's own answer was fed back as a lesson.")
+            cols = st.columns(min(len(resp_concepts), 5))
+            for i, c in enumerate(resp_concepts):
+                cols[i % len(cols)].markdown(f"`{c.text}`")

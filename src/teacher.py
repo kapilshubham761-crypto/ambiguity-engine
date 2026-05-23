@@ -405,6 +405,14 @@ class Teacher:
                 WorldModel.get().infer_from_context(all_texts)
             except Exception:
                 pass
+            # V4-02 — worldview: record region visit
+            try:
+                from worldview import Worldview
+                region = self._regions.active_region() if self._regions else None
+                if region:
+                    Worldview.get().record_region_visit(str(region))
+            except Exception:
+                pass
             # V4-01 — ecology tick (per lesson)
             try:
                 from ecology import CognitiveEcology
@@ -455,6 +463,13 @@ class Teacher:
         try:
             from abstractor import Abstractor
             Abstractor.get().run()
+        except Exception:
+            pass
+
+        # V4-02 — worldview update at check-in time
+        try:
+            from worldview import Worldview
+            Worldview.get().update()
         except Exception:
             pass
 
