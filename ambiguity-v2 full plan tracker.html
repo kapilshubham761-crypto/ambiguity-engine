@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ambiguity v2 — Full Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #f0eade;
+    --bg-deep:   #e7dfc8;
+    --surface:   #faf7ef;
+    --ink:       #1a1814;
+    --ink-soft:  #3a342a;
+    --muted:     #7a715f;
+    --muted-2:   #a89e8a;
+    --hair:      #d5cbb4;
+    --hair-soft: #e2dac6;
+    --shadow:    0 1px 0 rgba(26,24,20,0.04), 0 2px 12px -4px rgba(26,24,20,0.08);
+
+    /* Phase accent colours */
+    --a:         #5c3d8f;  /* violet  — Saturation */
+    --a-soft:    #b09fd4;
+    --a-bg:      rgba(92,61,143,0.05);
+    --b:         #1a6b5a;  /* teal    — Novelty */
+    --b-soft:    #7bbdae;
+    --b-bg:      rgba(26,107,90,0.05);
+    --c:         #8a4f10;  /* amber   — Regions */
+    --c-soft:    #d4a472;
+    --c-bg:      rgba(138,79,16,0.05);
+    --d:         #24405c;  /* slate   — Stability */
+    --d-soft:    #7fa3c0;
+    --d-bg:      rgba(36,64,92,0.05);
+    --forest:    #3f5a30;
+    --forest-soft:#9eb38d;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Newsreader', Georgia, serif;
+    --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      radial-gradient(rgba(120,100,60,0.035) 1px, transparent 1px),
+      radial-gradient(rgba(120,100,60,0.018) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    min-height: 100vh;
+  }
+
+  .shell { max-width: 1240px; margin: 0 auto; padding: 56px 48px 120px; display: grid; grid-template-columns: 1fr; gap: 48px; }
+
+  /* MASTHEAD */
+  .masthead { border-bottom: 1px solid var(--ink); padding-bottom: 28px; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 32px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .masthead h1 { font-family: var(--font-display); font-weight: 300; font-size: clamp(36px,5vw,56px); line-height:1.0; letter-spacing:-0.025em; font-variation-settings:'opsz' 144; margin-bottom:10px; }
+  .masthead h1 em { font-style:italic; }
+  .masthead h1 .ph-a { color: var(--a); }
+  .masthead h1 .ph-b { color: var(--b); }
+  .masthead h1 .ph-c { color: var(--c); }
+  .masthead h1 .ph-d { color: var(--d); }
+  .mast-tagline { font-style:italic; color:var(--muted); font-size:20px; line-height:1.4; max-width:640px; }
+  .mast-right { text-align:right; display:flex; flex-direction:column; gap:14px; align-items:flex-end; }
+  .meter-wrap { width:220px; height:4px; background:var(--hair); }
+  .meter-fill { height:100%; background: linear-gradient(90deg, var(--a), var(--b), var(--c), var(--d)); transition:width 0.4s ease; }
+  .meter-fill.complete { background: var(--forest); }
+  .meter-label { font-family:var(--font-mono); font-size:11px; color:var(--muted); letter-spacing:0.1em; margin-top:6px; }
+  .status-stamp { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted-2); border:1px solid var(--hair); padding:5px 10px; }
+  .status-stamp.live { color:var(--a); border-color:var(--a); }
+  .mast-actions { display:flex; gap:8px; }
+  .action-btn { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; padding:6px 12px; border:1px solid var(--hair); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .action-btn:hover { border-color:var(--ink-soft); color:var(--ink-soft); }
+
+  /* PHASE MAP */
+  .phase-map { display:grid; grid-template-columns: repeat(4,1fr); gap:16px; }
+  .phase-card { padding:20px 22px; border:1px solid var(--hair); background:var(--surface); position:relative; }
+  .phase-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .phase-card.ph-a::before { background:var(--a); }
+  .phase-card.ph-b::before { background:var(--b); }
+  .phase-card.ph-c::before { background:var(--c); }
+  .phase-card.ph-d::before { background:var(--d); }
+  .pc-label { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:6px; }
+  .ph-a .pc-label { color:var(--a); }
+  .ph-b .pc-label { color:var(--b); }
+  .ph-c .pc-label { color:var(--c); }
+  .ph-d .pc-label { color:var(--d); }
+  .pc-name { font-family:var(--font-display); font-size:20px; font-weight:400; margin-bottom:6px; font-variation-settings:'opsz' 60; }
+  .pc-desc { font-size:14px; color:var(--muted); line-height:1.45; margin-bottom:12px; }
+  .pc-steps { font-family:var(--font-mono); font-size:11px; color:var(--muted-2); }
+  .pc-bar { margin-top:10px; height:3px; background:var(--hair); }
+  .pc-bar-fill { height:100%; transition:width 0.4s; }
+  .ph-a .pc-bar-fill { background:var(--a-soft); }
+  .ph-b .pc-bar-fill { background:var(--b-soft); }
+  .ph-c .pc-bar-fill { background:var(--c-soft); }
+  .ph-d .pc-bar-fill { background:var(--d-soft); }
+
+  /* FILTER BAR */
+  .filter-bar { display:flex; gap:8px; align-items:center; }
+  .filter-label { font-family:var(--font-mono); font-size:11px; color:var(--muted-2); letter-spacing:0.1em; text-transform:uppercase; margin-right:4px; }
+  .filter-btn { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; padding:5px 11px; border:1px solid var(--hair); background:transparent; color:var(--muted-2); cursor:pointer; transition:all 0.15s; }
+  .filter-btn:hover { color:var(--muted); border-color:var(--muted); }
+  .filter-btn.active { color:var(--ink-soft); border-color:var(--ink-soft); background:var(--bg-deep); }
+  .filter-sep { width:1px; height:20px; background:var(--hair); margin:0 4px; }
+  .filter-phase { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:5px 10px; border:1px solid transparent; background:transparent; cursor:pointer; transition:all 0.15s; }
+  .filter-phase[data-phase="A"] { color:var(--a); }
+  .filter-phase[data-phase="B"] { color:var(--b); }
+  .filter-phase[data-phase="C"] { color:var(--c); }
+  .filter-phase[data-phase="D"] { color:var(--d); }
+  .filter-phase.active { border-color: currentColor; background: rgba(0,0,0,0.03); }
+
+  /* BODY GRID */
+  .body-grid { display:grid; grid-template-columns:200px 1fr; gap:48px; align-items:start; }
+
+  /* SIDENAV */
+  .sidenav { position:sticky; top:32px; }
+  .sidenav-title { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted-2); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--hair-soft); }
+  .nav-phase-head { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:12px 0 4px 10px; }
+  .nav-phase-head.ph-a { color:var(--a); }
+  .nav-phase-head.ph-b { color:var(--b); }
+  .nav-phase-head.ph-c { color:var(--c); }
+  .nav-phase-head.ph-d { color:var(--d); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:6px 0 6px 10px; text-decoration:none; color:var(--muted); font-family:var(--font-mono); font-size:11px; letter-spacing:0.04em; border-left:2px solid transparent; transition:all 0.15s; }
+  .nav-item:hover { color:var(--ink-soft); border-left-color:var(--hair); }
+  .nav-item.complete { color:var(--forest); border-left-color:var(--forest-soft); }
+  .nav-item.partial { color:var(--ink-soft); }
+  .nav-item.active-step.ph-a { color:var(--a); border-left-color:var(--a); }
+  .nav-item.active-step.ph-b { color:var(--b); border-left-color:var(--b); }
+  .nav-item.active-step.ph-c { color:var(--c); border-left-color:var(--c); }
+  .nav-item.active-step.ph-d { color:var(--d); border-left-color:var(--d); }
+  .nav-dot { width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; opacity:0.5; }
+  .nav-pause { font-family:var(--font-mono); font-size:10px; color:var(--muted-2); padding:4px 0 4px 10px; font-style:italic; letter-spacing:0.06em; }
+  .nav-label { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* PHASE BAND */
+  .phase-band { padding:20px 28px; margin-bottom:-8px; display:grid; grid-template-columns:auto 1fr auto; gap:24px; align-items:center; }
+  .phase-band.ph-a { background:var(--a-bg); border:1px solid var(--a-soft); border-left:4px solid var(--a); }
+  .phase-band.ph-b { background:var(--b-bg); border:1px solid var(--b-soft); border-left:4px solid var(--b); }
+  .phase-band.ph-c { background:var(--c-bg); border:1px solid var(--c-soft); border-left:4px solid var(--c); }
+  .phase-band.ph-d { background:var(--d-bg); border:1px solid var(--d-soft); border-left:4px solid var(--d); }
+  .pb-letter { font-family:var(--font-display); font-size:56px; font-weight:300; font-style:italic; line-height:1; font-variation-settings:'opsz' 144; }
+  .ph-a .pb-letter { color:var(--a); }
+  .ph-b .pb-letter { color:var(--b); }
+  .ph-c .pb-letter { color:var(--c); }
+  .ph-d .pb-letter { color:var(--d); }
+  .pb-meta {}
+  .pb-name { font-family:var(--font-display); font-size:26px; font-weight:400; letter-spacing:-0.01em; font-variation-settings:'opsz' 80; margin-bottom:4px; }
+  .pb-tagline { font-style:italic; color:var(--muted); font-size:15px; line-height:1.4; }
+  .pb-node { font-family:var(--font-mono); font-size:11px; color:var(--muted-2); text-align:right; }
+  .pb-bar { margin-top:6px; height:2px; background:var(--hair); }
+  .pb-bar-fill { height:100%; transition:width 0.4s; }
+  .ph-a .pb-bar-fill { background:var(--a); }
+  .ph-b .pb-bar-fill { background:var(--b); }
+  .ph-c .pb-bar-fill { background:var(--c); }
+  .ph-d .pb-bar-fill { background:var(--d); }
+
+  /* STEP CARDS */
+  .steps { display:flex; flex-direction:column; gap:24px; }
+  .step { background:var(--surface); border:1px solid var(--hair); padding:36px 40px 32px; position:relative; transition:all 0.3s ease; box-shadow:var(--shadow); }
+  .step.is-complete { border-color:var(--forest-soft); background: linear-gradient(180deg,#f4f1e3 0%,#faf6ec 60%); }
+  .step.is-active.ph-a { border-color:var(--a); box-shadow: 0 1px 0 rgba(92,61,143,0.06), 0 4px 24px -8px rgba(92,61,143,0.15); }
+  .step.is-active.ph-b { border-color:var(--b); box-shadow: 0 1px 0 rgba(26,107,90,0.06), 0 4px 24px -8px rgba(26,107,90,0.15); }
+  .step.is-active.ph-c { border-color:var(--c); box-shadow: 0 1px 0 rgba(138,79,16,0.06), 0 4px 24px -8px rgba(138,79,16,0.15); }
+  .step.is-active.ph-d { border-color:var(--d); box-shadow: 0 1px 0 rgba(36,64,92,0.06), 0 4px 24px -8px rgba(36,64,92,0.15); }
+
+  .step-head { display:grid; grid-template-columns:84px 1fr auto; gap:28px; align-items:start; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--hair-soft); }
+  .step-num { font-family:var(--font-display); font-weight:300; font-style:italic; font-size:64px; line-height:0.85; font-variation-settings:'opsz' 144; letter-spacing:-0.04em; color:var(--muted-2); }
+  .step.is-complete .step-num { color:var(--forest); }
+  .step.is-active.ph-a .step-num { color:var(--a); }
+  .step.is-active.ph-b .step-num { color:var(--b); }
+  .step.is-active.ph-c .step-num { color:var(--c); }
+  .step.is-active.ph-d .step-num { color:var(--d); }
+
+  .step-meta { padding-top:6px; }
+  .step-kicker { font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .estimate { color:var(--muted-2); font-style:normal; text-transform:none; letter-spacing:0.05em; }
+  .estimate::before { content:'·'; margin-right:14px; color:var(--muted-2); }
+  .step-title { font-family:var(--font-display); font-weight:400; font-size:30px; line-height:1.1; letter-spacing:-0.015em; color:var(--ink); margin-bottom:6px; font-variation-settings:'opsz' 80; }
+  .file-ref { font-family:var(--font-mono); font-size:14px; font-weight:500; background:var(--bg-deep); border:1px solid var(--hair); padding:2px 7px; margin-left:8px; color:var(--ink-soft); vertical-align:middle; position:relative; top:-3px; }
+  .step-tagline { font-style:italic; color:var(--muted); font-size:17px; line-height:1.4; }
+
+  .step-status { text-align:right; padding-top:6px; }
+  .status-pill { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:6px 12px; border:1px solid var(--hair); color:var(--muted); background:var(--bg); display:inline-block; }
+  .step.is-complete .status-pill { border-color:var(--forest); color:var(--forest); background:rgba(63,90,48,0.05); }
+  .step.is-active.ph-a .status-pill { border-color:var(--a); color:var(--a); background:var(--a-bg); }
+  .step.is-active.ph-b .status-pill { border-color:var(--b); color:var(--b); background:var(--b-bg); }
+  .step.is-active.ph-c .status-pill { border-color:var(--c); color:var(--c); background:var(--c-bg); }
+  .step.is-active.ph-d .status-pill { border-color:var(--d); color:var(--d); background:var(--d-bg); }
+  .step-progress { margin-top:10px; font-family:var(--font-mono); font-size:11px; color:var(--muted-2); letter-spacing:0.08em; }
+  .step-progress .frac { color:var(--ink-soft); font-weight:500; }
+
+  /* SUBSTEPS */
+  .substeps { display:flex; flex-direction:column; gap:2px; margin-bottom:20px; }
+  .substep { display:grid; grid-template-columns:28px auto 1fr; gap:14px; align-items:baseline; padding:11px 8px 11px 0; cursor:pointer; border-radius:2px; transition:background 0.12s; }
+  .substep:hover { background:var(--bg-deep); }
+  .substep-check { width:18px; height:18px; border:1.5px solid var(--muted-2); background:var(--bg); margin-top:2px; position:relative; transition:all 0.15s; flex-shrink:0; }
+  .substep.done .substep-check { background:var(--forest); border-color:var(--forest); }
+  .substep.done .substep-check::after { content:''; position:absolute; left:4px; top:1px; width:6px; height:10px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg); }
+  .substep-num { font-family:var(--font-mono); font-size:11px; color:var(--muted-2); letter-spacing:0.05em; white-space:nowrap; padding-top:1px; }
+  .substep.done .substep-num { color:var(--forest-soft); }
+  .substep-body { min-width:0; }
+  .substep-label { font-size:16px; color:var(--ink-soft); line-height:1.4; }
+  .substep.done .substep-label { color:var(--muted); text-decoration:line-through; text-decoration-color:var(--forest-soft); }
+  .substep-detail { margin-top:5px; font-size:13.5px; color:var(--muted); font-style:italic; line-height:1.45; }
+  .substep.filter-hidden { display:none; }
+
+  code { font-family:var(--font-mono); font-size:0.875em; background:var(--bg-deep); padding:1px 4px; color:var(--ink-soft); }
+
+  /* FORMULA BLOCK */
+  .formula-block { margin:16px 0 8px; background:var(--bg-deep); border:1px solid var(--hair); border-left:3px solid var(--muted-2); padding:16px 20px; }
+  .ph-a .formula-block { border-left-color:var(--a-soft); }
+  .ph-b .formula-block { border-left-color:var(--b-soft); }
+  .ph-c .formula-block { border-left-color:var(--c-soft); }
+  .ph-d .formula-block { border-left-color:var(--d-soft); }
+  .formula-label { font-family:var(--font-mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted-2); margin-bottom:8px; }
+  .formula-block pre { font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); white-space:pre-wrap; line-height:1.7; }
+  .formula-note { margin-top:10px; font-size:13px; font-style:italic; color:var(--muted); line-height:1.5; }
+
+  /* CONFIG BLOCK */
+  .codeblock { margin-top:14px; background:#1e1b16; padding:16px 20px; font-family:var(--font-mono); font-size:12.5px; line-height:1.7; position:relative; overflow-x:auto; }
+  .codeblock::before { content:attr(data-label); position:absolute; top:8px; right:12px; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#5a5040; }
+  .codeblock .k { color:#c9a96e; }
+  .codeblock .v { color:#8ecfa0; }
+  .codeblock .c { color:#5a6a52; }
+  .codeblock .s { color:#c9a96e; font-style:italic; }
+
+  /* NOTES */
+  .notes-wrap { margin-top:8px; }
+  .notes-label { font-family:var(--font-mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted-2); margin-bottom:8px; }
+  .notes-input { width:100%; min-height:60px; background:var(--bg-deep); border:1px solid var(--hair-soft); padding:10px 14px; font-family:var(--font-body); font-size:14px; color:var(--ink-soft); resize:vertical; outline:none; transition:border-color 0.15s; }
+  .notes-input:focus { border-color:var(--muted); }
+
+  /* PAUSE */
+  .pause { display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; padding:8px 0; }
+  .pause-line { height:1px; background:var(--hair); }
+  .pause-content { text-align:center; }
+  .pause-icon { font-family:var(--font-mono); font-size:10px; letter-spacing:0.18em; color:var(--muted-2); margin-bottom:8px; text-transform:uppercase; }
+  .pause-title { font-family:var(--font-display); font-size:20px; font-weight:400; color:var(--ink); margin-bottom:6px; font-variation-settings:'opsz' 60; font-style:italic; }
+  .pause-body { font-size:14px; color:var(--muted); max-width:480px; margin:0 auto; line-height:1.5; }
+
+  /* COMPLETION */
+  .completion { border:1px solid var(--forest); background:linear-gradient(135deg,rgba(63,90,48,0.04) 0%,var(--surface) 100%); padding:40px 48px; text-align:center; font-family:var(--font-display); font-size:22px; font-weight:300; line-height:1.6; color:var(--forest); font-variation-settings:'opsz' 80; }
+  .completion strong { font-weight:500; }
+  .completion em { font-style:italic; }
+  .completion code { font-family:var(--font-mono); font-size:13px; background:rgba(63,90,48,0.08); color:var(--forest); }
+
+  .colophon { border-top:1px solid var(--hair); padding-top:24px; display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--muted-2); letter-spacing:0.08em; }
+
+  @media (max-width:860px) {
+    .shell { padding:32px 24px 80px; }
+    .body-grid { grid-template-columns:1fr; }
+    .sidenav { display:none; }
+    .phase-map { grid-template-columns:1fr 1fr; }
+    .step-head { grid-template-columns:56px 1fr; }
+    .step-status { display:none; }
+    .pb-letter { font-size:40px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="mast-left">
+      <div class="eyebrow">Ambiguity Engine · V2 · Full Roadmap</div>
+      <h1>
+        <span class="ph-a">Saturate.</span>
+        <span class="ph-b"> Explore.</span>
+        <span class="ph-c"> Localise.</span>
+        <span class="ph-d"> Stabilise.</span>
+      </h1>
+      <p class="mast-tagline">Four phases of cognitive architecture — from fixation prevention to genuine spatial attention. Each phase is a prerequisite for the next.</p>
+    </div>
+    <div class="mast-right">
+      <div id="status-stamp" class="status-stamp">NOT STARTED</div>
+      <div class="meter-wrap"><div class="meter-fill" id="meter-fill" style="width:0%"></div></div>
+      <div class="meter-label"><span id="done-count">0</span> / <span id="total-count">0</span> substeps</div>
+      <div class="mast-actions">
+        <button class="action-btn" id="export-btn">Export</button>
+        <button class="action-btn" id="reset-btn">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PHASE MAP -->
+  <div class="phase-map" id="phase-map">
+    <div class="phase-card ph-a" id="pc-A">
+      <div class="pc-label">Phase A</div>
+      <div class="pc-name">Saturation</div>
+      <div class="pc-desc">Prevent permanent dominance. Sigmoid gain, fatigue, cooling.</div>
+      <div class="pc-steps">3 steps · meta_state.py [M]</div>
+      <div class="pc-bar"><div class="pc-bar-fill" id="pcbar-A" style="width:0%"></div></div>
+    </div>
+    <div class="phase-card ph-b" id="pc-B">
+      <div class="pc-label">Phase B</div>
+      <div class="pc-name">Novelty</div>
+      <div class="pc-desc">Prevent stagnation. Exposure tracking, curiosity pull, anti-loop.</div>
+      <div class="pc-steps">4 steps · novelty.py [V] new</div>
+      <div class="pc-bar"><div class="pc-bar-fill" id="pcbar-B" style="width:0%"></div></div>
+    </div>
+    <div class="phase-card ph-c" id="pc-C">
+      <div class="pc-label">Phase C</div>
+      <div class="pc-name">Regions</div>
+      <div class="pc-desc">Competing regional attention. Inhibition, bridges, dormancy.</div>
+      <div class="pc-steps">5 steps · regions.py [R] real</div>
+      <div class="pc-bar"><div class="pc-bar-fill" id="pcbar-C" style="width:0%"></div></div>
+    </div>
+    <div class="phase-card ph-d" id="pc-D">
+      <div class="pc-label">Phase D</div>
+      <div class="pc-name">Stability</div>
+      <div class="pc-desc">Normalization, entropy monitoring, meta-modulation.</div>
+      <div class="pc-steps">3 steps · stability.py [S] new</div>
+      <div class="pc-bar"><div class="pc-bar-fill" id="pcbar-D" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Show</span>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="pending">Pending</button>
+    <button class="filter-btn" data-filter="done">Done</button>
+    <div class="filter-sep"></div>
+    <span class="filter-label">Phase</span>
+    <button class="filter-phase" data-phase="A">A</button>
+    <button class="filter-phase" data-phase="B">B</button>
+    <button class="filter-phase" data-phase="C">C</button>
+    <button class="filter-phase" data-phase="D">D</button>
+  </div>
+
+  <!-- BODY GRID -->
+  <div class="body-grid">
+    <aside class="sidenav">
+      <div class="sidenav-title">Roadmap</div>
+      <nav id="sidenav-list"></nav>
+    </aside>
+    <main class="steps" id="steps-container"></main>
+  </div>
+
+  <footer class="colophon">
+    <div>Ambiguity v2 · Full Roadmap</div>
+    <div>Prerequisites flow A → B → C → D · Don't skip observation gates</div>
+  </footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// PLAN DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const PLAN = [
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE A — SATURATION LAYER
+  // ══════════════════════════════════════════════════════════════════════════
+  { type:'phase', phase:'A', name:'Saturation Layer',
+    tagline:'Prevent concepts from becoming permanently dominant. All changes inside meta_state.py [M] — no new files, no new protocols.',
+    nodes:'meta_state.py [M] · config.yaml' },
+
+  {
+    id:'step-A1', num:'A1', phase:'A',
+    kicker:'Saturation · primary', estimate:'~1 hr',
+    title:'Saturation curve', fileRef:'[M]',
+    tagline:'Weak concepts grow fast. Strong concepts grow slowly. Near-1.0 concepts barely move. The formula is self-bounding — no separate clamp needed.',
+    substeps:[
+      { id:'sA1-1', label:'Replace linear reinforce with sigmoid update',
+        detail:'Change <code>activation += gain</code> to <code>activation += gain × (1 − activation)</code> inside <code>reinforce()</code>.' },
+      { id:'sA1-2', label:'Verify boundary behaviour at three points',
+        detail:'At <code>a=0.0</code>: full gain. At <code>a=0.5</code>: half gain. At <code>a=0.9</code>: 10% of gain. Verify in a quick script before committing.' },
+      { id:'sA1-3', label:'Add <code>gain_mode: sigmoid | linear</code> to config',
+        detail:'Keep linear accessible as a toggle — needed for A/B against the v1.1 baseline. Default: <code>sigmoid</code>.', code:'cfg_A1' },
+      { id:'sA1-4', label:'Update <code>validate_meta_state.py</code>',
+        detail:'Add case: heavy repeated reinforce must plateau (asymptote), not spike to 1.0 and stay. Regression guard for all 14 existing cases.' },
+    ],
+    formula:{
+      label:'Saturation update — before vs after',
+      code:`# v1.1 — linear (creates runaway dominance):
+activation = min(1.0, activation + gain)
+
+# v2 A1 — sigmoid (self-bounding):
+activation = activation + gain * (1.0 - activation)
+# → result is always in (activation, 1.0) for any gain > 0
+# → asymptotically approaches 1.0; never reaches it`,
+      note:'At a=0: growth is full gain. At a=0.5: growth is halved. At a=0.9: growth is 10× slower. No hard clamp needed — the formula enforces it.',
+    },
+  },
+
+  {
+    id:'step-A2', num:'A2', phase:'A',
+    kicker:'Saturation · fatigue', estimate:'~2 hr',
+    title:'Reinforcement fatigue', fileRef:'[M]',
+    tagline:'Repeated hits inside a short window lose influence. New concepts can break through. The same content source stops dominating attention indefinitely.',
+    substeps:[
+      { id:'sA2-1', label:'Extend entry schema with two new fields',
+        detail:'Add <code>last_reinforced_at</code> (ISO datetime string) and <code>reinforce_count_window</code> (int) per concept. Initialise to <code>null</code> / <code>0</code>. Missing fields must degrade gracefully on load.' },
+      { id:'sA2-2', label:'Implement fatigue multiplier in <code>reinforce()</code>',
+        detail:'Before applying gain: <code>fatigue = 1 / (1 + hits × fatigue_k)</code> where <code>hits = reinforce_count_window</code>. Apply <code>effective_gain = gain × fatigue</code>.' },
+      { id:'sA2-3', label:'Implement window reset logic',
+        detail:'On every reinforce: if <code>now − last_reinforced_at > fatigue_window_minutes</code> → reset <code>reinforce_count_window = 0</code> before incrementing. "Rest" resets the penalty.' },
+      { id:'sA2-4', label:'Add fatigue config block', code:'cfg_A2' },
+      { id:'sA2-5', label:'Validate: 10 rapid hits < 10 spaced hits in total gain',
+        detail:'Two concepts, same base activation. Rapid: all reinforced in same minute. Spaced: one per window. Final activation must be lower in the rapid case.' },
+      { id:'sA2-6', label:'Ensure new fields survive JSON round-trip',
+        detail:'Save → reload → reinforce again. <code>reinforce_count_window</code> must persist across restart. Missing or corrupt fields → treat as 0.' },
+    ],
+    formula:{
+      label:'Fatigue multiplier formula',
+      code:`hits = reinforce_count_window  # hits inside current window
+fatigue_k = cfg["fatigue_k"]   # from config (e.g. 0.2)
+
+fatigue = 1.0 / (1.0 + hits * fatigue_k)
+effective_gain = gain * fatigue
+
+# Example at fatigue_k=0.2:
+#   hits=0  → fatigue=1.00  (no penalty — first hit)
+#   hits=1  → fatigue=0.83
+#   hits=5  → fatigue=0.50  (half strength)
+#   hits=9  → fatigue=0.36
+# fatigue_k=0.0 → pure no-op (safe A/B default)`,
+      note:'Start with fatigue_k=0.0 for baseline. Ramp to 0.2 once A1 is stable and observed.',
+    },
+  },
+
+  { type:'pause', icon:'◇  Observation Gate  ◇', title:'Pause A',
+    body:'Run the engine for 6 hours with A1 + A2 active. Open the Meta-State page. Watch the activation distribution — are values now spread out instead of clustering near 1.0? Check <code>data/meta_state.json</code> directly. Tune <code>reinforce_gain</code>, <code>fatigue_k</code>, and <code>fatigue_window_minutes</code> before proceeding to A3.' },
+
+  {
+    id:'step-A3', num:'A3', phase:'A',
+    kicker:'Saturation · cooling', estimate:'~2 hr',
+    title:'Activation cooling', fileRef:'[M]',
+    tagline:'Hot concepts burn out faster. Prevents permanent fixation. The system naturally cycles through topics rather than orbiting one forever. Critical prerequisite for Phase C.',
+    substeps:[
+      { id:'sA3-1', label:'Extend decay formula with activation-weighted exponent',
+        detail:'Change <code>a = a₀ × r^t</code> to <code>a = a₀ × r^(t × (1 + α × a₀))</code> inside <code>_decayed_value()</code>. Higher activation → faster decay clock.' },
+      { id:'sA3-2', label:'Add <code>cooling_alpha</code> to config',
+        detail:'<code>cooling_alpha: 0.0</code> = v1.1 identical (safe default). <code>cooling_alpha: 1.0</code> = concept at a=1.0 decays at 2× base rate. Start at 0.5.', code:'cfg_A3' },
+      { id:'sA3-3', label:'Regression guard: <code>cooling_alpha=0</code> must be numerically identical to v1.1',
+        detail:'Same concept, same timestamps, same decay_rate. With alpha=0 the result must match the old formula to floating-point precision.' },
+      { id:'sA3-4', label:'Cooling test: <code>a=1.0</code> decays faster than <code>a=0.3</code> at same elapsed time',
+        detail:'Add to <code>validate_meta_state.py</code>. Two concepts, same timestamps, <code>alpha=0.5</code>. After 30 min, higher-activation concept must have lower decayed proportion.' },
+      { id:'sA3-5', label:'Update ARCHITECTURE.md decay formula entry under [M]' },
+      { id:'sA3-6', label:'Run full validate suite — all 14 existing cases must pass',
+        detail:'Cooling must not break the bad-timestamp fallback, cap cull, or JSON round-trip cases.' },
+    ],
+    formula:{
+      label:'Activation cooling formula',
+      code:`# v1.1 — flat decay (no dependence on activation level):
+a = a0 * (decay_rate ** elapsed_minutes)
+
+# v2 A3 — activation-weighted exponent:
+α = cooling_alpha  # from config.yaml
+a = a0 * (decay_rate ** (elapsed_minutes * (1.0 + α * a0)))
+
+# Behaviour at α=1.0, decay_rate=0.97, elapsed=60min:
+#   a0=0.1  → exponent ×1.10  → barely faster than v1.1
+#   a0=0.5  → exponent ×1.50  → 50% faster burn
+#   a0=1.0  → exponent ×2.00  → 2× faster burn`,
+      note:'The stronger the concept, the faster its clock runs. α=0 is a strict no-op — use this as the regression baseline.',
+    },
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE B — NOVELTY PRESSURE
+  // ══════════════════════════════════════════════════════════════════════════
+  { type:'phase', phase:'B', name:'Novelty Pressure',
+    tagline:'Prevent cognitive stagnation. Without novelty, the system loops the same semantic zones forever. Attention collapses into local minima.',
+    nodes:'novelty.py [V] new · attention.py [N] · homework.py [H] · protocols.py [0]' },
+
+  {
+    id:'step-B1', num:'B1', phase:'B',
+    kicker:'Novelty · foundation', estimate:'~½ day',
+    title:'Exposure tracking', fileRef:'[V] new',
+    tagline:'Every concept carries its visit history. New concepts have natural exploratory advantage — the first time you see something, it is maximally novel.',
+    substeps:[
+      { id:'sB1-1', label:'Add <code>INovelty</code> protocol to <code>protocols.py [0]</code>',
+        detail:'Methods: <code>observe(concept)</code>, <code>novelty_score(concept) → float</code>, <code>snapshot() → dict</code>. Add before IRegions in the file.' },
+      { id:'sB1-2', label:'Create <code>novelty.py [V]</code> with <code>NoveltyTracker</code> class',
+        detail:'Internal schema: <code>{concept: {times_seen: int, first_seen: ISO, last_seen: ISO}}</code>. Singleton via <code>NoveltyTracker.get()</code>. Atomic save to <code>data/novelty.json</code>.' },
+      { id:'sB1-3', label:'Implement <code>novelty_score(concept) → float</code>',
+        detail:'Formula: <code>1 / log(times_seen + e)</code> where <code>e ≈ 2.718</code>. At <code>times_seen=0</code>: score = 1.0 (max). At <code>times_seen=100</code>: score ≈ 0.20.' },
+      { id:'sB1-4', label:'Hook into <code>detector.detect_and_log()</code>',
+        detail:'After the tension observe hook (s5-3): call <code>novelty.observe(c.text)</code> for each concept. One line, same pattern as TensionTracker.' },
+      { id:'sB1-5', label:'Add <code>novelty:</code> config block', code:'cfg_B1' },
+      { id:'sB1-6', label:'Write basic validation',
+        detail:'New concept must score 1.0. After 10 observe() calls: score must be lower. After 100: even lower. Monotone decrease guaranteed by log.' },
+    ],
+    formula:{
+      label:'Novelty score formula',
+      code:`import math
+
+def novelty_score(times_seen: int) -> float:
+    # e ≈ 2.718 ensures score = 1.0 at times_seen=0
+    return 1.0 / math.log(times_seen + math.e)
+
+# times_seen=0   → 1.000  (never seen — max novelty)
+# times_seen=1   → 0.731
+# times_seen=9   → 0.417
+# times_seen=99  → 0.217
+# times_seen=999 → 0.145`,
+      note:'Monotonically decreasing. Approaches 0 but never reaches it — old concepts never become fully invisible to novelty pressure.',
+    },
+  },
+
+  {
+    id:'step-B2', num:'B2', phase:'B',
+    kicker:'Novelty · attention', estimate:'~1 hr',
+    title:'Novelty in attention bias', fileRef:'[N]',
+    tagline:'Attention now balances familiarity and freshness. The same concept competes differently depending on how many times the system has encountered it.',
+    substeps:[
+      { id:'sB2-1', label:'Extend <code>bias()</code> to accept optional novelty scores',
+        detail:'New signature: <code>bias(candidates, scores, meta, strength, novelty_scores=None, novelty_strength=0.0)</code>. Novelty scores are a parallel list like base scores.' },
+      { id:'sB2-2', label:'Update bias formula to include novelty term',
+        detail:'<code>new = base × (1 + activation_bias + novelty_bias)</code> where <code>novelty_bias = novelty_strength × novelty_score(concept)</code>.' },
+      { id:'sB2-3', label:'Update <code>bias_neighbours()</code> wrapper to fetch novelty scores',
+        detail:'Pull scores from <code>NoveltyTracker.get()</code> for each candidate. Pass as <code>novelty_scores</code> to <code>bias()</code>.' },
+      { id:'sB2-4', label:'Add <code>novelty_strength: 0.0</code> to attention config',
+        detail:'Start at 0.0 (off). Ramp slowly after Phase A is stable. Too much novelty = system chases every new concept, attention destabilises.', code:'cfg_B2' },
+      { id:'sB2-5', label:'Verify: new concept outranks equally-weighted familiar concept when novelty_strength > 0',
+        detail:'Two candidates, same base score, same meta activation. One seen 0 times, one seen 100. At novelty_strength=0.5: new concept must rank higher.' },
+    ],
+    formula:{
+      label:'Extended attention bias formula',
+      code:`# v1.1 — activation only:
+new_score = base * (1 + strength * activation)
+
+# v2 B2 — activation + novelty:
+novelty_bias   = novelty_strength * novelty_score(concept)
+activation_bias = strength * activation
+
+new_score = base * (1 + activation_bias + novelty_bias)
+
+# Balance point: novelty_strength = strength means
+# a concept seen 0 times competes equally with a concept
+# at full activation. Start lower (0.3 × strength).`,
+      note:'Both terms are additive. At novelty_strength=0 this is identical to v1.1 — safe rollback.',
+    },
+  },
+
+  {
+    id:'step-B3', num:'B3', phase:'B',
+    kicker:'Novelty · homework', estimate:'~1 hr',
+    title:'Curiosity pull', fileRef:'[H]',
+    tagline:'Homework occasionally prefers low familiarity + high ambiguity + graph-edge concepts. Creates outward expansion pressure — prevents semantic collapse.',
+    substeps:[
+      { id:'sB3-1', label:'Add <code>curiosity_pull_prob</code> config',
+        detail:'Fraction of homework slots (0–1) that go to curiosity-selected topics. Default: <code>0.20</code>. At 0.0: pure coverage-and-pressure mode (v1.1 behaviour).', code:'cfg_B3' },
+      { id:'sB3-2', label:'Implement curiosity topic selection in <code>homework.generate()</code>',
+        detail:'Curiosity criteria in priority order: (1) low novelty_score (rarely seen), (2) high mean tension score (unresolved ambiguity), (3) graph-edge concepts (few connections, low activation).' },
+      { id:'sB3-3', label:'Add graph-edge concept retrieval',
+        detail:'Query graph for nodes with degree ≤ median_degree AND activation < active_threshold. These are the frontier — concepts the engine knows exist but has barely explored.' },
+      { id:'sB3-4', label:'Tag curiosity-sourced assignments with <code>source: "curiosity"</code>',
+        detail:'So the UI can surface them distinctly and the judgment log can track whether curiosity assignments led to better graph growth.' },
+      { id:'sB3-5', label:'Verify: when curiosity_pull_prob=0.0 output is identical to pre-B3',
+        detail:'Regression guard. Same graph, same meta, same tension state: homework list must be identical at prob=0.' },
+    ],
+  },
+
+  {
+    id:'step-B4', num:'B4', phase:'B',
+    kicker:'Novelty · escape', estimate:'~2 hr',
+    title:'Anti-loop detection', fileRef:'[V]',
+    tagline:'Detect when the system is cycling the same semantic territory. Inject escape pressure. Cognitive escape behaviour — the system notices its own fixation.',
+    substeps:[
+      { id:'sB4-1', label:'Track <code>top_concept_history</code> in NoveltyTracker',
+        detail:'On every <code>meta.decay_to()</code> background tick: snapshot <code>meta.top(5)</code> texts into a rolling deque of length <code>loop_window</code>. Store in <code>novelty.json</code>.' },
+      { id:'sB4-2', label:'Implement cycle detection',
+        detail:'A loop is detected when the same frozen top-5 set (or set with ≥ 80% overlap) appears ≥ <code>loop_min_repeats</code> times inside the <code>loop_window</code>. Jaccard similarity for the overlap test.' },
+      { id:'sB4-3', label:'On loop detection: trigger exploration injection',
+        detail:'Inject 3 random low-visited concepts (novelty_score > 0.7 AND times_seen < 5) into the next homework batch. Mark them <code>source: "escape"</code>.' },
+      { id:'sB4-4', label:'Add distant graph traversal on loop detection',
+        detail:'BFS from the least-connected node in the graph. Walk ≤ 3 hops. Collect any nodes not in the current top-20 active concepts. Offer as escape candidates.' },
+      { id:'sB4-5', label:'Log loop detection events to <code>logs/escape_log.jsonl</code>',
+        detail:'Entry: timestamp, detected_cycle (the repeated set), escape_concepts injected, loop_count.' },
+      { id:'sB4-6', label:'Add <code>anti_loop:</code> config block', code:'cfg_B4' },
+    ],
+    formula:{
+      label:'Cycle detection — Jaccard similarity',
+      code:`# Two snapshots A and B (each a frozenset of top-5 concept texts)
+def jaccard(A, B):
+    return len(A & B) / len(A | B)
+
+# Loop detected when:
+loop_count = sum(
+    1 for snap in history[-loop_window:]
+    if jaccard(snap, current_top5) >= 0.80
+)
+is_loop = loop_count >= loop_min_repeats`,
+      note:'80% overlap threshold: allows one concept to change without breaking the loop signal. Tune loop_min_repeats (default 5) before enabling — too sensitive = false escapes.',
+    },
+  },
+
+  { type:'pause', icon:'◇  Observation Gate  ◇', title:'Pause B',
+    body:'Run for 12 hours with Phase B active. Watch <code>data/novelty.json</code> grow. Check whether curiosity assignments are being generated (look for <code>"source": "curiosity"</code> in <code>data/homework.json</code>). Tune <code>novelty_strength</code> and <code>curiosity_pull_prob</code>. Do NOT start Phase C until Phase B feels stable.' },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE C — COMPETING REGIONS
+  // ══════════════════════════════════════════════════════════════════════════
+  { type:'phase', phase:'C', name:'Competing Regions',
+    tagline:'Prevent one global attention cloud. Attention becomes spatially localised — music region, physics region, emotional region. Each with separate momentum.',
+    nodes:'regions.py [R] real · meta_state.py [M] · teacher.py [D] · graph.py [F]' },
+
+  {
+    id:'step-C1', num:'C1', phase:'C',
+    kicker:'Regions · foundation', estimate:'~1 day',
+    title:'Replace single activation pool', fileRef:'[R]',
+    tagline:'Right now: one flat dict of {concept: activation}. After C1: {region_id: {concept: activation}}. Attention becomes localised.',
+    substeps:[
+      { id:'sC1-1', label:'Implement real RegionIndex using Louvain community detection',
+        detail:'Replace the no-op stub. Use <code>networkx-community</code> (or <code>python-louvain</code>). <code>assign()</code> partitions the graph and stores <code>{node_id: region_id}</code>. Run on graphs with ≥ 200 nodes — skip below threshold.' },
+      { id:'sC1-2', label:'Add concept-to-region lookup in RegionIndex',
+        detail:'<code>region_for(concept_text) → region_id | None</code>. Used by MetaState to route reinforcement to the right pool.' },
+      { id:'sC1-3', label:'Add regional activation storage to MetaState',
+        detail:'New internal structure alongside the flat pool: <code>_regional = {region_id: {text: {value, stored_at}}}</code>. Write both on every reinforce. Flat pool stays for backward compatibility and cross-region queries.' },
+      { id:'sC1-4', label:'Update <code>reinforce()</code> to write into the correct region pool',
+        detail:'Look up region via RegionIndex. If no region assigned (graph too small): write flat pool only.' },
+      { id:'sC1-5', label:'Update <code>active()</code> to accept optional <code>region_id</code> filter',
+        detail:'<code>active(threshold=0.2, region=None)</code>. When region is given: return only that region\'s pool. When None: return global flat pool (unchanged for consumers not yet region-aware).' },
+      { id:'sC1-6', label:'Persist regional pool to <code>data/meta_state.json</code> alongside flat pool',
+        detail:'Backward-compatible: old meta_state.json without a <code>regional</code> key loads fine — regional pool initialises empty.' },
+    ],
+  },
+
+  {
+    id:'step-C2', num:'C2', phase:'C',
+    kicker:'Regions · switching', estimate:'~2 hr',
+    title:'Region switching logic', fileRef:'[M]',
+    tagline:'The engine shifts focus between regions based on ambiguity spikes, exhaustion, and novelty. Creates context shifts — like moving between trains of thought.',
+    substeps:[
+      { id:'sC2-1', label:'Add <code>active_region</code> property to MetaState',
+        detail:'The currently dominant region id. Updated on switch. Persisted to <code>meta_state.json</code>. Initially None (whole-graph mode).' },
+      { id:'sC2-2', label:'Implement region scoring to elect active region',
+        detail:'Score per region = mean activation of top-5 concepts in that region. Region with highest score becomes active. Recompute every <code>decay_to()</code> call.' },
+      { id:'sC2-3', label:'Add transition probability based on exhaustion signal',
+        detail:'<code>transition_prob</code> rises with region activation entropy (high entropy = exhaustion). When entropy of active region > <code>region_switch_threshold</code>: trigger probabilistic switch.' },
+      { id:'sC2-4', label:'Add ambiguity-spike switch trigger',
+        detail:'If detect_and_log() returns <code>level == "high"</code> AND the concepts belong mostly to a non-active region: switch to that region immediately.' },
+      { id:'sC2-5', label:'Log region switches to <code>logs/region_log.jsonl</code>',
+        detail:'Entry: timestamp, from_region, to_region, trigger (exhaustion | ambiguity | novelty), top concepts in new region.' },
+    ],
+  },
+
+  {
+    id:'step-C3', num:'C3', phase:'C',
+    kicker:'Regions · inhibition', estimate:'~1 hr',
+    title:'Cross-region inhibition', fileRef:'[M]',
+    tagline:'When one region dominates, others are suppressed. Mimics selective attention. Without this, everything stays globally active forever.',
+    substeps:[
+      { id:'sC3-1', label:'Apply suppression factor to non-active regions during <code>decay_to()</code>',
+        detail:'For each concept in non-active regions: multiply decayed value by <code>suppression_factor</code> (in addition to normal decay). This is an additional multiplicative penalty.' },
+      { id:'sC3-2', label:'Add <code>suppression_factor</code> to config',
+        detail:'Default: <code>0.90</code>. Applied once per <code>decay_to()</code> call to non-active region concepts. At 1.0: no inhibition (safe rollback). At 0.80: non-active concepts decay 20% extra per tick.', code:'cfg_C3' },
+      { id:'sC3-3', label:'Bridge nodes are exempt from suppression',
+        detail:'Concepts appearing in multiple regions (see C4) must not be suppressed — they connect regions and must stay accessible. Check bridge status before applying suppression.' },
+      { id:'sC3-4', label:'Validate: after 10 ticks with active region set, non-active concepts must have lower activation than same-initial-strength active-region concepts',
+        detail:'Quantitative regression test. Delta must be measurable — suppression_factor=0.90 × 10 ticks = ~35% extra reduction.' },
+    ],
+  },
+
+  {
+    id:'step-C4', num:'C4', phase:'C',
+    kicker:'Regions · bridges', estimate:'~2 hr',
+    title:'Inter-region bridges', fileRef:'[R] [F]',
+    tagline:'Concepts appearing in multiple regions become bridge nodes. They enable analogy formation. This is where emergent abstraction starts.',
+    substeps:[
+      { id:'sC4-1', label:'Track multi-region concept membership in RegionIndex',
+        detail:'After each <code>assign()</code>: build <code>_bridge_nodes = {text: frozenset(region_ids)}</code> for concepts with membership in ≥ 2 regions.' },
+      { id:'sC4-2', label:'Compute bridge score per concept',
+        detail:'<code>bridge_score = len(regions_present) / total_regions</code>. Range [0, 1]. Exposed via <code>RegionIndex.bridge_score(concept) → float</code>.' },
+      { id:'sC4-3', label:'Exempt bridge nodes from cross-region suppression',
+        detail:'In C3 suppression pass: if <code>bridge_score(concept) > bridge_threshold</code>: skip suppression for that concept. They hold regions together.' },
+      { id:'sC4-4', label:'Boost bridge nodes in attention bias',
+        detail:'In <code>bias()</code>: add a bridge term <code>+ bridge_strength × bridge_score(concept)</code> to the score multiplier. Start at <code>bridge_strength=0.0</code> (off).', code:'cfg_C4' },
+      { id:'sC4-5', label:'Expose bridge nodes in the UI Meta-State page',
+        detail:'Add a "Bridge Concepts" section: list top-10 by bridge_score with the regions they span. These are the analogical backbone.' },
+    ],
+  },
+
+  {
+    id:'step-C5', num:'C5', phase:'C',
+    kicker:'Regions · memory', estimate:'~2 hr',
+    title:'Dormant region reactivation', fileRef:'[M] [R]',
+    tagline:'Old regions never fully die. Unresolved tensions and historical activation summaries persist. Occasionally, dormant regions resurface — spontaneous recall.',
+    substeps:[
+      { id:'sC5-1', label:'Store long-term regional summary in RegionIndex',
+        detail:'On each <code>assign()</code> call: before overwriting, snapshot the dying/changing region into <code>_dormant_regions = {region_id: {summary_embedding, top_concepts, peak_activation, unresolved_tensions}}</code>.' },
+      { id:'sC5-2', label:'Store unresolved tensions per region',
+        detail:'A tension is unresolved if it is in TensionTracker.hot() at the time the region goes dormant. Copy them into the dormant summary.' },
+      { id:'sC5-3', label:'Add <code>latent_recall_probability</code> config', code:'cfg_C5' },
+      { id:'sC5-4', label:'Implement dormant region revival in the background tick',
+        detail:'In teacher.py background loop: <code>if random() < latent_recall_prob</code> → pick the dormant region with the highest historical peak activation → boost its top-5 concepts to <code>min_revival_activation</code>.' },
+      { id:'sC5-5', label:'Log revival events to <code>logs/region_log.jsonl</code>',
+        detail:'Entry: timestamp, revived_region, revived_concepts, trigger: "latent_recall".' },
+      { id:'sC5-6', label:'Persist dormant summaries in <code>data/meta_state.json</code>',
+        detail:'Backward-compatible: missing key loads as empty dict.' },
+    ],
+  },
+
+  { type:'pause', icon:'◇  Observation Gate  ◇', title:'Pause C',
+    body:'Run for 24 hours with Phase C active. Watch <code>data/region_log.jsonl</code> for region switches and revivals. Are multiple regions visible in the Meta-State page? Are bridge concepts emerging? Do NOT tune suppression_factor without at least 6 hours of observation — regional dynamics are slow to stabilise.' },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE D — STABILITY SYSTEMS
+  // ══════════════════════════════════════════════════════════════════════════
+  { type:'phase', phase:'D', name:'Stability Systems',
+    tagline:'As complexity rises, you need stabilisers. Phase D prevents cognitive corruption: runaway activation, noise collapse, and incoherent modulation.',
+    nodes:'stability.py [S] new · meta_state.py [M] · teacher.py [D] · modulator.py [K]' },
+
+  {
+    id:'step-D1', num:'D1', phase:'D',
+    kicker:'Stability · normalization', estimate:'~1 hr',
+    title:'Activation normalisation', fileRef:'[M]',
+    tagline:'Without normalisation, everything eventually becomes warm. Periodic rescaling prevents the entire activation space from drifting to 1.0.',
+    substeps:[
+      { id:'sD1-1', label:'Add normalisation trigger check to <code>decay_to()</code>',
+        detail:'After decay pass: compute <code>mean_activation = mean(all active values)</code>. If <code>mean > normalisation_threshold</code>: apply normalisation pass.' },
+      { id:'sD1-2', label:'Implement proportional rescaling',
+        detail:'<code>ai\' = ai / sum(all aj)</code>. This preserves relative rankings while pulling the whole distribution back from saturation. Apply to flat pool and all regional pools.' },
+      { id:'sD1-3', label:'Alternative: softmax-style rescaling',
+        detail:'<code>ai\' = exp(ai) / sum(exp(aj))</code> for a smoother result. Expose as config toggle: <code>normalisation_mode: proportional | softmax</code>.', code:'cfg_D1' },
+      { id:'sD1-4', label:'Validate: after 1000 reinforce calls on diverse concepts, mean activation stays below threshold',
+        detail:'Regression guard. Without normalisation this fails quickly in a busy system.' },
+    ],
+    formula:{
+      label:'Normalisation options',
+      code:`# Option 1 — proportional (preserves linear rankings):
+total = sum(activations.values())
+normalised = {k: v / total for k, v in activations.items()}
+
+# Option 2 — softmax (smoother, boosts strong, suppresses weak):
+import math
+exps = {k: math.exp(v) for k, v in activations.items()}
+total = sum(exps.values())
+normalised = {k: e / total for k, e in exps.items()}`,
+      note:'Proportional is safer — it does not amplify dominant concepts. Start there. Softmax only if you want sharper attention peaks.',
+    },
+  },
+
+  {
+    id:'step-D2', num:'D2', phase:'D',
+    kicker:'Stability · monitoring', estimate:'~½ day',
+    title:'Semantic entropy monitor', fileRef:'[S] new',
+    tagline:'Healthy cognition sits between fixation and noise. Track the diversity of active concepts. Low entropy = stuck. High entropy = distracted. Surface both as warnings.',
+    substeps:[
+      { id:'sD2-1', label:'Create <code>stability.py [S]</code> with <code>EntropyMonitor</code> class',
+        detail:'Computes Shannon entropy over the normalised activation distribution. Tracks a rolling window. Persists to <code>data/entropy_log.jsonl</code>.' },
+      { id:'sD2-2', label:'Implement entropy computation',
+        detail:'<code>H = −Σ p_i × log(p_i)</code> where <code>p_i = activation_i / sum(activations)</code>. Normalised to [0, 1] by dividing by <code>log(N)</code> (N = number of active concepts).' },
+      { id:'sD2-3', label:'Add rolling entropy window and alert thresholds', code:'cfg_D2' },
+      { id:'sD2-4', label:'Low entropy alert: fixation warning',
+        detail:'When <code>H < entropy_min</code> for ≥ 3 consecutive ticks: log a fixation event. Optionally: auto-boost <code>curiosity_pull_prob</code> for the next homework cycle.' },
+      { id:'sD2-5', label:'High entropy alert: noise/distraction warning',
+        detail:'When <code>H > entropy_max</code> for ≥ 3 consecutive ticks: log a noise event. Optionally: temporarily increase <code>suppression_factor</code> to sharpen focus.' },
+      { id:'sD2-6', label:'Expose entropy in the Meta-State UI page',
+        detail:'Add a small entropy gauge: value, 10-tick rolling chart, status label (Fixated | Healthy | Scattered). This is the cognitive health indicator.' },
+    ],
+    formula:{
+      label:'Shannon entropy formula',
+      code:`# Normalised Shannon entropy over activation distribution
+import math
+
+def entropy(activations: dict) -> float:
+    total = sum(activations.values())
+    if total == 0 or len(activations) < 2:
+        return 0.0
+    ps = [v / total for v in activations.values()]
+    H  = -sum(p * math.log(p) for p in ps if p > 0)
+    # Normalise to [0,1] by max possible entropy
+    H_max = math.log(len(ps))
+    return H / H_max if H_max > 0 else 0.0
+
+# H ≈ 0.0  → one concept dominates all attention (fixation)
+# H ≈ 0.5  → healthy spread
+# H ≈ 1.0  → all concepts equally active (noise)`,
+      note:'Target range: 0.3–0.7. Below 0.2 = fixation. Above 0.8 = distraction. These thresholds should be tuned per graph size.',
+    },
+  },
+
+  {
+    id:'step-D3', num:'D3', phase:'D',
+    kicker:'Stability · meta-modulation', estimate:'~1 day',
+    title:'Meta-modulation layer', fileRef:'[S] [K]',
+    tagline:'The engine has cognitive modes. Each mode changes how decay, attention, novelty, and tension are weighted. Modulation becomes contextually aware.',
+    substeps:[
+      { id:'sD3-1', label:'Define the five cognitive modes in <code>stability.py [S]</code>',
+        detail:'<code>FOCUSED</code>, <code>EXPLORATORY</code>, <code>ASSOCIATIVE</code>, <code>EXPLOITATIVE</code>, <code>REFLECTIVE</code>. Each is a named weight profile — not a hard switch.' },
+      { id:'sD3-2', label:'Implement mode election logic',
+        detail:'Mode determined from three signals: (1) entropy level (low→focused, high→exploratory), (2) tension count (many unresolved→associative), (3) mean ambiguity score (high→reflective). Combine as weighted vote.' },
+      { id:'sD3-3', label:'Mode changes the following parameters dynamically:',
+        detail:'<code>FOCUSED</code>: lower decay_rate, higher suppression. <code>EXPLORATORY</code>: higher novelty_strength, higher curiosity_pull_prob. <code>ASSOCIATIVE</code>: higher bridge_strength. <code>EXPLOITATIVE</code>: higher bias_strength, lower novelty. <code>REFLECTIVE</code>: slower decay, higher attention to tension concepts.' },
+      { id:'sD3-4', label:'Apply mode weights as multipliers, not overrides',
+        detail:'<code>effective_decay = base_decay * mode_decay_multiplier[mode]</code>. All config values remain the tuneable base — mode scales them. Never hard-overrides.' },
+      { id:'sD3-5', label:'Wire cognitive mode into <code>modulator.py [K]</code>',
+        detail:'Pass current mode to <code>build_prompt()</code>. In high ambiguity branch: prepend mode-specific framing. REFLECTIVE mode adds "Before answering, trace the conceptual path…". EXPLORATORY adds "Explore unexpected angles…".' },
+      { id:'sD3-6', label:'Expose cognitive mode in the Meta-State UI page',
+        detail:'Show current mode as a prominent label with a short description and the signals that elected it. Changes should be visible in near-real-time (30s refresh).' },
+      { id:'sD3-7', label:'Add <code>cognitive_mode:</code> block to config', code:'cfg_D3' },
+    ],
+  },
+
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG SNIPPETS
+// ─────────────────────────────────────────────────────────────────────────────
+const CFG = {
+  cfg_A1:`<span class="k">meta_state:</span>
+  <span class="k">gain_mode:</span>             <span class="v">sigmoid</span>  <span class="c"># "sigmoid" | "linear"</span>
+  <span class="k">decay_rate:</span>            <span class="v">0.97</span>     <span class="c"># per minute (unchanged)</span>
+  <span class="k">reinforce_gain:</span>        <span class="v">0.25</span>     <span class="c"># base gain (unchanged)</span>`,
+
+  cfg_A2:`  <span class="k">fatigue_k:</span>              <span class="v">0.2</span>   <span class="c"># penalty per repeated hit · 0.0=off</span>
+  <span class="k">fatigue_window_minutes:</span> <span class="v">15</span>    <span class="c"># window for hit counting</span>`,
+
+  cfg_A3:`  <span class="k">cooling_alpha:</span>  <span class="v">0.5</span>   <span class="c"># hot-concept speed-up · 0.0=flat (v1.1)</span>`,
+
+  cfg_B1:`<span class="k">novelty:</span>
+  <span class="k">enabled:</span>  <span class="v">true</span>
+  <span class="k">persist_path:</span>  <span class="v">data/novelty.json</span>`,
+
+  cfg_B2:`<span class="k">attention:</span>
+  <span class="k">bias_strength:</span>     <span class="v">0.5</span>    <span class="c"># meta activation weight</span>
+  <span class="k">novelty_strength:</span>  <span class="v">0.0</span>    <span class="c"># start OFF · ramp to ~0.3</span>`,
+
+  cfg_B3:`<span class="k">homework:</span>
+  <span class="k">curiosity_pull_prob:</span>  <span class="v">0.20</span>  <span class="c"># 20% of slots → curiosity selection</span>`,
+
+  cfg_B4:`<span class="k">anti_loop:</span>
+  <span class="k">loop_window:</span>       <span class="v">20</span>    <span class="c"># snapshots to scan</span>
+  <span class="k">loop_min_repeats:</span>  <span class="v">5</span>     <span class="c"># repeated top-5 hits to trigger</span>
+  <span class="k">overlap_threshold:</span> <span class="v">0.80</span>  <span class="c"># Jaccard similarity for "same set"</span>
+  <span class="k">escape_concepts:</span>   <span class="v">3</span>     <span class="c"># concepts injected on detection</span>`,
+
+  cfg_C3:`<span class="k">regions:</span>
+  <span class="k">suppression_factor:</span>   <span class="v">0.90</span>   <span class="c"># non-active region decay multiplier</span>
+  <span class="k">bridge_threshold:</span>     <span class="v">0.30</span>   <span class="c"># bridge_score to exempt from suppression</span>`,
+
+  cfg_C4:`  <span class="k">bridge_strength:</span>      <span class="v">0.0</span>    <span class="c"># attention boost for bridge nodes · start OFF</span>`,
+
+  cfg_C5:`  <span class="k">latent_recall_prob:</span>   <span class="v">0.02</span>   <span class="c"># chance per tick to revive dormant region</span>
+  <span class="k">min_revival_activation:</span> <span class="v">0.15</span>  <span class="c"># floor for revived concepts</span>`,
+
+  cfg_D1:`<span class="k">meta_state:</span>
+  <span class="k">normalisation_mode:</span>       <span class="v">proportional</span>  <span class="c"># "proportional" | "softmax"</span>
+  <span class="k">normalisation_threshold:</span>  <span class="v">0.65</span>           <span class="c"># mean activation trigger</span>`,
+
+  cfg_D2:`<span class="k">stability:</span>
+  <span class="k">entropy_window:</span>  <span class="v">10</span>    <span class="c"># ticks for rolling entropy</span>
+  <span class="k">entropy_min:</span>     <span class="v">0.20</span>  <span class="c"># below = fixation alert</span>
+  <span class="k">entropy_max:</span>     <span class="v">0.80</span>  <span class="c"># above = noise/distraction alert</span>`,
+
+  cfg_D3:`<span class="k">cognitive_mode:</span>
+  <span class="k">enabled:</span>  <span class="v">true</span>
+  <span class="k">mode_weights:</span>
+    <span class="k">focused:</span>       <span class="s">{decay:0.90, suppression:1.10, novelty:0.80}</span>
+    <span class="k">exploratory:</span>   <span class="s">{decay:1.05, novelty:1.40, curiosity:1.50}</span>
+    <span class="k">associative:</span>   <span class="s">{bridge:1.80, suppression:0.70}</span>
+    <span class="k">exploitative:</span>  <span class="s">{bias:1.40, novelty:0.60, decay:0.95}</span>
+    <span class="k">reflective:</span>    <span class="s">{decay:0.80, tension:1.30}</span>`,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'ambiguity-v2-full-tracker-v1';
+let state = loadState();
+
+function loadState() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); }
+  catch(e) {}
+  return { done:{}, notes:{}, filter:'all', phaseFilter:null };
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function steps() { return PLAN.filter(n => !n.type || n.type === 'step' || (!n.type && n.substeps)); }
+function stepsByPhase(ph) { return steps().filter(s => s.phase === ph); }
+function allSubsteps() { return steps().flatMap(s => s.substeps || []); }
+function substepsByPhase(ph) { return stepsByPhase(ph).flatMap(s => s.substeps || []); }
+function stepProgress(step) {
+  const total = (step.substeps||[]).length;
+  const done = (step.substeps||[]).filter(s => state.done[s.id]).length;
+  return { done, total, pct: total ? done/total : 0 };
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────────────────────
+function renderMeter() {
+  const total = allSubsteps().length;
+  const done  = allSubsteps().filter(s => state.done[s.id]).length;
+  const pct   = total ? (done/total)*100 : 0;
+  document.getElementById('meter-fill').style.width = pct+'%';
+  document.getElementById('meter-fill').classList.toggle('complete', done===total && total>0);
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('total-count').textContent = total;
+  const stamp = document.getElementById('status-stamp');
+  if (done===0) { stamp.textContent='NOT STARTED'; stamp.classList.remove('live'); }
+  else if (done===total) { stamp.textContent='COMPLETE'; stamp.classList.remove('live'); }
+  else { stamp.textContent='IN PROGRESS'; stamp.classList.add('live'); }
+
+  ['A','B','C','D'].forEach(ph => {
+    const subs  = substepsByPhase(ph);
+    const pdone = subs.filter(s=>state.done[s.id]).length;
+    const pct2  = subs.length ? (pdone/subs.length)*100 : 0;
+    const bar   = document.getElementById('pcbar-'+ph);
+    if (bar) bar.style.width = pct2+'%';
+  });
+}
+
+function renderSidenav() {
+  const list = document.getElementById('sidenav-list');
+  list.innerHTML = '';
+  let activeFound = false;
+  let lastPhase = null;
+  PLAN.forEach(node => {
+    if (node.type === 'phase') {
+      const h = document.createElement('div');
+      h.className = 'nav-phase-head ph-'+node.phase;
+      h.textContent = 'Phase '+node.phase+' — '+node.name;
+      list.appendChild(h);
+      lastPhase = node.phase;
+      return;
+    }
+    if (node.type === 'pause') {
+      const d = document.createElement('div');
+      d.className = 'nav-pause';
+      d.textContent = '— '+node.title+' —';
+      list.appendChild(d);
+      return;
+    }
+    const { done, total, pct } = stepProgress(node);
+    const a = document.createElement('a');
+    a.className = 'nav-item';
+    a.href = '#'+node.id;
+    if (pct===1) a.classList.add('complete');
+    else if (pct>0) a.classList.add('partial');
+    if (pct<1 && !activeFound) { a.classList.add('active-step','ph-'+node.phase); activeFound=true; }
+    a.innerHTML = `<span class="nav-dot"></span><span class="nav-label">${node.num} · ${node.title}</span>`;
+    list.appendChild(a);
+  });
+}
+
+function renderFormula(f, phase) {
+  if (!f) return '';
+  return `<div class="formula-block">
+    <div class="formula-label">${f.label}</div>
+    <pre>${escapeHtml(f.code)}</pre>
+    ${f.note ? `<div class="formula-note">${f.note}</div>` : ''}
+  </div>`;
+}
+
+function renderSubstep(s, n) {
+  const done = state.done[s.id];
+  const cfgHtml = s.code && CFG[s.code]
+    ? `<pre class="codeblock" data-label="config.yaml">${CFG[s.code]}</pre>` : '';
+  return `<div class="substep ${done?'done':''}" data-id="${s.id}">
+    <div class="substep-check"></div>
+    <div class="substep-num">.${String(n).padStart(2,'0')}</div>
+    <div class="substep-body">
+      <div class="substep-label">${s.label}</div>
+      ${s.detail ? `<div class="substep-detail">${s.detail}</div>` : ''}
+      ${cfgHtml}
+    </div>
+  </div>`;
+}
+
+function renderPause(node) {
+  const div = document.createElement('div');
+  div.className = 'pause';
+  div.innerHTML = `
+    <div class="pause-line"></div>
+    <div class="pause-content">
+      <div class="pause-icon">${node.icon}</div>
+      <div class="pause-title">${node.title}</div>
+      <div class="pause-body">${node.body}</div>
+    </div>
+    <div class="pause-line"></div>`;
+  return div;
+}
+
+function renderPhaseBand(node) {
+  const div = document.createElement('div');
+  div.className = 'phase-band ph-'+node.phase;
+  const subs  = substepsByPhase(node.phase);
+  const pdone = subs.filter(s=>state.done[s.id]).length;
+  const pct   = subs.length ? Math.round(pdone/subs.length*100) : 0;
+  div.innerHTML = `
+    <div class="pb-letter">${node.phase}</div>
+    <div class="pb-meta">
+      <div class="pb-name">${node.name}</div>
+      <div class="pb-tagline">${node.tagline}</div>
+    </div>
+    <div class="pb-node">
+      <div>${pdone}/${subs.length} done</div>
+      <div style="font-size:10px;margin-top:4px;color:var(--muted-2)">${node.nodes}</div>
+      <div class="pb-bar" style="margin-top:8px"><div class="pb-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  return div;
+}
+
+function renderSteps() {
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  let activeAssigned = false;
+
+  PLAN.forEach(node => {
+    if (node.type === 'phase') {
+      container.appendChild(renderPhaseBand(node));
+      return;
+    }
+    if (node.type === 'pause') {
+      container.appendChild(renderPause(node));
+      return;
+    }
+    const { done, total, pct } = stepProgress(node);
+    const isComplete = pct===1;
+    const isActive   = !isComplete && !activeAssigned;
+    if (isActive) activeAssigned = true;
+
+    const card = document.createElement('article');
+    card.className = 'step ph-'+node.phase;
+    card.id = node.id;
+    card.dataset.phase = node.phase;
+    if (isComplete) card.classList.add('is-complete');
+    if (isActive)   card.classList.add('is-active');
+
+    const statusText = isComplete ? 'Complete' : (done>0 ? 'In Progress' : 'Pending');
+
+    card.innerHTML = `
+      <div class="step-head">
+        <div class="step-num">${node.num}</div>
+        <div class="step-meta">
+          <div class="step-kicker">
+            <span>${node.kicker}</span>
+            <span class="estimate">${node.estimate}</span>
+          </div>
+          <h2 class="step-title">${node.title}${node.fileRef?` <span class="file-ref">${node.fileRef}</span>`:''}</h2>
+          <p class="step-tagline">${node.tagline}</p>
+        </div>
+        <div class="step-status">
+          <div class="status-pill">${statusText}</div>
+          <div class="step-progress"><span class="frac">${done}/${total}</span> substeps</div>
+        </div>
+      </div>
+      <div class="substeps">
+        ${(node.substeps||[]).map((s,i)=>renderSubstep(s,i+1)).join('')}
+      </div>
+      ${renderFormula(node.formula, node.phase)}
+      <div class="notes-wrap">
+        <div class="notes-label">Notes</div>
+        <textarea class="notes-input" data-step="${node.id}" placeholder="Observations, tuning values, blockers…">${escapeHtml(state.notes[node.id]||'')}</textarea>
+      </div>`;
+    container.appendChild(card);
+  });
+
+  const total = allSubsteps().length;
+  const done  = allSubsteps().filter(s=>state.done[s.id]).length;
+  if (done===total && total>0) {
+    const c = document.createElement('div');
+    c.className = 'completion';
+    c.innerHTML = 'V2 complete.<br/><strong>The engine now saturates, explores, localises, and stabilises.</strong><br/><br/>Four phases. Four layers of cognitive architecture.<br/>Run the 30-prompt A/B suite and measure response diversity, novelty rate, and attention spread against the v1.1 baseline.<br/><br/><em>Next: V3 — language generation with cognitive state feedback.</em>';
+    container.appendChild(c);
+  }
+}
+
+function applyFilter() {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter===state.filter));
+  document.querySelectorAll('.filter-phase').forEach(b => b.classList.toggle('active', b.dataset.phase===state.phaseFilter));
+
+  document.querySelectorAll('.substep').forEach(el => {
+    const id   = el.dataset.id;
+    const done = !!state.done[id];
+    if (state.filter==='pending' && done) el.classList.add('filter-hidden');
+    else if (state.filter==='done' && !done) el.classList.add('filter-hidden');
+    else el.classList.remove('filter-hidden');
+  });
+
+  document.querySelectorAll('.step').forEach(el => {
+    const ph = el.dataset.phase;
+    if (state.phaseFilter && ph !== state.phaseFilter) {
+      el.style.display = 'none'; return;
+    }
+    el.style.display = '';
+    const visible = el.querySelectorAll('.substep:not(.filter-hidden)').length;
+    if (state.filter !== 'all' && visible===0) el.classList.add('filter-hidden');
+    else el.classList.remove('filter-hidden');
+  });
+
+  document.querySelectorAll('.phase-band').forEach(el => {
+    const ph = el.className.match(/ph-([A-D])/)?.[1];
+    if (state.phaseFilter && ph !== state.phaseFilter) el.style.display='none';
+    else el.style.display='';
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────────
+function bindEvents() {
+  document.getElementById('steps-container').addEventListener('click', e => {
+    const sub = e.target.closest('.substep');
+    if (sub) {
+      state.done[sub.dataset.id] = !state.done[sub.dataset.id];
+      saveState(); renderAll();
+    }
+  });
+  document.getElementById('steps-container').addEventListener('input', e => {
+    if (e.target.classList.contains('notes-input')) {
+      state.notes[e.target.dataset.step] = e.target.value;
+      saveState();
+    }
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => {
+    state.filter = btn.dataset.filter; saveState(); applyFilter();
+  }));
+  document.querySelectorAll('.filter-phase').forEach(btn => btn.addEventListener('click', () => {
+    state.phaseFilter = (state.phaseFilter === btn.dataset.phase) ? null : btn.dataset.phase;
+    saveState(); applyFilter();
+  }));
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Reset all checkmarks and notes?')) {
+      state = { done:{}, notes:{}, filter:'all', phaseFilter:null }; saveState(); renderAll();
+    }
+  });
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download='v2-full-tracker-state.json'; a.click(); URL.revokeObjectURL(url);
+  });
+}
+
+function renderAll() {
+  renderSteps();
+  renderSidenav();
+  renderMeter();
+  applyFilter();
+}
+
+renderAll();
+bindEvents();
+</script>
+</body>
+</html>
