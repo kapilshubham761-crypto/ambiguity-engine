@@ -93,3 +93,55 @@ cognitive_mode:
     associative:  {bridge: 1.80, suppression: 0.70}
     exploitative: {bias: 1.40, novelty: 0.60, decay: 0.95}
     reflective:   {decay: 0.80, tension: 1.30}
+
+# ── V3 — Deep Memory & Reasoning ──────────────────────────────────────────
+
+temporal_memory:
+  working:
+    decay_rate: 0.97          # per minute — same plane as meta_state
+    gain: 0.40
+    promote_threshold: 0.35   # working value to trigger episodic write
+  episodic:
+    decay_rate: 0.9997        # ~0.78 after 4h (240 min)
+    gain: 0.10
+    promote_count: 3          # episodic hits before semantic consolidation
+    promote_threshold: 0.15
+  semantic:
+    decay_rate: 0.99997       # ~0.87 after 24h (1440 min)
+    gain: 0.03
+
+episodes:
+  max_episodes: 1000          # rolling JSONL window
+  min_concepts: 2             # skip single-concept episodes
+  transition_decay: 0.95      # per-use weight decay on transition edges
+
+predictor:
+  top_k: 5                    # predictions to pre-activate
+  pre_activation_gain: 0.08   # gain applied to pre-activated concepts
+  min_transition_weight: 0.05 # ignore weak transitions
+
+contradiction:
+  detection_cosine_min: 0.30  # min cosine distance between conflicting concepts
+  tension_min: 0.40           # concept must be hot to register contradiction
+  max_contradictions: 50      # rolling cap (oldest dropped first)
+
+simulator:
+  max_steps: 5
+  branch_factor: 3            # top predictions per propagation step
+
+reflection:
+  tick_every: 5               # background ticks between reflection snapshots
+
+abstractor:
+  min_cooccurrence: 5         # times pair must co-occur to form abstract link
+  min_cluster_size: 3         # minimum members for an abstract concept
+  emergence_threshold: 0.60   # co-occurrence density to trigger compression
+
+goals:
+  drives:
+    reduce_uncertainty:    0.30
+    increase_novelty:      0.25
+    resolve_contradiction: 0.20
+    maintain_stability:    0.15
+    expand_regions:        0.10
+  update_every: 10            # background ticks between goal updates

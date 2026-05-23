@@ -353,13 +353,16 @@ class Teacher:
 
         n_concepts = 0
         all_texts: list[str] = []
+        last_ambiguity = 0.0
         for sent in sentences:
             concepts = extract(sent)
             if concepts:
-                detect_and_log(sent, concepts, graph=graph)
+                result = detect_and_log(sent, concepts, graph=graph)
+                last_ambiguity = result.score
                 graph.update(concepts)
                 n_concepts += len(concepts)
                 all_texts.extend(c.text for c in concepts)
+        lesson['_last_ambiguity'] = last_ambiguity
 
         if sentences:
             graph.save()
@@ -373,6 +376,29 @@ class Teacher:
                     self._regions.assign()
                 except Exception:
                     pass
+            # V3 — temporal memory reinforce
+            try:
+                from memory import TemporalMemory
+                TemporalMemory.get().reinforce(all_texts)
+            except Exception:
+                pass
+            # V3 — record episode + pre-activate predictions
+            try:
+                from episodes import EpisodeStore
+                from predictor import Predictor
+                region = self._regions.active_region() if self._regions else None
+                amb    = lesson.get('_last_ambiguity', 0.0)
+                EpisodeStore.get().record(all_texts, ambiguity=amb,
+                                          region=str(region) if region else None)
+                Predictor.get().pre_activate(all_texts, TemporalMemory.get())
+            except Exception:
+                pass
+            # V3 — contradiction detection
+            try:
+                from contradiction import ContradictionRegistry
+                ContradictionRegistry.get().observe(all_texts)
+            except Exception:
+                pass
 
         self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
@@ -412,6 +438,13 @@ class Teacher:
         save_card(card)
 
         self._hw.generate(stage, graph, meta=self._meta)
+
+        # V3 — abstraction run at check-in time
+        try:
+            from abstractor import Abstractor
+            Abstractor.get().run()
+        except Exception:
+            pass
 
         self._last_checkin = time.time()
         return card.__dict__
@@ -626,6 +659,39 @@ class Teacher:
                         try:
                             from stability import StabilityMonitor
                             StabilityMonitor.get().tick(self._meta)
+                        except Exception:
+                            pass
+
+                        # V3 — goal engine tick
+                        try:
+                            from goals import GoalEngine
+                            GoalEngine.get().tick()
+                        except Exception:
+                            pass
+
+                        # V3 — self-reflection tick (every reflection.tick_every cycles)
+                        try:
+                            import yaml as _yaml
+                            _rf_cfg = _yaml.safe_load(
+                                open(os.path.join(_ROOT, 'config.yaml'), encoding='utf-8')
+                            ).get('reflection', {})
+                            _rf_every = int(_rf_cfg.get('tick_every', 5))
+                        except Exception:
+                            _rf_every = 5
+                        if not hasattr(self, '_rf_tick'):
+                            self._rf_tick = 0
+                        self._rf_tick += 1
+                        if self._rf_tick % _rf_every == 0:
+                            try:
+                                from reflection import ReflectionMonitor
+                                ReflectionMonitor.get().report()
+                            except Exception:
+                                pass
+
+                        # V3 — temporal memory decay
+                        try:
+                            from memory import TemporalMemory
+                            TemporalMemory.get().decay_to()
                         except Exception:
                             pass
 

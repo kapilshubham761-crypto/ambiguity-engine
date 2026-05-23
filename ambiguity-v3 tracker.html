@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambiguity Engine — V3 Execution Tracker</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --accent: #7c6af7;
+    --accent2: #f76a8c;
+    --accent3: #6af7c8;
+    --accent4: #f7c86a;
+    --text: #e0e0f0;
+    --muted: #888;
+    --done: #3af7a0;
+    --pending: #555;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 { font-size: 2rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.3rem; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--stripe);
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+  .step-badge {
+    background: var(--stripe);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .node-id {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: #1a1a26;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+  h3 { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .card p { font-size: 0.85rem; color: #aaa; margin-bottom: 0.8rem; }
+  .features { list-style: none; }
+  .features li { font-size: 0.82rem; color: #bbb; padding: 0.2rem 0; display: flex; gap: 0.5rem; }
+  .features li::before { content: '▸'; color: var(--stripe); flex-shrink: 0; }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    margin-top: 0.8rem;
+  }
+  .status-done { background: rgba(58,247,160,0.15); color: var(--done); border: 1px solid rgba(58,247,160,0.3); }
+  .status-pending { background: rgba(100,100,100,0.15); color: var(--muted); border: 1px solid #333; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot-done { background: var(--done); }
+  .dot-pending { background: var(--pending); }
+
+  /* Wire section */
+  .wire-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin-bottom: 2rem; }
+  .wire-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent); }
+  .wire-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.83rem; color: #bbb; padding: 0.3rem 0; border-bottom: 1px solid #1a1a26; }
+  .wire-row:last-child { border-bottom: none; }
+  .wire-label { font-family: monospace; color: var(--accent3); }
+  .wire-arrow { color: var(--muted); }
+
+  /* Data section */
+  .data-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin-bottom: 2rem; }
+  .data-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent4); }
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .data-file { font-family: monospace; font-size: 0.8rem; background: #0d0d18; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid #1a1a26; }
+  .data-file span { color: var(--muted); display: block; font-family: sans-serif; font-size: 0.75rem; }
+
+  /* Progress bar */
+  .progress-container { margin-bottom: 2rem; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted); }
+  .progress-bar { height: 6px; background: #1a1a26; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.5s; }
+
+  .section-title { font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; color: var(--text); }
+  .commit-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.82rem; color: var(--done); }
+</style>
+</head>
+<body>
+
+<h1>Ambiguity Engine V3</h1>
+<p class="subtitle">Deep Memory &amp; Reasoning — 8 cognitive architecture nodes</p>
+
+<div class="progress-container">
+  <div class="progress-label"><span>Execution progress</span><span>8 / 8 complete</span></div>
+  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+</div>
+
+<div class="grid">
+
+  <!-- Step 1 -->
+  <div class="card" style="--stripe: #7c6af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#7c6af7;">Step 1</div>
+      <span class="node-id">[Mem] memory.py</span>
+    </div>
+    <h3>Temporal Memory Layers</h3>
+    <p>Three timescales: working (fast), episodic (4h), semantic (7d).</p>
+    <ul class="features">
+      <li>reinforce() → always working; promote to episodic → semantic</li>
+      <li>value() = weighted sum across all three layers</li>
+      <li>Decay: 0.97^min / 0.9997^min / 0.99997^min</li>
+      <li>Atomic write to data/memory.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card" style="--stripe: #f76a8c;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f76a8c;">Step 2</div>
+      <span class="node-id">[Ep] episodes.py</span>
+    </div>
+    <h3>Episodic Trace Graphs</h3>
+    <p>Sequences not just concepts. The engine remembers trajectories.</p>
+    <ul class="features">
+      <li>Episode: {id, ts, concepts[], ambiguity, region, outcome}</li>
+      <li>Transition graph: A→B weight = EMA decay × 1.0 per occurrence</li>
+      <li>transitions_from() / cooccurrence_matrix() for abstractor</li>
+      <li>Rolling 1000-episode JSONL window</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card" style="--stripe: #6af7c8;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#6af7c8;">Step 3</div>
+      <span class="node-id">[P] predictor.py</span>
+    </div>
+    <h3>Predictive Activation Engine</h3>
+    <p>Predicts what concepts should appear next. The start of anticipation.</p>
+    <ul class="features">
+      <li>predict(context) = P(next | context) from transition graph</li>
+      <li>pre_activate() pushes top-K into working memory (gain=0.08)</li>
+      <li>System pre-activates concepts before retrieval occurs</li>
+      <li>No training needed — purely from experienced sequences</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card" style="--stripe: #f7c86a;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#f7c86a;">Step 4</div>
+      <span class="node-id">[X] contradiction.py</span>
+    </div>
+    <h3>Contradiction Engine</h3>
+    <p>Incompatible models coexist. Contradiction is a cognitive driver.</p>
+    <ul class="features">
+      <li>Detection: hot(A) ∧ hot(B) ∧ bidirectional transitions A↔B</li>
+      <li>Contradictions stay alive until explicitly resolved</li>
+      <li>Feeds GoalEngine "resolve_contradiction" drive</li>
+      <li>Persists: {concept_a, concept_b, conflict_type, tension_a/b}</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="card" style="--stripe: #a06af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#a06af7;">Step 5</div>
+      <span class="node-id">[Sim] simulator.py</span>
+    </div>
+    <h3>Internal Simulation Space</h3>
+    <p>Hypothetical cognition without committing state. Imagination begins.</p>
+    <ul class="features">
+      <li>simulate(context, steps) → trajectory dict (pure functional)</li>
+      <li>Copies working memory → scratchpad, runs Predictor propagation</li>
+      <li>Returns {steps[], terminal_concepts, total_concepts_touched}</li>
+      <li>Zero side effects — safe to call any time</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="card" style="--stripe: #6ab8f7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#6ab8f7;">Step 6</div>
+      <span class="node-id">[Rf] reflection.py</span>
+    </div>
+    <h3>Self-Reflection Layer</h3>
+    <p>Structural self-observation. The system models its own cognition.</p>
+    <ul class="features">
+      <li>report() → {mode, entropy, ambiguity_load, novelty_balance, goal}</li>
+      <li>Pathology flags: over_fixating / drifting / looping / stuck</li>
+      <li>describe() → one-line natural language cognitive summary</li>
+      <li>Reads all subsystems — purely non-invasive</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 7 -->
+  <div class="card" style="--stripe: #f76ab8;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f76ab8;">Step 7</div>
+      <span class="node-id">[Ab] abstractor.py</span>
+    </div>
+    <h3>Concept Abstractor</h3>
+    <p>Higher-order concepts emerge automatically from co-occurrence clusters.</p>
+    <ul class="features">
+      <li>Reads cooccurrence_matrix() from EpisodeStore</li>
+      <li>Union-find cluster detection on weighted co-occurrence graph</li>
+      <li>AbstractConcept: name="~"+central, emergence_score, stability</li>
+      <li>stability = fraction of members in semantic memory layer</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <!-- Step 8 -->
+  <div class="card" style="--stripe: #3af7a0;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#3af7a0;">Step 8</div>
+      <span class="node-id">[Go] goals.py</span>
+    </div>
+    <h3>Goal Formation Engine</h3>
+    <p>Emergent directional behavior. Not hardcoded tasks — intrinsic drives.</p>
+    <ul class="features">
+      <li>5 drives: reduce_uncertainty, increase_novelty, resolve_contradiction,<br>maintain_stability, expand_regions</li>
+      <li>goal = argmax(weight × signal_strength)</li>
+      <li>Updates every 10 background ticks — lightweight</li>
+      <li>Goal feeds ReflectionMonitor + future homework bias</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+</div>
+
+<!-- Wiring diagram -->
+<div class="wire-section">
+  <h2>Wiring — teacher.py call sites</h2>
+  <div class="wire-row"><span class="wire-label">accept()</span><span class="wire-arrow">→</span>reinforce [Mem] · record episode [Ep] · pre_activate [P] · observe contradictions [X]</div>
+  <div class="wire-row"><span class="wire-label">check_in()</span><span class="wire-arrow">→</span>Abstractor.run() [Ab] every 3h</div>
+  <div class="wire-row"><span class="wire-label">background loop</span><span class="wire-arrow">→</span>GoalEngine.tick() [Go] · ReflectionMonitor.report() every 5 ticks [Rf] · TemporalMemory.decay_to() [Mem]</div>
+  <div class="wire-row"><span class="wire-label">start(graph)</span><span class="wire-arrow">→</span>RegionIndex injected into MetaState (Phase C)</div>
+  <div class="wire-row"><span class="wire-label">detect_and_log()</span><span class="wire-arrow">→</span>ambiguity score stored on lesson for episode recording</div>
+</div>
+
+<!-- Data files -->
+<div class="data-section">
+  <h2>New V3 data files</h2>
+  <div class="data-grid">
+    <div class="data-file">data/memory.json<span>{working, episodic, semantic} layers</span></div>
+    <div class="data-file">data/episodes.jsonl<span>Rolling 1000-episode sequence log</span></div>
+    <div class="data-file">data/transitions.json<span>A→B directed transition graph</span></div>
+    <div class="data-file">data/contradictions.json<span>Open + resolved contradiction list</span></div>
+    <div class="data-file">data/abstractions.json<span>AbstractConcept nodes (~name)</span></div>
+    <div class="data-file">data/reflection.json<span>Last cognitive self-report snapshot</span></div>
+  </div>
+</div>
+
+<!-- Commit box -->
+<p class="section-title">Git commit</p>
+<div class="commit-box">
+Step V3 complete — Deep Memory &amp; Reasoning architecture<br><br>
+[Mem] memory.py — 3-layer temporal memory (working/episodic/semantic)<br>
+[Ep]  episodes.py — episodic trace graph + directed transitions<br>
+[P]   predictor.py — predictive activation from transition history<br>
+[X]   contradiction.py — bidirectional tension contradiction registry<br>
+[Sim] simulator.py — pure-functional sandbox cognition (imagination)<br>
+[Rf]  reflection.py — structural self-reflection + pathology flags<br>
+[Ab]  abstractor.py — co-occurrence cluster → abstract concept emergence<br>
+[Go]  goals.py — intrinsic drive competition + goal selection<br><br>
+All 8 nodes protocol-checked · wired into teacher.py · 8/8 smoke-test pass<br>
+ARCHITECTURE.md updated · config.yaml extended · 5 new protocols in protocols.py
+</div>
+
+</body>
+</html>

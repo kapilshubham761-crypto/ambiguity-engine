@@ -315,6 +315,118 @@ AMBIGUITY ENGINE
 │   │       └──► injected into [M] MetaState via set_region_index() from [D] start()
 │   │             assign() called in [D] accept() after every graph.save()
 │   │
+│   ├── ── V3 — Deep Memory & Reasoning ──────────────────────────────────────
+│   │   │
+│   │   ├── memory.py            [Mem]  ← temporal memory layers  (V3 Step 1)
+│   │   │     TemporalMemory(path)      3-layer memory: working / episodic / semantic
+│   │   │       reinforce(concepts)     always→working; promote to episodic→semantic
+│   │   │         working decay:   0.97^min  (fast — recency)
+│   │   │         episodic decay:  0.9997^min (~4h half-life)
+│   │   │         semantic decay:  0.99997^min (~7-day half-life)
+│   │   │       value(concept)     weighted aggregate [working=0.5, ep=0.35, sem=0.15]
+│   │   │       top_working(n)     most recent attention
+│   │   │       top_semantic(n)    deepest consolidated knowledge
+│   │   │       decay_to(now)      prune dead entries across all layers
+│   │   │     TemporalMemory.get() singleton
+│   │   │     └──► reinforced by [D] teacher.accept() alongside meta_state
+│   │   │           read by [P] Predictor, [Sim] Simulator, [Rf] ReflectionMonitor
+│   │   │           persisted → data/memory.json
+│   │   │
+│   │   ├── episodes.py          [Ep]   ← episodic trace graph  (V3 Step 2)
+│   │   │     EpisodeStore()            persists episodes + directed transition graph
+│   │   │       record(concepts, ambiguity, region, outcome)
+│   │   │         → saves episode to episodes.jsonl (rolling 1000)
+│   │   │         → updates transition edges: A→B weight += 1 × decay EMA
+│   │   │       transitions_from(concept) → dict[next, weight]
+│   │   │       recent(n) → last n episodes
+│   │   │       strongest_paths(n) → top transition edges
+│   │   │       cooccurrence_matrix() → dict for [Ab] cluster detection
+│   │   │     EpisodeStore.get() singleton
+│   │   │     └──► fed by [D] teacher.accept() after each lesson
+│   │   │           read by [P] Predictor, [Ab] Abstractor
+│   │   │           persisted → data/episodes.jsonl + data/transitions.json
+│   │   │
+│   │   ├── predictor.py         [P]    ← predictive activation engine  (V3 Step 3)
+│   │   │     Predictor()               reads [Ep] transitions, outputs next-concept probs
+│   │   │       predict(context_concepts) → list[(concept, probability)]
+│   │   │         aggregate transition weights from all context concepts
+│   │   │         normalise to probability distribution
+│   │   │       pre_activate(context, memory)
+│   │   │         push top-K predictions into [Mem] working with pre_activation_gain
+│   │   │     Predictor.get() singleton
+│   │   │     └──► called by [D] teacher.accept() after episode recording
+│   │   │           called by [Sim] Simulator for trajectory propagation
+│   │   │
+│   │   ├── contradiction.py     [X]    ← contradiction registry  (V3 Step 4)
+│   │   │     ContradictionRegistry()   detects + preserves incompatible activations
+│   │   │       observe(concepts)       detect: hot(A) ∧ hot(B) ∧ A→B ∧ B→A (bidirectional)
+│   │   │       register(a, b, type)    manual contradiction injection
+│   │   │       unresolved() → list     active open contradictions
+│   │   │       resolve(id)             mark resolved
+│   │   │       snapshot() → dict       {total, open, resolved, top_open}
+│   │   │     ContradictionRegistry.get() singleton
+│   │   │     └──► fed by [D] teacher.accept() on every lesson
+│   │   │           read by [Rf] ReflectionMonitor, [Go] GoalEngine
+│   │   │           persisted → data/contradictions.json
+│   │   │
+│   │   ├── simulator.py         [Sim]  ← internal simulation space  (V3 Step 5)
+│   │   │     Simulator()               pure-functional sandbox cognition
+│   │   │       simulate(context_concepts, steps) → SimResult
+│   │   │         copies working memory snapshot → scratchpad (no mutation)
+│   │   │         runs [P] predict() propagation for steps iterations
+│   │   │         records concept trajectory at each step
+│   │   │         returns {steps:[], total_concepts_touched, terminal_concepts}
+│   │   │       simulate_goal(goal_keyword) → SimResult
+│   │   │     Simulator.get() singleton
+│   │   │     └──► stateless — safe to call any time without side effects
+│   │   │           used by UI / reflection / future planning layer
+│   │   │
+│   │   ├── reflection.py        [Rf]   ← self-reflection layer  (V3 Step 6)
+│   │   │     ReflectionMonitor()       aggregates metrics from all cognitive subsystems
+│   │   │       report() → dict         {mode, entropy, active_count, novelty_balance,
+│   │   │                                ambiguity_load, open_contradictions,
+│   │   │                                semantic_depth, goal, flags[]}
+│   │   │       describe() → str        one-line natural language cognitive summary
+│   │   │       Pathology flags:
+│   │   │         over_fixating   entropy < 0.20
+│   │   │         drifting        entropy > 0.80
+│   │   │         looping         repetition_rate > 0.80
+│   │   │         stuck           contradictions > 5 and low novelty
+│   │   │     ReflectionMonitor.get() singleton
+│   │   │     └──► called by [D] background tick every tick_every=5 cycles
+│   │   │           reads [S][M][V][T][X][Mem][Go]  — non-invasive, read-only
+│   │   │           persisted → data/reflection.json
+│   │   │
+│   │   ├── abstractor.py        [Ab]   ← concept abstractor  (V3 Step 7)
+│   │   │     Abstractor()              detects recurring co-occurrence clusters
+│   │   │       run() → list[AbstractConcept]
+│   │   │         reads [Ep] cooccurrence_matrix()
+│   │   │         greedy cluster detection (union-find on co-occurrence graph)
+│   │   │         emergence_score = internal edge density / max_edges
+│   │   │         AbstractConcept: {name="~"+central, members, emergence_score,
+│   │   │                            stability, reuse_frequency}
+│   │   │         stability = fraction of members still in [Mem] semantic layer
+│   │   │       stable(min_stability) → subset list
+│   │   │     Abstractor.get() singleton
+│   │   │     └──► called by [D] check_in() every 3h
+│   │   │           persisted → data/abstractions.json
+│   │   │
+│   │   └── goals.py             [Go]   ← goal formation engine  (V3 Step 8)
+│   │         GoalEngine()              emergent intrinsic drives via score competition
+│   │           Five drives:
+│   │             reduce_uncertainty    signal = ambiguity_load
+│   │             increase_novelty      signal = 1 − novelty_balance
+│   │             resolve_contradiction signal = open_contradictions / 10
+│   │             maintain_stability    signal = |entropy − 0.5| × 2
+│   │             expand_regions        signal = 1 / region_count
+│   │           goal = argmax(weight × signal)
+│   │           current_goal() → str
+│   │           drive_scores() → dict
+│   │           tick() → str   (recomputes every update_every=10 ticks)
+│   │         GoalEngine.get() singleton
+│   │         └──► ticked by [D] background loop every 60s
+│   │               read by [Rf] ReflectionMonitor for describe()
+│   │
 │   ├── ── CLI tools ──────────────────────────────────────────────────────────
 │   │   └── feed.py                     ← batch feeder: text file → pipeline
 │   │         feed(path, label)
@@ -448,6 +560,12 @@ AMBIGUITY ENGINE
         meta_state.json        {entries, regional, active_region, dormant} — lazy decay on read
         tension.json           {concept: [score, …]} — rolling ambiguity windows per concept
         novelty.json           {exposures: {concept: {times_seen, first/last_seen}}, top5_history}
+        memory.json            {working, episodic, semantic} — 3-layer temporal memory
+        episodes.jsonl         rolling 1000-episode sequence log
+        transitions.json       directed transition graph {A__SEP__B: {weight, count}}
+        contradictions.json    list of Contradiction objects
+        abstractions.json      list of AbstractConcept objects
+        reflection.json        last ReflectionMonitor.report() snapshot
       logs/
         ambiguity_scores.jsonl  every detect_and_log() output
         ab_log.jsonl            modulated vs control response pairs
