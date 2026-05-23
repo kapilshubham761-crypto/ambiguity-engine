@@ -225,6 +225,54 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
+# ── V3 cognitive chip (goal + mode) ──────────────────────────────────────────
+_goal_html = ''
+try:
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+    from goals import GoalEngine
+    from stability import StabilityMonitor
+    _ge   = GoalEngine.get()
+    _sm   = StabilityMonitor.get()
+    _goal = _ge.current_goal().replace('_', ' ')
+    _mode = _sm._current_mode
+    _MODE_CHIP_COLOUR = {
+        'focused':      '#f59e0b',
+        'exploratory':  '#3b82f6',
+        'associative':  '#8b5cf6',
+        'exploitative': '#ef4444',
+        'reflective':   '#10b981',
+    }
+    _mc = _MODE_CHIP_COLOUR.get(_mode, '#6b7280')
+    _goal_html = f"""
+    <style>
+    .ae-cog-chip {{
+        display:flex; align-items:center; gap:6px;
+        padding: 5px 12px; margin:4px 0;
+        font-size:0.73em; color:#bbb; border-radius:4px;
+        background:#11111a; border:1px solid #1e1e2e;
+    }}
+    .ae-cog-dot {{ width:6px;height:6px;border-radius:50%;background:{_mc};flex-shrink:0; }}
+    .ae-cog-label {{ font-size:0.68em;color:#555;text-transform:uppercase;letter-spacing:0.07em; }}
+    </style>
+    <div class="ae-cog-chip">
+      <div class="ae-cog-dot"></div>
+      <div>
+        <div class="ae-cog-label">mode / goal</div>
+        <div style="color:{_mc}">{_mode}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="ae-cog-label">drive</div>
+        <div style="color:#a78bfa">{_goal}</div>
+      </div>
+    </div>
+    """
+except Exception:
+    pass
+
+if _goal_html:
+    st.sidebar.markdown(_goal_html, unsafe_allow_html=True)
+
 
 # ======================================================================== #
 # Navigation                                                                #
@@ -241,6 +289,8 @@ pages = [
     st.Page("_pages/6_discover.py",    title="Learn",       icon="📚"),
     st.Page("_pages/7_learnings.py",   title="Learnings",   icon="📖"),
     st.Page("_pages/9_report_card.py", title="Report Card", icon="📊"),
+    st.Page("_pages/0_meta_state.py",  title="Meta-State",  icon="🧠"),
+    st.Page("_pages/10_cognition.py",  title="Cognition",   icon="💡"),
 ]
 
 pg = st.navigation(pages)
