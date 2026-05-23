@@ -235,6 +235,14 @@ def detect_and_log(input_text: str, concepts: list,
     """4.3 — detect() then append a JSONL entry to the score log."""
     result = detect(concepts, graph=graph, weights=weights)
     _log_score(result, input_text=input_text)
+    # s5-3 — feed each concept's score into the tension tracker
+    try:
+        from tension import TensionTracker
+        _t = TensionTracker.get()
+        for c in concepts:
+            _t.observe(c.text, result.score)
+    except Exception:
+        pass
     return result
 
 

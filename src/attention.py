@@ -87,9 +87,19 @@ def bias(candidates: list, scores: list[float],
     except Exception:
         return list(candidates)
 
+    # s5-6 — hot tension concepts get an extra activation bump
+    try:
+        from tension import TensionTracker
+        _tension = TensionTracker.get()
+        hot_set = set(_tension.hot(n=20))
+    except Exception:
+        hot_set = set()
+
     biased: list[tuple[float, int]] = []
     for i, (cand, base) in enumerate(zip(candidates, scores)):
-        act  = active.get(cand, 0.0) if isinstance(cand, str) else 0.0
+        act = active.get(cand, 0.0) if isinstance(cand, str) else 0.0
+        if isinstance(cand, str) and cand in hot_set:
+            act = min(1.0, act + _tension.mean(cand) * 0.5)
         new  = base * (1.0 + strength * act)
         biased.append((new, i))
 

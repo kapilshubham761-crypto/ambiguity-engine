@@ -85,6 +85,28 @@ class HomeworkTracker:
                 'due':      'next check-in',
             })
 
+        # s5-5 — inject hot tension concepts as extra assignments (directed curiosity)
+        try:
+            from tension import TensionTracker
+            hot = TensionTracker.get().hot(n=5)
+            existing_topics = {a['topic'].lower() for a in assignments}
+            for htopic in hot:
+                if htopic.lower() not in existing_topics:
+                    words    = set(htopic.lower().split())
+                    coverage = len(words & known) / max(len(words), 1)
+                    assignments.append({
+                        'id':       str(uuid.uuid4()),
+                        'topic':    htopic,
+                        'stage':    stage,
+                        'coverage': round(coverage, 2),
+                        'status':   'done' if coverage >= 0.5 else 'pending',
+                        'assigned': datetime.now(tz=timezone.utc).isoformat(),
+                        'due':      'next check-in',
+                        'source':   'tension',
+                    })
+        except Exception:
+            pass
+
         # s4-4 — bias topic order by meta pressure + inverse coverage
         from attention import bias_topics
         assignments = bias_topics(assignments, meta)
