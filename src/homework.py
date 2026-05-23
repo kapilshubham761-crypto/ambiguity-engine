@@ -60,7 +60,7 @@ class HomeworkTracker:
     # IHomework interface                                                    #
     # -------------------------------------------------------------------- #
 
-    def generate(self, stage: int, graph) -> list[dict]:
+    def generate(self, stage: int, graph, meta=None) -> list[dict]:
         """
         Scan the current stage's topics against known graph concepts.
         Assign the 15 least-covered topics as pending homework.
@@ -85,7 +85,9 @@ class HomeworkTracker:
                 'due':      'next check-in',
             })
 
-        assignments.sort(key=lambda a: a['coverage'])   # least-known first
+        # s4-4 — bias topic order by meta pressure + inverse coverage
+        from attention import bias_topics
+        assignments = bias_topics(assignments, meta)
         self._items = assignments[:15]
         self._save()
         return list(self._items)

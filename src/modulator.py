@@ -54,25 +54,27 @@ Related concepts from prior context: {neighbours}"""
 # Neighbour retrieval                                                          #
 # --------------------------------------------------------------------------- #
 
-def _get_neighbours(concepts: list, graph, top_k: int) -> list[str]:
+def _get_neighbours(concepts: list, graph, top_k: int,
+                    meta=None) -> list[str]:
     """
     5.2a — For each input concept, find the closest graph node and pull its
     top-k highest-weighted neighbours.
     5.2b — Deduplicate and rank by combined edge weight.
+    5.2c — Rerank by attention bias (meta-state pressure) before slicing.
     """
     if graph is None or graph.node_count == 0:
         return []
 
     import numpy as np
+    from attention import bias_neighbours
 
     node_ids   = list(graph._g.nodes())
     node_embs  = {nid: graph._g.nodes[nid]['embedding'] for nid in node_ids}
     all_embs   = np.array([node_embs[nid] for nid in node_ids], dtype=np.float32)
 
-    # input concept texts to exclude from neighbours (avoid feeding back same words)
     input_texts = {c.text for c in concepts}
 
-    scored: dict[str, float] = {}  # neighbour_text -> max edge weight seen
+    scored: dict[str, float] = {}
 
     for concept in concepts:
         emb = np.array(concept.embedding, dtype=np.float32)
@@ -93,8 +95,13 @@ def _get_neighbours(concepts: list, graph, top_k: int) -> list[str]:
             if nb_text not in scored or scored[nb_text] < nb_weight:
                 scored[nb_text] = nb_weight
 
-    ranked = sorted(scored.items(), key=lambda x: x[1], reverse=True)
-    return [text for text, _ in ranked[:top_k]]
+    ranked  = sorted(scored.items(), key=lambda x: x[1], reverse=True)
+    texts   = [t for t, _ in ranked]
+    weights = [w for _, w in ranked]
+
+    # s4-5 — rerank warm neighbours to the front before slicing to top_k
+    texts = bias_neighbours(texts, weights, meta=meta)
+    return texts[:top_k]
 
 
 # --------------------------------------------------------------------------- #

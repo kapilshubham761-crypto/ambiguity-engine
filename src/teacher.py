@@ -399,7 +399,7 @@ class Teacher:
         card = assess(graph, stage, prev)
         save_card(card)
 
-        self._hw.generate(stage, graph)
+        self._hw.generate(stage, graph, meta=self._meta)
 
         self._last_checkin = time.time()
         return card.__dict__
@@ -473,7 +473,8 @@ class Teacher:
                 if added >= needed or self._load_paused():
                     break
 
-                sources = stage_sources[:2]
+                from attention import bias_sources
+                sources = bias_sources(stage_sources, self._meta)[:2]
                 all_results: list[dict] = []
 
                 def _search_one(src, q=framed_topic):
