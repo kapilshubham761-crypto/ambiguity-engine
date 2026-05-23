@@ -1,0 +1,111 @@
+{
+  "timestamp": "2026-05-22T21:19:54+00:00",
+  "mood": "saturated",
+  "mood_intensity": 1.0,
+  "tensions": [
+    {
+      "concept_a": "kid",
+      "concept_b": "baby shark",
+      "strength": 0.6916,
+      "edge_weight": 0.4043
+    },
+    {
+      "concept_a": "baby shark",
+      "concept_b": "april",
+      "strength": 0.6673,
+      "edge_weight": 0.4012
+    },
+    {
+      "concept_a": "baby shark",
+      "concept_b": "youtube",
+      "strength": 0.6637,
+      "edge_weight": 0.3956
+    },
+    {
+      "concept_a": "baby shark",
+      "concept_b": "song",
+      "strength": 0.6562,
+      "edge_weight": 0.4096
+    },
+    {
+      "concept_a": "baby shark",
+      "concept_b": "world",
+      "strength": 0.6223,
+      "edge_weight": 0.3601
+    }
+  ],
+  "attractors": [
+    {
+      "concept": "special food",
+      "pull": 2.9292,
+      "degree": 4,
+      "momentum": 1.82
+    },
+    {
+      "concept": "yuanxiao",
+      "pull": 2.9292,
+      "degree": 4,
+      "momentum": 1.82
+    },
+    {
+      "concept": "small ball",
+      "pull": 2.9292,
+      "degree": 4,
+      "momentum": 1.82
+    },
+    {
+      "concept": "sticky rice",
+      "pull": 2.9292,
+      "degree": 4,
+      "momentum": 1.82
+    },
+    {
+      "concept": "sweet soup",
+      "pull": 2.9292,
+      "degree": 4,
+      "momentum": 1.82
+    }
+  ],
+  "momentum": {
+    "special food": 1.8199999999999998,
+    "yuanxiao": 1.8199999999999998,
+    "small ball": 1.8199999999999998,
+    "sticky rice": 1.8199999999999998,
+    "sweet soup": 1.8199999999999998,
+    "lichun": 1.8199999999999998,
+    "chinese new year": 1.8199999999999998,
+    "the chinese new year": 1.8199999999999998,
+    "spring": 1.8199999999999998,
+    "celebrate": 1.8199999999999998,
+    "eat": 1.8199999999999998
+  },
+  "context_window": [
+    "special food",
+    "yuanxiao",
+    "small ball",
+    "sticky rice",
+    "sweet soup",
+    "lichun",
+    "chinese new year",
+    "the chinese new year",
+    "spring",
+    "celebrate",
+    "eat",
+    "special food",
+    "yuanxiao",
+    "small ball",
+    "sticky rice",
+    "sweet soup",
+    "lichun",
+    "chinese new year",
+    "the chinese new year",
+    "spring",
+    "celebrate",
+    "eat"
+  ],
+  "drift_in": [],
+  "drift_out": [],
+  "active_concept_count": 11,
+  "avg_momentum": 1.82,
+  "recent_growth": 0
+}

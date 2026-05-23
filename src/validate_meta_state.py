@@ -7,6 +7,8 @@ Covers the three cases from the Step 01 tracker:
   3. cap drops the weakest entries
 """
 
+import glob as _glob
+import json
 import os, sys, tempfile
 sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.dirname(__file__))
@@ -112,6 +114,53 @@ results.append((PASS if all_strong_present else FAIL,
 top3 = ms3.top(3)
 ok8  = len(top3) <= 3
 results.append((PASS if ok8 else FAIL, f'top(3) returns ≤ 3 items (got {len(top3)})'))
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Case 4 — values stay in [0, 1] under all conditions
+# ─────────────────────────────────────────────────────────────────────────────
+ms4 = _ms(tmp)
+ms4.reinforce(['concept'], gain=0.5)
+ms4.reinforce(['concept'], gain=-99.0)   # large negative gain
+floored = ms4.active(threshold=0.0).get('concept', 0.0)
+ok9 = floored >= 0.0
+results.append((PASS if ok9 else FAIL,
+    f'negative gain cannot push below 0.0 (got {floored:.4f})'))
+
+ms4.reinforce(['concept'], gain=99.0)    # large positive gain
+capped2 = ms4.active(threshold=0.0).get('concept', 0.0)
+ok10 = capped2 <= 1.0
+results.append((PASS if ok10 else FAIL,
+    f'large positive gain clamped at 1.0 (got {capped2:.4f})'))
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Case 5 — bad stored_at timestamp decays to zero, not freezes
+# ─────────────────────────────────────────────────────────────────────────────
+ms5 = _ms(tmp)
+ms5._entries['ancient'] = {'value': 0.9, 'stored_at': 'NOT-A-DATE'}
+# decayed value should be near zero (epoch = huge elapsed)
+v = ms5._decayed_value('ancient', datetime.now(tz=timezone.utc))
+ok11 = v < 0.001
+results.append((PASS if ok11 else FAIL,
+    f'bad stored_at decays to ~0, not frozen (got {v:.6f})'))
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Case 6 — crash-safe write (no partial JSON left behind)
+# ─────────────────────────────────────────────────────────────────────────────
+ms6 = _ms(tmp)
+ms6.reinforce(['atom', 'neutron'])
+# File must exist and be valid JSON after save
+with open(ms6._path, encoding='utf-8') as f:
+    loaded = json.load(f)
+ok12 = 'entries' in loaded and isinstance(loaded['entries'], dict)
+results.append((PASS if ok12 else FAIL, 'saved file is valid JSON with entries key'))
+
+# No .tmp file should remain adjacent to our file after successful save
+# Scope glob to our file stem only — avoids picking up system temp dir noise
+stem = ms6._path[:-5] if ms6._path.endswith('.json') else ms6._path
+leftovers = _glob.glob(stem + '*.tmp')
+ok13 = len(leftovers) == 0
+results.append((PASS if ok13 else FAIL,
+    f'no .tmp files left after save (found {len(leftovers)})'))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Summary

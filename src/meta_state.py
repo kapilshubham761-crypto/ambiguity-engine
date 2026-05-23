@@ -88,7 +88,8 @@ def _parse_dt(s: str) -> datetime:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt
     except Exception:
-        return _now_dt()
+        # Bad/missing timestamp — return epoch so elapsed is huge and entry decays/prunes
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 def _elapsed_minutes(stored_at: str, now: datetime) -> float:
     return max((now - _parse_dt(stored_at)).total_seconds() / 60.0, 0.0)
@@ -144,7 +145,7 @@ class MetaState:
             if not text or not isinstance(text, str):
                 continue
             current = self._decayed_value(text, now)
-            new_val = min(current + g, 1.0)
+            new_val = max(0.0, min(current + g, 1.0))
             self._entries[text] = {'value': new_val, 'stored_at': now.isoformat(timespec='seconds')}
         self._enforce_cap(now)
         self._save()
@@ -172,13 +173,14 @@ class MetaState:
 
     def active(self, threshold: float | None = None) -> dict[str, float]:
         """Return {text: activation} for all concepts above threshold."""
-        floor = threshold if threshold is not None else self._active_threshold
-        now   = _now_dt()
-        return {
-            text: round(self._decayed_value(text, now), 4)
-            for text in self._entries
-            if self._decayed_value(text, now) >= floor
-        }
+        floor  = threshold if threshold is not None else self._active_threshold
+        now    = _now_dt()
+        result = {}
+        for text in self._entries:
+            v = self._decayed_value(text, now)
+            if v >= floor:
+                result[text] = round(v, 4)
+        return result
 
     def top(self, n: int = 10) -> list[tuple[str, float]]:
         """Return top-n (text, activation) sorted descending by current activation."""
@@ -221,8 +223,7 @@ class MetaState:
             return 'drifting', 0.8
 
         import numpy as np
-        avg   = float(np.mean(vals))
-        top_v = vals[0] if vals else 0.0
+        avg = float(np.mean(vals))
 
         # read ambiguity spread from log
         score_log = os.path.join(_ROOT, 'logs', 'ambiguity_scores.jsonl')
@@ -269,13 +270,20 @@ class MetaState:
         log.debug('cap enforced: dropped %d weakest entries', drop)
 
     def _save(self) -> None:
-        os.makedirs(os.path.dirname(self._path), exist_ok=True)
-        with open(self._path, 'w', encoding='utf-8') as f:
-            json.dump({
-                'entries':    self._entries,
-                'saved_at':   _now_str(),
-                'pool_size':  len(self._entries),
-            }, f, ensure_ascii=False, indent=2)
+        import tempfile
+        dir_ = os.path.dirname(self._path)
+        os.makedirs(dir_, exist_ok=True)
+        payload = json.dumps({
+            'entries':   self._entries,
+            'saved_at':  _now_str(),
+            'pool_size': len(self._entries),
+        }, ensure_ascii=False, indent=2)
+        # Atomic write: temp file → os.replace (crash-safe; never leaves partial JSON)
+        with tempfile.NamedTemporaryFile('w', dir=dir_, delete=False,
+                                         suffix='.tmp', encoding='utf-8') as tf:
+            tf.write(payload)
+            tmp = tf.name
+        os.replace(tmp, self._path)
 
     def _load(self) -> None:
         try:

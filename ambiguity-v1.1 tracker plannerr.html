@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ambiguity v1.1 — Cognition Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #f1ece1;
+    --bg-deep:   #e9e2d2;
+    --surface:   #faf6ec;
+    --ink:       #1a1814;
+    --ink-soft:  #3a342a;
+    --muted:     #7a715f;
+    --muted-2:   #a89e8a;
+    --hair:      #d5cbb4;
+    --hair-soft: #e2dac6;
+    --ember:     #b14a1c;
+    --ember-soft:#dca387;
+    --forest:    #3f5a30;
+    --forest-soft:#9eb38d;
+    --gold:      #a8822e;
+    --shadow:    0 1px 0 rgba(26,24,20,0.04), 0 2px 12px -4px rgba(26,24,20,0.08);
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Newsreader', Georgia, serif;
+    --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-image:
+      radial-gradient(rgba(120,100,60,0.04) 1px, transparent 1px),
+      radial-gradient(rgba(120,100,60,0.025) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    min-height: 100vh;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 56px 48px 120px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+  .mast-left .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--ink);
+    display: inline-block;
+  }
+  .mast-left h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(38px, 5vw, 64px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variation-settings: 'opsz' 120;
+    color: var(--ink);
+  }
+  .mast-left h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ember);
+  }
+  .mast-left .subtitle {
+    margin-top: 14px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 18px;
+    max-width: 56ch;
+  }
+
+  .mast-right {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mast-right .stamp {
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    padding: 8px 14px;
+    display: inline-block;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .mast-right .stamp.live { color: var(--ember); border-color: var(--ember); }
+
+  /* ---------- PROGRESS METER ---------- */
+  .meter {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .meter-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meter-bar {
+    height: 4px;
+    background: var(--hair-soft);
+    position: relative;
+    overflow: hidden;
+  }
+  .meter-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--ember);
+    width: 0%;
+    transition: width 0.5s cubic-bezier(.2,.7,.2,1);
+  }
+  .meter-fill.complete { background: var(--forest); }
+  .meter-count {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    font-variation-settings: 'opsz' 60;
+    color: var(--ink);
+    min-width: 90px;
+    text-align: right;
+  }
+  .meter-count .of { color: var(--muted-2); font-size: 16px; }
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-top: -16px;
+  }
+  .filters { display: flex; gap: 4px; }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--hair);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .filter-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .filter-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .actions { display: flex; gap: 8px; }
+  .action-btn {
+    background: transparent;
+    border: 1px solid var(--hair);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .action-btn:hover { color: var(--ember); border-color: var(--ember); }
+
+  /* ---------- MAIN COLUMNS ---------- */
+  .columns {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ---------- SIDEBAR NAV ---------- */
+  .sidenav {
+    position: sticky;
+    top: 32px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .sidenav-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--hair);
+  }
+  .nav-item {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.15s ease;
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding-left: 12px;
+    margin-left: -14px;
+  }
+  .nav-item:hover { color: var(--ink); }
+  .nav-item.complete { color: var(--forest); }
+  .nav-item.active-step {
+    color: var(--ember);
+    border-left-color: var(--ember);
+  }
+  .nav-dot {
+    width: 10px; height: 10px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    position: relative;
+  }
+  .nav-item.partial .nav-dot::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    background: currentColor;
+    border-radius: 50%;
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+  }
+  .nav-item.complete .nav-dot::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    background: currentColor;
+    border-radius: 50%;
+  }
+  .nav-item .nav-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nav-pause {
+    color: var(--muted-2);
+    font-style: italic;
+    padding: 6px 0 6px 24px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------- STEP CARDS ---------- */
+  .steps { display: flex; flex-direction: column; gap: 32px; }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    padding: 36px 40px 32px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+  }
+  .step.is-active {
+    border-color: var(--ember);
+    box-shadow: 0 1px 0 rgba(177,74,28,0.06), 0 4px 24px -8px rgba(177,74,28,0.15);
+  }
+  .step.is-complete {
+    border-color: var(--forest-soft);
+    background: linear-gradient(180deg, #f4f1e3 0%, #faf6ec 60%);
+  }
+
+  .step-head {
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
+    gap: 28px;
+    align-items: start;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--hair-soft);
+  }
+  .step-num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: 72px;
+    line-height: 0.85;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.04em;
+  }
+  .step.is-active .step-num { color: var(--ember); }
+  .step.is-complete .step-num { color: var(--forest); }
+
+  .step-meta {
+    padding-top: 6px;
+  }
+  .step-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .estimate {
+    color: var(--muted-2);
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: 0.05em;
+  }
+  .estimate::before {
+    content: '·';
+    margin-right: 14px;
+    color: var(--muted-2);
+  }
+  .step-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-variation-settings: 'opsz' 80;
+  }
+  .step-title .file-ref {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 500;
+    background: var(--bg-deep);
+    border: 1px solid var(--hair);
+    padding: 2px 8px;
+    margin-left: 8px;
+    color: var(--ink-soft);
+    vertical-align: middle;
+    position: relative;
+    top: -4px;
+  }
+  .step-tagline {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  .step-status {
+    text-align: right;
+    padding-top: 6px;
+  }
+  .status-pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--hair);
+    color: var(--muted);
+    background: var(--bg);
+    display: inline-block;
+  }
+  .step.is-active .status-pill {
+    border-color: var(--ember);
+    color: var(--ember);
+    background: rgba(177,74,28,0.05);
+  }
+  .step.is-complete .status-pill {
+    border-color: var(--forest);
+    color: var(--forest);
+    background: rgba(63,90,48,0.05);
+  }
+  .step-progress {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-2);
+    letter-spacing: 0.08em;
+  }
+  .step-progress .frac { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------- SUBSTEPS ---------- */
+  .substeps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 24px;
+  }
+  .substep {
+    display: grid;
+    grid-template-columns: 28px auto 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 12px 8px 12px 0;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.12s ease;
+  }
+  .substep:hover { background: var(--bg-deep); }
+  .substep:hover .substep-check { border-color: var(--ink); }
+
+  .substep-check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--muted-2);
+    background: var(--bg);
+    margin-top: 2px;
+    position: relative;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .substep.done .substep-check {
+    background: var(--forest);
+    border-color: var(--forest);
+  }
+  .substep.done .substep-check::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 5px;
+    width: 5px; height: 9px;
+    border: solid var(--surface);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .substep-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-2);
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    padding-top: 3px;
+  }
+  .substep-body { padding-top: 1px; }
+  .substep-label {
+    color: var(--ink-soft);
+    font-size: 16.5px;
+    line-height: 1.45;
+  }
+  .substep.done .substep-label {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--muted-2);
+    text-decoration-thickness: 1px;
+  }
+  .substep-detail {
+    color: var(--muted);
+    font-size: 14.5px;
+    margin-top: 4px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .substep code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-deep);
+    padding: 1px 6px;
+    border: 1px solid var(--hair);
+    color: var(--ink);
+    font-style: normal;
+  }
+
+  /* ---------- CODE BLOCK ---------- */
+  .codeblock {
+    background: #2a2620;
+    color: #e8dec8;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 18px 22px;
+    margin: 16px 0 8px;
+    border-left: 3px solid var(--ember);
+    overflow-x: auto;
+    position: relative;
+  }
+  .codeblock::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(232,222,200,0.4);
+  }
+  .codeblock .k { color: #d89e5f; }   /* keys */
+  .codeblock .v { color: #a8b87a; }   /* values */
+  .codeblock .c { color: #6b6356; font-style: italic; }  /* comments */
+
+  /* ---------- NOTES ---------- */
+  .notes-wrap {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--hair);
+  }
+  .notes-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 8px;
+  }
+  .notes-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--ink-soft);
+    font-style: italic;
+    resize: vertical;
+    min-height: 28px;
+    line-height: 1.5;
+    outline: none;
+  }
+  .notes-input::placeholder { color: var(--muted-2); }
+
+  /* ---------- PAUSE GATE ---------- */
+  .pause {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: 32px 0;
+    color: var(--gold);
+  }
+  .pause-line {
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .pause-content {
+    text-align: center;
+    max-width: 460px;
+  }
+  .pause-icon {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .pause-title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .pause-body {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ---------- FINAL CARD ---------- */
+  .completion {
+    margin-top: 40px;
+    text-align: center;
+    padding: 48px 32px;
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .completion strong {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--ember);
+  }
+
+  /* ---------- FILTER STATES ---------- */
+  .step.filter-hidden { display: none; }
+  .substep.filter-hidden { display: none; }
+
+  /* ---------- COLOPHON ---------- */
+  .colophon {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hair);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 980px) {
+    .shell { padding: 32px 24px 80px; gap: 32px; }
+    .columns { grid-template-columns: 1fr; gap: 32px; }
+    .sidenav { position: static; }
+    .step { padding: 24px 22px; }
+    .step-head { grid-template-columns: 56px 1fr; }
+    .step-status { grid-column: 1 / -1; text-align: left; margin-top: 4px; }
+    .step-num { font-size: 52px; }
+    .step-title { font-size: 24px; }
+    .masthead { grid-template-columns: 1fr; }
+    .mast-right { text-align: left; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="mast-left">
+      <div class="eyebrow">Ambiguity / v1.1</div>
+      <h1>The <em>Cognition</em> Layer</h1>
+      <p class="subtitle">Build tracker for meta-state, attention, and unresolved tension — turning the engine from stateless lookup into something with thinking residue.</p>
+    </div>
+    <div class="mast-right">
+      <div class="stamp live" id="status-stamp">IN PROGRESS</div>
+      <div>Saved locally · auto-persists</div>
+    </div>
+  </header>
+
+  <!-- METER -->
+  <section class="meter">
+    <div class="meter-label">Overall</div>
+    <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+    <div class="meter-count"><span id="done-count">0</span><span class="of"> / </span><span id="total-count">0</span></div>
+  </section>
+
+  <!-- TOOLBAR -->
+  <section class="toolbar">
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="pending">Pending</button>
+      <button class="filter-btn" data-filter="done">Done</button>
+    </div>
+    <div class="actions">
+      <button class="action-btn" id="export-btn">Export JSON</button>
+      <button class="action-btn" id="reset-btn">Reset</button>
+    </div>
+  </section>
+
+  <!-- MAIN COLUMNS -->
+  <div class="columns">
+
+    <!-- SIDENAV -->
+    <aside class="sidenav">
+      <div class="sidenav-title">Build Order</div>
+      <nav id="sidenav-list"></nav>
+    </aside>
+
+    <!-- STEPS -->
+    <main class="steps" id="steps-container"></main>
+
+  </div>
+
+  <!-- COLOPHON -->
+  <footer class="colophon">
+    <div>Ambiguity v1.1 · Cognition Layer Tracker</div>
+    <div>Maintain node-tree discipline · One file = one job</div>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// PLAN DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const PLAN = [
+  {
+    id: 'step-0',
+    num: '00',
+    kicker: 'Foundation',
+    estimate: '~15 min',
+    title: 'Extend <code class="file-ref">protocols.py</code>',
+    fileRef: null,
+    tagline: 'Contracts before code. Every later step gets injected via these — if you skip this, modulator and teacher start coupling to implementations.',
+    substeps: [
+      { id: 's0-1', label: 'Add <code>IMetaState</code> protocol', detail: 'Methods: <code>reinforce()</code>, <code>decay_to(now)</code>, <code>active(threshold)</code>, <code>top(n)</code>, <code>snapshot()</code>' },
+      { id: 's0-2', label: 'Add <code>IAttention</code> protocol', detail: 'Single method: <code>bias(candidates, scores) → rescored list</code>' },
+      { id: 's0-3', label: 'Add <code>ITension</code> protocol', detail: 'Methods: <code>observe(concept, score)</code>, <code>hot(n)</code>, <code>is_hot(concept)</code>' },
+      { id: 's0-4', label: 'Add <code>IRegions</code> stub protocol', detail: 'Methods: <code>assign()</code>, <code>active_region()</code>, <code>nodes_in()</code> — real impl deferred to Step 6' },
+      { id: 's0-5', label: 'Verify no concrete imports leak yet', detail: 'Grep <code>teacher.py</code> and <code>modulator.py</code> for any direct imports of yet-unbuilt modules.' },
+    ],
+  },
+  {
+    id: 'step-1',
+    num: '01',
+    kicker: 'Cognition · primary',
+    estimate: '~½ day',
+    title: 'Build <code class="file-ref">meta_state.py</code>',
+    fileRef: '[M]',
+    tagline: 'The temporary activation layer. Combines priority 1 and 2 — decay is meta-state\'s internal mechanic, not a separate module.',
+    substeps: [
+      { id: 's1-1', label: 'Create file skeleton with <code>MetaState</code> class implementing <code>IMetaState</code>', detail: 'No side effects in <code>__init__</code> beyond load.' },
+      { id: 's1-2', label: 'Implement lazy decay', detail: 'On every read: <code>a = a₀ × rate^elapsed_minutes</code>. No separate thread. Survives crash + restart.' },
+      { id: 's1-3', label: 'Implement <code>reinforce(concepts, gain)</code>', detail: 'Clamp activation to <code>[0, 1]</code>.' },
+      { id: 's1-4', label: 'Persist to <code>data/meta_state.json</code>', detail: 'Write on every reinforce. Small file (&lt;100KB). Batch only if it becomes visible cost.' },
+      { id: 's1-5', label: 'Enforce <code>max_concepts</code> cap', detail: 'Drop weakest when over limit. Without this the dict bloats forever.' },
+      { id: 's1-6', label: 'Add <code>meta_state:</code> block to <code>config.yaml</code>', detail: 'Honour rule #8 — no magic numbers in code.', code: 'meta_state' },
+      { id: 's1-7', label: 'Write <code>tests/validate_meta_state.py</code>', detail: 'Cover: reinforce raises score · decay over simulated time · cap drops weakest.' },
+    ],
+  },
+  {
+    type: 'pause',
+    icon: '◇  Observation Gate  ◇',
+    title: 'Pause I',
+    body: 'Run the engine for 24 hours. Watch <code>meta_state.json</code> grow. Tune <code>decay_rate</code> and <code>reinforce_gain</code> before continuing. Don\'t stack steps without observation — meta-state is a feedback loop.',
+  },
+  {
+    id: 'step-2',
+    num: '02',
+    kicker: 'Integration',
+    estimate: '~1 hr',
+    title: 'Wire <code class="file-ref">[M]</code> into Teacher',
+    fileRef: null,
+    tagline: 'First feedback loop. No new file — modifies <code>teacher.py</code> only.',
+    substeps: [
+      { id: 's2-1', label: 'Extend constructor to <code>Teacher(queue, homework, meta: IMetaState)</code>' },
+      { id: 's2-2', label: 'Inside <code>accept()</code>, call <code>meta.reinforce([c.text for c in concepts])</code>', detail: 'After graph.update. Every accepted lesson reinforces its concepts.' },
+      { id: 's2-3', label: 'In background loop tick, call <code>meta.decay_to(now())</code>', detail: 'No-op with lazy decay, but triggers <code>.snapshot()</code> to persist fresh state.' },
+      { id: 's2-4', label: 'Update Teacher construction site', detail: 'Wherever DI happens (likely <code>ui/app.py</code>), pass a fresh <code>MetaState()</code> instance.' },
+    ],
+  },
+  {
+    id: 'step-3',
+    num: '03',
+    kicker: 'Integration',
+    estimate: '~1 hr',
+    title: 'Inject meta-state into <code class="file-ref">modulator.py</code>',
+    fileRef: '[K]',
+    tagline: 'Cognition starts feeling continuous. The same prompt now interprets differently depending on what\'s recently warm.',
+    substeps: [
+      { id: 's3-1', label: 'Add <code>meta: IMetaState</code> parameter to <code>build_prompt()</code>' },
+      { id: 's3-2', label: 'In <code>medium</code> branch: append 2 from <code>meta.top(5)</code> to neighbours', detail: 'Dedup against <code>concepts</code> already in the prompt.' },
+      { id: 's3-3', label: 'In <code>high</code> branch: append 3 from <code>meta.top(5)</code> (dedup)' },
+      { id: 's3-4', label: 'Thread <code>meta</code> through <code>run_ab()</code> signature' },
+      { id: 's3-5', label: 'Update caller in <code>ui/_pages/3_runner.py</code>', detail: 'One-line edit — read meta from session state or pass through.' },
+    ],
+  },
+  {
+    type: 'pause',
+    icon: '◇  Observation Gate  ◇',
+    title: 'Pause II',
+    body: 'Run the 30-prompt eval suite with <code>bias_strength = 0</code>. Note the baseline win-rate. You\'ll re-run after Step 4 with bias on — that delta tells you whether attention is helping or distorting.',
+  },
+  {
+    id: 'step-4',
+    num: '04',
+    kicker: 'Cognition · attention',
+    estimate: '~½ day',
+    title: 'Build <code class="file-ref">attention.py</code>',
+    fileRef: '[N]',
+    tagline: 'Three call sites, one function. The doc\'s "attention biasing" priority — without this module, bias logic scatters across modulator, refill, and homework.',
+    substeps: [
+      { id: 's4-1', label: 'Create core <code>bias(candidates, scores, meta, strength)</code> function', detail: 'Pure function: <code>new_score = score × (1 + strength × activation)</code>, then normalise.' },
+      { id: 's4-2', label: 'Add three thin wrappers', detail: '<code>bias_neighbours</code>, <code>bias_sources</code>, <code>bias_topics</code> — same logic, named call sites.' },
+      { id: 's4-3', label: 'Wire into <code>teacher._refill</code>', detail: 'Bias which sources to query based on current activation.' },
+      { id: 's4-4', label: 'Wire into <code>homework.generate</code>', detail: 'Bias topic selection — active concepts get assignments preferentially.' },
+      { id: 's4-5', label: 'Wire into <code>modulator</code> neighbour retrieval', detail: 'Among graph neighbours, the ones already warm get pulled in first.' },
+      { id: 's4-6', label: 'Add <code>attention.bias_strength: 0.0</code> to config', detail: 'Start OFF. Ramp slowly. Too much bias = system gets stuck in last topic.', code: 'attention' },
+    ],
+  },
+  {
+    id: 'step-5',
+    num: '05',
+    kicker: 'Cognition · tension',
+    estimate: '~½ day',
+    title: 'Build <code class="file-ref">tension.py</code>',
+    fileRef: '[T]',
+    tagline: 'The system begins orbiting what it can\'t resolve. Tracks concepts that repeatedly produce high ambiguity — they become exploration attractors.',
+    substeps: [
+      { id: 's5-1', label: 'Create <code>TensionTracker</code> class implementing <code>ITension</code>' },
+      { id: 's5-2', label: 'Add rolling-window storage', detail: 'Keep last <code>window_size</code> ambiguity observations per concept.' },
+      { id: 's5-3', label: 'One-line hook in <code>detector.detect_and_log()</code>', detail: '<code>for c in concepts: tension.observe(c.text, result.score)</code>' },
+      { id: 's5-4', label: 'Persist to <code>data/tension.json</code>' },
+      { id: 's5-5', label: 'Integrate <code>tension.hot()</code> into <code>homework.generate</code>', detail: 'Hotspots become assignments — directed curiosity.' },
+      { id: 's5-6', label: 'Integrate <code>tension.hot()</code> into <code>attention</code>', detail: 'Hot concepts get an extra bias bump beyond their raw activation.' },
+      { id: 's5-7', label: 'Add <code>tension:</code> block to <code>config.yaml</code>', code: 'tension' },
+    ],
+  },
+  {
+    id: 'step-6',
+    num: '06',
+    kicker: 'Stub · deferred',
+    estimate: '~30 min',
+    title: 'Stub <code class="file-ref">regions.py</code>',
+    fileRef: '[R]',
+    tagline: 'Defer the real implementation until graph crosses ~50k nodes. The stub keeps the protocol live so future swap-in is a one-line DI change.',
+    substeps: [
+      { id: 's6-1', label: 'Create <code>RegionIndex</code> class', detail: '<code>assign()</code> is no-op · <code>active_region()</code> returns <code>None</code> · <code>nodes_in()</code> returns all nodes (whole-graph mode).' },
+      { id: 's6-2', label: 'Register in DI container', detail: 'So future real implementation slots in without touching consumers.' },
+    ],
+  },
+];
+
+const CONFIG_SNIPPETS = {
+  meta_state: `<span class="k">meta_state:</span>
+  <span class="k">decay_rate:</span> <span class="v">0.97</span>        <span class="c"># per minute</span>
+  <span class="k">reinforce_gain:</span> <span class="v">0.25</span>    <span class="c"># per accepted lesson</span>
+  <span class="k">active_threshold:</span> <span class="v">0.20</span>  <span class="c"># cutoff for "currently active"</span>
+  <span class="k">max_concepts:</span> <span class="v">500</span>        <span class="c"># hard cap, drop weakest</span>`,
+  attention: `<span class="k">attention:</span>
+  <span class="k">bias_strength:</span> <span class="v">0.0</span>       <span class="c"># start OFF, ramp slowly</span>`,
+  tension: `<span class="k">tension:</span>
+  <span class="k">window_size:</span> <span class="v">50</span>          <span class="c"># observations per concept retained</span>
+  <span class="k">hot_threshold:</span> <span class="v">0.60</span>      <span class="c"># mean ambiguity to count as hot</span>
+  <span class="k">hot_min_observations:</span> <span class="v">5</span>   <span class="c"># avoid one-off spikes</span>`,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'ambiguity-cognition-tracker-v1';
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.warn('load failed', e); }
+  return { done: {}, notes: {}, filter: 'all' };
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.warn('save failed', e); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────────────────────
+function allSubsteps() {
+  return PLAN.filter(n => n.type !== 'pause').flatMap(s => s.substeps);
+}
+function stepProgress(step) {
+  const total = step.substeps.length;
+  const done = step.substeps.filter(s => state.done[s.id]).length;
+  return { done, total, pct: total === 0 ? 0 : done / total };
+}
+
+function renderSidenav() {
+  const list = document.getElementById('sidenav-list');
+  list.innerHTML = '';
+  let activeFound = false;
+  PLAN.forEach((node) => {
+    if (node.type === 'pause') {
+      const div = document.createElement('div');
+      div.className = 'nav-pause';
+      div.textContent = '— ' + node.title + ' —';
+      list.appendChild(div);
+      return;
+    }
+    const { done, total, pct } = stepProgress(node);
+    const a = document.createElement('a');
+    a.className = 'nav-item';
+    a.href = '#' + node.id;
+    if (pct === 1) a.classList.add('complete');
+    else if (pct > 0) a.classList.add('partial');
+    if (pct < 1 && !activeFound) {
+      a.classList.add('active-step');
+      activeFound = true;
+    }
+    a.innerHTML = `<span class="nav-dot"></span><span class="nav-label">${node.num} · ${stripTags(node.title)}</span>`;
+    list.appendChild(a);
+  });
+}
+
+function stripTags(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return (div.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 28);
+}
+
+function renderSteps() {
+  const container = document.getElementById('steps-container');
+  container.innerHTML = '';
+  let activeAssigned = false;
+
+  PLAN.forEach((node) => {
+    if (node.type === 'pause') {
+      container.appendChild(renderPause(node));
+      return;
+    }
+    const { done, total, pct } = stepProgress(node);
+    const isComplete = pct === 1;
+    const isActive = !isComplete && !activeAssigned;
+    if (isActive) activeAssigned = true;
+
+    const card = document.createElement('article');
+    card.className = 'step';
+    card.id = node.id;
+    if (isComplete) card.classList.add('is-complete');
+    if (isActive) card.classList.add('is-active');
+
+    const statusText = isComplete ? 'Complete' : (done > 0 ? 'In Progress' : 'Pending');
+
+    card.innerHTML = `
+      <div class="step-head">
+        <div class="step-num">${node.num}</div>
+        <div class="step-meta">
+          <div class="step-kicker">
+            <span>${node.kicker}</span>
+            <span class="estimate">${node.estimate}</span>
+          </div>
+          <h2 class="step-title">${node.title}${node.fileRef ? ` <span class="file-ref">${node.fileRef}</span>` : ''}</h2>
+          <p class="step-tagline">${node.tagline}</p>
+        </div>
+        <div class="step-status">
+          <div class="status-pill">${statusText}</div>
+          <div class="step-progress"><span class="frac">${done}/${total}</span> substeps</div>
+        </div>
+      </div>
+      <div class="substeps">
+        ${node.substeps.map((s, i) => renderSubstep(s, i + 1)).join('')}
+      </div>
+      ${renderConfigBlocks(node)}
+      <div class="notes-wrap">
+        <div class="notes-label">Notes</div>
+        <textarea class="notes-input" data-step="${node.id}" placeholder="Observations, blockers, decisions…">${escapeHtml(state.notes[node.id] || '')}</textarea>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Completion banner
+  const total = allSubsteps().length;
+  const done = allSubsteps().filter(s => state.done[s.id]).length;
+  if (done === total) {
+    const c = document.createElement('div');
+    c.className = 'completion';
+    c.innerHTML = 'Cognition layer complete. <br/>The engine now has <strong>thinking residue.</strong> <br/><br/>Next: open the <em>5_ab</em> page, rerun the 30-prompt suite with <code>attention.bias_strength = 0.5</code>, and measure the delta against the Pause II baseline.';
+    container.appendChild(c);
+  }
+}
+
+function renderSubstep(s, n) {
+  const done = state.done[s.id];
+  const codeHtml = s.code && CONFIG_SNIPPETS[s.code]
+    ? `<pre class="codeblock" data-label="config.yaml">${CONFIG_SNIPPETS[s.code]}</pre>`
+    : '';
+  return `
+    <div class="substep ${done ? 'done' : ''}" data-id="${s.id}">
+      <div class="substep-check"></div>
+      <div class="substep-num">.${String(n).padStart(2,'0')}</div>
+      <div class="substep-body">
+        <div class="substep-label">${s.label}</div>
+        ${s.detail ? `<div class="substep-detail">${s.detail}</div>` : ''}
+        ${codeHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderConfigBlocks(node) { return ''; } // currently rendered inline with substep
+
+function renderPause(node) {
+  const div = document.createElement('div');
+  div.className = 'pause';
+  div.innerHTML = `
+    <div class="pause-line"></div>
+    <div class="pause-content">
+      <div class="pause-icon">${node.icon}</div>
+      <div class="pause-title">${node.title}</div>
+      <div class="pause-body">${node.body}</div>
+    </div>
+    <div class="pause-line"></div>
+  `;
+  return div;
+}
+
+function renderMeter() {
+  const total = allSubsteps().length;
+  const done = allSubsteps().filter(s => state.done[s.id]).length;
+  const pct = total === 0 ? 0 : (done / total) * 100;
+  const fill = document.getElementById('meter-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('complete', done === total && total > 0);
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('total-count').textContent = total;
+  const stamp = document.getElementById('status-stamp');
+  if (done === 0) { stamp.textContent = 'NOT STARTED'; stamp.classList.remove('live'); }
+  else if (done === total) { stamp.textContent = 'COMPLETE'; stamp.classList.remove('live'); }
+  else { stamp.textContent = 'IN PROGRESS'; stamp.classList.add('live'); }
+}
+
+function applyFilter() {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === state.filter);
+  });
+  document.querySelectorAll('.substep').forEach(el => {
+    const id = el.dataset.id;
+    const done = !!state.done[id];
+    if (state.filter === 'pending' && done) el.classList.add('filter-hidden');
+    else if (state.filter === 'done' && !done) el.classList.add('filter-hidden');
+    else el.classList.remove('filter-hidden');
+  });
+  document.querySelectorAll('.step').forEach(stepEl => {
+    const visible = stepEl.querySelectorAll('.substep:not(.filter-hidden)').length;
+    if (state.filter !== 'all' && visible === 0) stepEl.classList.add('filter-hidden');
+    else stepEl.classList.remove('filter-hidden');
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────────
+function bindEvents() {
+  document.getElementById('steps-container').addEventListener('click', (e) => {
+    const sub = e.target.closest('.substep');
+    if (sub) {
+      const id = sub.dataset.id;
+      state.done[id] = !state.done[id];
+      saveState();
+      renderAll();
+    }
+  });
+  document.getElementById('steps-container').addEventListener('input', (e) => {
+    if (e.target.classList.contains('notes-input')) {
+      state.notes[e.target.dataset.step] = e.target.value;
+      saveState();
+    }
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filter = btn.dataset.filter;
+      saveState();
+      applyFilter();
+    });
+  });
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Reset all checkmarks and notes? This cannot be undone.')) {
+      state = { done: {}, notes: {}, filter: 'all' };
+      saveState();
+      renderAll();
+    }
+  });
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cognition-tracker-state.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+function renderAll() {
+  renderSteps();
+  renderSidenav();
+  renderMeter();
+  applyFilter();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+renderAll();
+bindEvents();
+</script>
+</body>
+</html>
