@@ -21,7 +21,11 @@ AMBIGUITY ENGINE
 │   │       IQueue                      add(), remove(), list(), size(), known_urls()
 │   │       IHomework                   generate(), tick(), all(), pending()
 │   │       ILessonSource               search(), fetch()
-│   │       └──► imported by [D] so Teacher depends on shapes, not classes
+│   │       IMetaState                  reinforce(), decay_to(), active(), top(), snapshot()
+│   │       IAttention                  bias(candidates, scores, meta, strength) → list
+│   │       ITension                    observe(concept, score), hot(n), is_hot(concept)
+│   │       IRegions                    assign(), active_region(), nodes_in(region)
+│   │       └──► imported by [D][K][M][N][T][R] — all cognition nodes depend on shapes
 │   │
 │   ├── curriculum.py        [A]        ← pure data  (zero imports, zero logic)
 │   │       CURRICULUM[]               8 stages: label, description, topics[]
@@ -53,7 +57,10 @@ AMBIGUITY ENGINE
 │   │
 │   ├── homework.py          [H]        ← homework tracking
 │   │       class HomeworkTracker      implements IHomework
-│   │         generate(stage, graph)   scan coverage gaps → assign 15 topics
+│   │         generate(stage, graph, meta=None)
+│   │           scan coverage gaps → assign 15 topics
+│   │           s5-5: inject hot [T] tension concepts as extra assignments
+│   │           s4-4: bias_topics([N]) reranks by pressure + inverse coverage
 │   │         tick(topic)              mark done on accept
 │   │         all() → list[dict]
 │   │         pending() → list[dict]
@@ -61,6 +68,7 @@ AMBIGUITY ENGINE
 │   │         reload()
 │   │       └──► injected into [D] Teacher constructor
 │   │             imports [A] curriculum (for topics list)
+│   │             imports [N] attention.bias_topics, [T] TensionTracker
 │   │
 │   ├── teacher.py           [D]        ← ORCHESTRATOR  (runs 24/7)
 │   │       REGIONS{}                  12-region spherical grid
@@ -96,6 +104,7 @@ AMBIGUITY ENGINE
 │   │         │
 │   │         ├── Refill  (fast path — search only, no full fetch)
 │   │         │     _refill()
+│   │         │       s4-3: bias_sources([N]) reranks sources by active concepts
 │   │         │       └─► [B] SOURCES[src](query)   parallel threads
 │   │         │       └─► writes fetch_status.json
 │   │         │
@@ -108,6 +117,7 @@ AMBIGUITY ENGINE
 │   │                 4. auto-accept all queued lessons (if enabled)
 │   │                 5. _write_growth() → growth_log.jsonl
 │   │                 6. check_in() if 3h elapsed
+│   │                 7. meta.decay_to() — write back decayed values
 │   │
 │   ├── extractor.py         [E]        ← concept extraction
 │   │       Concept(text, embedding, source)   named tuple
@@ -146,20 +156,23 @@ AMBIGUITY ENGINE
 │   │                    score < 0.60 → medium
 │   │                    score ≥ 0.60 → high
 │   │       detect_and_log(text, concepts, graph) → logs + returns
+│   │         s5-3: observe(concept, score) into [T] TensionTracker for each concept
 │   │       └──► logs to logs/ambiguity_scores.jsonl
 │   │             called by [D] teacher.accept(), [CLI] feed.py
 │   │
 │   ├── modulator.py         [K]        ← prompt modulation + A/B
-│   │       ModulationResult(system_prompt, strategy, neighbours, …)
-│   │       build_prompt(concepts, result, graph) → ModulationResult
+│   │       ModulationResult(level, system_prompt, neighbours, concept_list, meta_concepts)
+│   │       build_prompt(concepts, result, graph, meta=None) → ModulationResult
 │   │         low    → bare clean prompt
-│   │         medium → inject 5 graph neighbours
-│   │         high   → tension framing + 8 neighbours
+│   │         medium → inject 5 graph neighbours + 2 [M] pressure concepts
+│   │         high   → tension framing + 8 neighbours + 3 [M] pressure concepts
+│   │         s4-5: _get_neighbours() calls bias_neighbours([N]) before slicing
 │   │       call_llm(input, prompt, cfg) → str
 │   │         └─► POST localhost:11434 (Ollama / Qwen 2.5 3B)
-│   │       run_ab(input, concepts, result, graph) → (modulated, control)
-│   │         └──► logs to logs/ab_log.jsonl
+│   │       run_ab(input, concepts, result, graph, meta=None) → dict
+│   │         └──► logs to logs/ab_log.jsonl (includes meta_concepts field)
 │   │       └──► called by [UI] 3_runner.py, 5_ab.py
+│   │             imports [N] attention.bias_neighbours, [0] IMetaState
 │   │
 │   ├── assessor.py          [I]        ← assessment + grading
 │   │       Assessment(dataclass)        all fields typed
@@ -184,26 +197,55 @@ AMBIGUITY ENGINE
 │   │       preview_maintenance(graph) → dry-run dict (no changes)
 │   │       └──► called by [F] graph.__init__() (daily gate via stamp file)
 │   │
-│   ├── modulator.py         [K]        ← prompt modulation  (low/medium/high)
-│   │       modulate(result, graph, user_prompt) → system_prompt str
-│   │       └──► reads [F] graph neighbours; reads [M] meta_state (mood/tension)
+│   ├── meta_state.py        [M]        ← cognitive pressure layer  (ephemeral)
+│   │       MetaState(path)             lazy time-based decay — no thread, crash-safe
+│   │         reinforce(texts, gain)    boost activation; clamp [0.0, 1.0]; atomic save
+│   │         decay_to(now)            write-back decayed values; prune < 0.001
+│   │         active(threshold) → dict  {text: activation}  — decay computed on read
+│   │         top(n) → list[tuple]     top-n (text, activation) pairs, decay-aware
+│   │         snapshot() → dict        full state for UI / logging
+│   │       Decay formula:  a(t) = a₀ × 0.97^elapsed_minutes  (per config)
+│   │       Storage:        {text: {value: float, stored_at: ISO datetime}}
+│   │       MOOD_META       6 mood labels mapped to activation patterns
+│   │       MetaState.get() singleton; direct instantiation for DI
+│   │       └──► updated by [D] teacher.accept() (reinforce) + background tick (decay_to)
+│   │             injected into [K][H] via constructor; persisted → data/meta_state.json
 │   │
-│   ├── meta_state.py        [M]        ← meta-state dynamics  (ephemeral layer)
-│   │       MetaStateEngine.get()       singleton
-│   │         .on_accept(texts, graph) → MetaState   (called by [D] after each accept)
-│   │         .current()              → MetaState | None
-│   │         .snapshot()             → dict
-│   │       MetaState  dataclass
-│   │         .mood              curious | conflicted | focused | drifting |
-│   │                            saturated | exploring
-│   │         .mood_intensity    float 0–1
-│   │         .tensions          top-5 concept pairs in structural conflict
-│   │         .attractors        top-5 high-momentum hubs
-│   │         .context_window    last 60 activated concept texts
-│   │         .drift_in/out      concepts entering/leaving focus
-│   │         .momentum          {concept_text: float}  decays ×0.82 per accept
-│   │       └──► updated by [D] teacher.accept() after every graph.update()
-│   │             persisted → data/meta_state.json
+│   ├── attention.py         [N]        ← attention biasing  (pure, no side effects)
+│   │       bias(candidates, scores, meta, strength) → list
+│   │         biased = score × (1 + strength × activation)  then normalised
+│   │         strength=0.0 → pure no-op (safe before Pause II ramp)
+│   │         s5-6: hot [T] tension concepts get extra activation bump (mean × 0.5)
+│   │       bias_neighbours(neighbours, scores, meta) → list[str]   s4-5 call site
+│   │       bias_sources(sources, meta) → list[str]                  s4-3 call site
+│   │         scores by _SOURCE_DOMAINS keyword overlap with active concepts
+│   │       bias_topics(assignments, meta) → list[dict]              s4-4 call site
+│   │         base_score = 1 − coverage  (least-known first, then meta-boosted)
+│   │       _strength()    reads attention.bias_strength from config.yaml live
+│   │       └──► called by [K] modulator, [D] teacher._refill, [H] homework.generate
+│   │             imports [T] TensionTracker for hot-concept boost
+│   │
+│   ├── tension.py           [T]        ← ambiguity tension tracker  (exploration attractors)
+│   │       TensionTracker(path)        rolling-window per-concept ambiguity scores
+│   │         observe(concept, score)   append to deque(maxlen=window_size); atomic save
+│   │         hot(n) → list[str]        top-n where mean ≥ hot_threshold AND obs ≥ min_obs
+│   │         is_hot(concept) → bool    single-concept hot check
+│   │         mean(concept) → float     mean ambiguity score for a concept
+│   │         observations(concept) → int
+│   │         snapshot() → dict         full window state for UI
+│   │       TensionTracker.get()        singleton
+│   │       └──► fed by [G] detect_and_log() (s5-3) after every detection
+│   │             consumed by [H] homework.generate (s5-5) + [N] attention.bias (s5-6)
+│   │             persisted → data/tension.json
+│   │
+│   ├── regions.py           [R]        ← region index stub  (deferred to ~50k nodes)
+│   │       RegionIndex(graph=None)     implements IRegions; whole-graph mode
+│   │         assign()                  no-op — no partitioning at current scale
+│   │         active_region() → None    always None until real implementation
+│   │         nodes_in(region) → list   returns all node IDs (full graph)
+│   │       Real implementation slot-in: Louvain community detection via DI,
+│   │         no consumer changes needed (all consumers talk to IRegions only)
+│   │       └──► protocol-checked: isinstance(RegionIndex(), IRegions) == True
 │   │
 │   ├── ── CLI tools ──────────────────────────────────────────────────────────
 │   │   └── feed.py                     ← batch feeder: text file → pipeline
@@ -223,6 +265,8 @@ AMBIGUITY ENGINE
 │       ├── validate_detector.py
 │       ├── validate_modulator.py
 │       ├── validate_maintenance.py
+│       ├── validate_meta_state.py      14 cases: decay math, cap, clamp, atomic write
+│       ├── eval_baseline.py            Pause II: 30-prompt A/B suite at bias_strength=0
 │       ├── test_discover.py
 │       └── eval_prompts.py
 │
@@ -333,7 +377,8 @@ AMBIGUITY ENGINE
         growth_log.jsonl       append-only node/edge count snapshots
         search_prefs.json      {region, year_from, year_to}
         last_cleaned.txt       date stamp for daily maintenance gate
-        meta_state.json        MetaState snapshot — mood, tensions, attractors, drift, momentum
+        meta_state.json        {entries: {concept: {value, stored_at}}} — lazy decay on read
+        tension.json           {concept: [score, …]} — rolling ambiguity windows per concept
       logs/
         ambiguity_scores.jsonl  every detect_and_log() output
         ab_log.jsonl            modulated vs control response pairs
