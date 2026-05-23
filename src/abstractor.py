@@ -150,12 +150,95 @@ class Abstractor:
 
     def snapshot(self) -> dict:
         return {
+            'abstract_count': len(self._abstractions),
             'total':       len(self._abstractions),
             'stable':      len(self.stable()),
             'top':         sorted(self._abstractions,
                                   key=lambda a: a.get('emergence_score', 0),
                                   reverse=True)[:10],
         }
+
+    # ------------------------------------------------------------------ #
+    # V3-14: Hierarchical abstraction tree                                 #
+    # ------------------------------------------------------------------ #
+
+    def build_hierarchy(self) -> dict:
+        """
+        Build a multi-level abstraction tree:
+        Level 0 = raw concepts (members of abstractions)
+        Level 1 = abstractions from V3-7
+        Level 2 = abstractions of abstractions (if clusters of L1 share members)
+
+        Returns a nested dict describing the hierarchy.
+        """
+        if len(self._abstractions) < 2:
+            return {'levels': [], 'depth': 0}
+
+        level1 = {a['name']: set(a['members']) for a in self._abstractions}
+
+        # Build a co-occurrence matrix over abstract concepts:
+        # Two abstractions overlap if they share at least 1 member
+        overlap: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        names = list(level1.keys())
+        for i, n1 in enumerate(names):
+            for n2 in names[i+1:]:
+                shared = len(level1[n1] & level1[n2])
+                if shared >= 1:
+                    overlap[n1][n2] = shared
+                    overlap[n2][n1] = shared
+
+        # Cluster the abstract concepts the same way we cluster raw ones
+        adjacency: dict[str, set[str]] = defaultdict(set)
+        for a, neighbours in overlap.items():
+            for b, count in neighbours.items():
+                if count >= 1:
+                    adjacency[a].add(b)
+                    adjacency[b].add(a)
+
+        parent = {n: n for n in adjacency}
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(x, y):
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        for a, neighbours in adjacency.items():
+            for b in neighbours:
+                union(a, b)
+
+        from collections import defaultdict as _dd
+        groups: dict[str, list] = _dd(list)
+        for node in adjacency:
+            groups[find(node)].append(node)
+
+        level2 = []
+        for group_members in groups.values():
+            if len(group_members) >= 2:
+                # Name = ~~  + most reused member
+                central = max(group_members, key=lambda n: next(
+                    (a.get('reuse_frequency', 0) for a in self._abstractions if a['name'] == n), 0))
+                level2.append({
+                    'name':    '~~' + central.lstrip('~'),
+                    'members': group_members,
+                    'depth':   2,
+                })
+
+        hierarchy = {
+            'levels': [
+                {'level': 1, 'abstractions': [a['name'] for a in self._abstractions]},
+                {'level': 2, 'abstractions': level2},
+            ],
+            'depth': 2 if level2 else 1,
+            'level2_count': len(level2),
+        }
+        log.debug('abstractor: hierarchy depth=%d level2=%d', hierarchy['depth'], len(level2))
+        return hierarchy
 
     @classmethod
     def get(cls) -> 'Abstractor':

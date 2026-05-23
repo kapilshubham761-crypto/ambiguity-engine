@@ -145,3 +145,79 @@ goals:
     maintain_stability:    0.15
     expand_regions:        0.10
   update_every: 10            # background ticks between goal updates
+
+# ── V3 Steps 9-20 + V4 ────────────────────────────────────────────────────
+
+agents:
+  sub_agents:
+    explorer:    {novelty: 1.5, tension: 0.5, stability: 0.3, curiosity: 1.8}
+    skeptic:     {novelty: 0.4, tension: 1.6, stability: 1.2, curiosity: 0.6}
+    optimizer:   {novelty: 0.6, tension: 0.8, stability: 0.9, curiosity: 0.7}
+    stabilizer:  {novelty: 0.3, tension: 0.4, stability: 2.0, curiosity: 0.4}
+  arbitration_weights:        # vote weight per agent in final merge
+    explorer:   0.30
+    skeptic:    0.25
+    optimizer:  0.25
+    stabilizer: 0.20
+
+world_model:
+  confidence_decay: 0.98      # per observation (older evidence fades)
+  min_confidence: 0.05        # prune edges below this
+  max_edges: 2000
+  relations: [causes, suppresses, predicts, depends_on]
+
+evolver:
+  observe_window: 20          # ticks of metric history to analyse
+  adapt_every: 30             # ticks between adaptation cycles
+  max_delta: 0.05             # max single-step parameter change
+
+prediction_error:
+  window: 50                  # rolling error history per concept
+  surprise_threshold: 0.60    # error above this = "surprising"
+  curiosity_boost: 0.15       # activation gain applied to surprising concepts
+
+active_inference:
+  uncertainty_threshold: 0.65 # trigger information-seeking
+  entropy_low_threshold: 0.20 # trigger novelty injection
+  contradiction_threshold: 5  # open contradictions to trigger exploration
+
+binding:
+  min_domain_spread: 2        # concept must appear in N distinct episode contexts
+  bridge_decay: 0.97          # bridge strength decays if not re-observed
+  max_bridges: 200
+
+energy:
+  total: 1.0                  # full budget
+  replenish_per_tick: 0.08    # recovered each background cycle
+  costs:
+    simulation_per_step: 0.04
+    exploration: 0.06
+    region_switch: 0.05
+    abstraction_run: 0.10
+
+self_model:
+  horizon_ticks: 5            # how far ahead to predict own state
+  history_window: 20          # self-predictions kept for comparison
+
+identity:
+  drift_rate: 0.02            # how fast traits drift per observation
+  traits:                     # initial neutral values [0, 1]
+    exploration_style: 0.50   # 0=conservative  1=aggressive explorer
+    novelty_bias: 0.50        # 0=familiarity   1=novelty seeker
+    stability_bias: 0.50      # 0=chaotic       1=stability seeker
+    abstraction_depth: 0.50   # 0=concrete      1=abstract thinker
+    contradiction_tolerance: 0.50  # 0=avoid     1=embrace
+
+meta_learning:
+  strategy_window: 30         # observations per strategy before scoring
+  effectiveness_decay: 0.95   # older measurements count less
+  strategies:
+    - high_novelty_strength
+    - high_bias_strength
+    - fast_decay
+    - slow_decay
+    - aggressive_fatigue
+
+ecology:
+  tick_every: 1               # run ecology loop every N teacher ticks
+  log_every: 10               # write ecology state to log every N ticks

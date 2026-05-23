@@ -399,6 +399,18 @@ class Teacher:
                 ContradictionRegistry.get().observe(all_texts)
             except Exception:
                 pass
+            # V3-10 — world model causal inference
+            try:
+                from world_model import WorldModel
+                WorldModel.get().infer_from_context(all_texts)
+            except Exception:
+                pass
+            # V4-01 — ecology tick (per lesson)
+            try:
+                from ecology import CognitiveEcology
+                CognitiveEcology.get().tick(all_texts)
+            except Exception:
+                pass
 
         self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
@@ -692,6 +704,41 @@ class Teacher:
                         try:
                             from memory import TemporalMemory
                             TemporalMemory.get().decay_to()
+                        except Exception:
+                            pass
+
+                        # V3-17 — energy replenish
+                        try:
+                            from energy import EnergyBudget
+                            EnergyBudget.get().replenish()
+                        except Exception:
+                            pass
+
+                        # V3-18 — self-model tick
+                        try:
+                            from self_model import SelfModel
+                            SelfModel.get().tick()
+                        except Exception:
+                            pass
+
+                        # V3-19 — identity drift
+                        try:
+                            from identity import IdentityTracker
+                            IdentityTracker.get().observe()
+                        except Exception:
+                            pass
+
+                        # V3-20 — meta-learning tick
+                        try:
+                            from meta_learning import MetaLearner
+                            MetaLearner.get().tick()
+                        except Exception:
+                            pass
+
+                        # V3-11 — evolver tick
+                        try:
+                            from evolver import Evolver
+                            Evolver.get().tick()
                         except Exception:
                             pass
 

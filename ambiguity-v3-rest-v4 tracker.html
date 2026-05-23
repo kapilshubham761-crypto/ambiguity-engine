@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambiguity Engine — V3 Rest + V4 Execution Tracker</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --accent: #7c6af7;
+    --accent2: #f76a8c;
+    --accent3: #6af7c8;
+    --accent4: #f7c86a;
+    --text: #e0e0f0;
+    --muted: #888;
+    --done: #3af7a0;
+    --pending: #555;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 { font-size: 2rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.3rem; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--stripe);
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+  .step-badge {
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .node-id {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: #1a1a26;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+  h3 { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .card p { font-size: 0.85rem; color: #aaa; margin-bottom: 0.8rem; }
+  .features { list-style: none; }
+  .features li { font-size: 0.82rem; color: #bbb; padding: 0.2rem 0; display: flex; gap: 0.5rem; }
+  .features li::before { content: '▸'; color: var(--stripe); flex-shrink: 0; }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    margin-top: 0.8rem;
+  }
+  .status-done { background: rgba(58,247,160,0.15); color: var(--done); border: 1px solid rgba(58,247,160,0.3); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot-done { background: var(--done); }
+
+  .wire-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin-bottom: 2rem; }
+  .wire-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent); }
+  .wire-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.83rem; color: #bbb; padding: 0.3rem 0; border-bottom: 1px solid #1a1a26; }
+  .wire-row:last-child { border-bottom: none; }
+  .wire-label { font-family: monospace; color: var(--accent3); }
+  .wire-arrow { color: var(--muted); }
+
+  .data-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin-bottom: 2rem; }
+  .data-section h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent4); }
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .data-file { font-family: monospace; font-size: 0.8rem; background: #0d0d18; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid #1a1a26; }
+  .data-file span { color: var(--muted); display: block; font-family: sans-serif; font-size: 0.75rem; }
+
+  .progress-container { margin-bottom: 2rem; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted); }
+  .progress-bar { height: 6px; background: #1a1a26; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; }
+
+  .section-title { font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; color: var(--text); }
+  .commit-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.82rem; color: var(--done); }
+  .phase-label { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .wide { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<h1>Ambiguity Engine V3 (rest) + V4</h1>
+<p class="subtitle">V3 Steps 9-20 + V4 Step 1 — 13 cognitive architecture nodes, all complete</p>
+
+<div class="progress-container">
+  <div class="progress-label"><span>Execution progress</span><span>13 / 13 complete</span></div>
+  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+</div>
+
+<div class="phase-label">V3 Steps 9-13: Multi-Agent · World Model · Evolver · Prediction Error · Active Inference</div>
+<div class="grid">
+
+  <div class="card" style="--stripe: #7c6af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#7c6af7;">Step 9</div>
+      <span class="node-id">[Ag] agents.py</span>
+    </div>
+    <h3>Multi-Agent Internal Cognition</h3>
+    <p>4 sub-agents with competing attention biases debate every input simultaneously.</p>
+    <ul class="features">
+      <li>explorer (novelty=1.5, curiosity=1.8) — finds unfamiliar territory</li>
+      <li>skeptic (tension=1.6) — challenges assumptions, flags contradictions</li>
+      <li>optimizer (balanced) — prefers high-value well-connected concepts</li>
+      <li>stabilizer (stability=2.0) — anchors to settled knowledge</li>
+      <li>arbitrate() → weighted vote merge → sorted candidates</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #f76a8c;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f76a8c;">Step 10</div>
+      <span class="node-id">[W] world_model.py</span>
+    </div>
+    <h3>World Model Formation</h3>
+    <p>Causal edge registry — directed causality, not just co-occurrence.</p>
+    <ul class="features">
+      <li>Relations: causes | suppresses | predicts | depends_on</li>
+      <li>observe(a, b, relation) → confidence decay + reinforce</li>
+      <li>infer_from_context() → auto-observe from episode transitions</li>
+      <li>predict_effects(concept) → list of causal consequences</li>
+      <li>Persists to data/world_model.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #6af7c8;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#6af7c8;">Step 11</div>
+      <span class="node-id">[Ev] evolver.py</span>
+    </div>
+    <h3>Architecture Evolver</h3>
+    <p>Watches rolling metrics and nudges config parameters to improve performance.</p>
+    <ul class="features">
+      <li>observe_window=20 ticks; adapt_every=30; max_delta=0.05</li>
+      <li>entropy low → +novelty_strength; entropy high → +bias_strength</li>
+      <li>repetition &gt; 0.65 → +novelty_strength</li>
+      <li>Evolved params saved to data/evolved_params.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #f7c86a;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#f7c86a;">Step 12</div>
+      <span class="node-id">[PE] prediction_error.py</span>
+    </div>
+    <h3>Prediction Error Engine</h3>
+    <p>Measures how wrong predictions are — surprise drives curiosity.</p>
+    <ul class="features">
+      <li>error = 1 - Jaccard(predicted, actual)</li>
+      <li>surprise_threshold=0.60 triggers curiosity_boost=0.15</li>
+      <li>Surprising concepts get working memory reinforcement</li>
+      <li>Rolling window=50 per concept; most_surprising() query</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #a06af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#a06af7;">Step 13</div>
+      <span class="node-id">[AI] active_inference.py</span>
+    </div>
+    <h3>Active Inference</h3>
+    <p>The engine decides what to attend to next. Passive to directive.</p>
+    <ul class="features">
+      <li>uncertainty &gt; 0.65 → seek_information (hottest concept)</li>
+      <li>entropy &lt; 0.20 → inject_novelty (most novel active concept)</li>
+      <li>contradictions &gt; 5 → explore_contradiction (first open pair)</li>
+      <li>Returns urgency-ranked seek_action or None</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+</div>
+
+<div class="phase-label">V3 Steps 14-16: Hierarchical Abstraction · Cross-Modal Binding · Simulation Chains</div>
+<div class="grid">
+
+  <div class="card" style="--stripe: #6ab8f7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#6ab8f7;">Step 14</div>
+      <span class="node-id">[Ab+] abstractor.py extended</span>
+    </div>
+    <h3>Hierarchical Abstraction Tree</h3>
+    <p>Abstractions of abstractions — multi-level compression of knowledge.</p>
+    <ul class="features">
+      <li>build_hierarchy() → Level 1 (clusters) + Level 2 (meta-clusters)</li>
+      <li>Level 2 formed by overlap between Level 1 abstractions</li>
+      <li>Names: ~~ prefix for level-2 nodes</li>
+      <li>Returns depth, level2_count, full nested structure</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #f76ab8;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f76ab8;">Step 15</div>
+      <span class="node-id">[Bn] binding.py</span>
+    </div>
+    <h3>Cross-Modal Binding</h3>
+    <p>Concepts that bridge multiple distinct knowledge domains are flagged as integration points.</p>
+    <ul class="features">
+      <li>bridge_strength = domain_spread / sqrt(appearances)</li>
+      <li>min_domain_spread=2 distinct episode regions required</li>
+      <li>bridge_decay=0.97 per update cycle; max_bridges=200</li>
+      <li>Persists to data/bindings.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #3af7a0;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#3af7a0;">Step 16</div>
+      <span class="node-id">[Sim+] simulator.py extended</span>
+    </div>
+    <h3>Recursive Simulation Chains</h3>
+    <p>Planning trees — the engine imagines multiple futures and picks the best.</p>
+    <ul class="features">
+      <li>simulate_chains(context, depth=10, branching=3)</li>
+      <li>Branch score: novelty x0.4 + goal_alignment x0.3 - contradiction x0.2</li>
+      <li>Returns best_branch + full tree; zero side effects</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+</div>
+
+<div class="phase-label">V3 Steps 17-20: Energy Budget · Self-Model · Identity · Meta-Learning</div>
+<div class="grid">
+
+  <div class="card" style="--stripe: #f7a06a;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f7a06a;">Step 17</div>
+      <span class="node-id">[En] energy.py</span>
+    </div>
+    <h3>Cognitive Energy Budget</h3>
+    <p>Finite resource pool — expensive operations cost energy.</p>
+    <ul class="features">
+      <li>total=1.0; replenish_per_tick=0.08</li>
+      <li>simulation_per_step=0.04, exploration=0.06, abstraction_run=0.10</li>
+      <li>spend(activity) returns bool — False means skip operation</li>
+      <li>Persists to data/energy.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #6af7f7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#6af7f7;">Step 18</div>
+      <span class="node-id">[Sm] self_model.py</span>
+    </div>
+    <h3>Recursive Self-Model</h3>
+    <p>The engine predicts its own future cognitive state and measures accuracy.</p>
+    <ul class="features">
+      <li>Predicts entropy + mode at horizon=5 ticks ahead</li>
+      <li>15% mean-reversion heuristic toward entropy=0.5</li>
+      <li>Accuracy: entropy_error x0.6 + mode_match x0.4</li>
+      <li>Persists to data/self_model.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #f76af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#f76af7;">Step 19</div>
+      <span class="node-id">[Id] identity.py</span>
+    </div>
+    <h3>Identity Persistence</h3>
+    <p>Five cognitive traits drift slowly — the engine develops a personality over time.</p>
+    <ul class="features">
+      <li>exploration_style · novelty_bias · stability_bias · abstraction_depth · contradiction_tolerance</li>
+      <li>drift_rate=0.02 toward current behavioral signal per observation</li>
+      <li>personality_summary() → one-line natural language description</li>
+      <li>Persists to data/identity.json</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+  <div class="card" style="--stripe: #a0f76a;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#000; background:#a0f76a;">Step 20</div>
+      <span class="node-id">[ML] meta_learning.py</span>
+    </div>
+    <h3>Meta-Learning</h3>
+    <p>Tracks which learning strategies actually improve prediction accuracy over time.</p>
+    <ul class="features">
+      <li>5 strategies: high_novelty_strength · high_bias_strength · fast_decay · slow_decay · aggressive_fatigue</li>
+      <li>strategy_window=30; effectiveness_decay=0.95</li>
+      <li>Active strategies inferred from Evolver params + config at runtime</li>
+      <li>best_strategy() → argmax of rolling effectiveness</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+</div>
+
+<div class="phase-label">V4 Step 1: Autonomous Cognitive Ecology</div>
+<div class="grid">
+
+  <div class="card wide" style="--stripe: #7c6af7;">
+    <div class="card-header">
+      <div class="step-badge" style="color:#fff; background:#7c6af7;">V4 — Step 1</div>
+      <span class="node-id">[Ec] ecology.py</span>
+    </div>
+    <h3>Autonomous Cognitive Ecology</h3>
+    <p>Full-loop orchestrator. All 20+ cognitive nodes fire in causal sequence each tick. The system is now fully self-sustaining.</p>
+    <ul class="features">
+      <li>1. EnergyBudget.replenish() — restore capacity each cycle</li>
+      <li>2. PredictionError.observe(last_predicted, actual) — measure accuracy of last cycle</li>
+      <li>3. ActiveInference.step() — determine most urgent attention target</li>
+      <li>4. WorldModel.infer_from_context() — update causal graph from lesson</li>
+      <li>5. BindingDetector.update() — refresh cross-modal bridge strengths</li>
+      <li>6. MetaLearner.tick() — score strategy effectiveness</li>
+      <li>7. Evolver.tick() — nudge architecture parameters</li>
+      <li>8. SelfModel.tick() — advance self-prediction cycle</li>
+      <li>9. IdentityTracker.observe() — drift personality traits toward behavior</li>
+      <li>10. GoalEngine.tick() — recompute intrinsic drives</li>
+      <li>11. ReflectionMonitor.report() — snapshot full cognitive state</li>
+      <li>12. CognitiveAgents.arbitrate(hot_concepts) — rank by 4 lenses</li>
+      <li>tick_every=1 (fires on every lesson accept) · log_every=10</li>
+    </ul>
+    <div class="status-badge status-done"><div class="dot dot-done"></div>Complete</div>
+  </div>
+
+</div>
+
+<div class="wire-section">
+  <h2>Wiring — teacher.py call sites (V3 rest + V4)</h2>
+  <div class="wire-row"><span class="wire-label">accept()</span><span class="wire-arrow">→</span>WorldModel.infer_from_context() [W] · CognitiveEcology.tick(all_texts) [Ec]</div>
+  <div class="wire-row"><span class="wire-label">background loop (every cycle)</span><span class="wire-arrow">→</span>EnergyBudget.replenish() [En] · SelfModel.tick() [Sm] · IdentityTracker.observe() [Id] · MetaLearner.tick() [ML] · Evolver.tick() [Ev]</div>
+  <div class="wire-row"><span class="wire-label">ecology.tick() internal</span><span class="wire-arrow">→</span>PredictionError [PE] · ActiveInference [AI] · WorldModel [W] · BindingDetector [Bn] · MetaLearner [ML] · Evolver [Ev] · SelfModel [Sm] · Identity [Id] · GoalEngine [Go] · Reflection [Rf] · CognitiveAgents [Ag]</div>
+  <div class="wire-row"><span class="wire-label">agents.arbitrate()</span><span class="wire-arrow">→</span>TensionTracker.hot_concepts() → scored by 4 lenses → dominant_agent tracked</div>
+</div>
+
+<div class="data-section">
+  <h2>New V3-rest + V4 data files</h2>
+  <div class="data-grid">
+    <div class="data-file">data/world_model.json<span>Causal edges {source, target, relation, confidence}</span></div>
+    <div class="data-file">data/evolved_params.json<span>Adapted {novelty_strength, bias_strength}</span></div>
+    <div class="data-file">data/prediction_error.json<span>Rolling Jaccard errors per concept</span></div>
+    <div class="data-file">data/bindings.json<span>Cross-modal bridge strengths per concept</span></div>
+    <div class="data-file">data/energy.json<span>Current energy level + spend/denied counts</span></div>
+    <div class="data-file">data/self_model.json<span>Self-predictions vs actuals + accuracy history</span></div>
+    <div class="data-file">data/identity.json<span>5 cognitive traits, slowly drifting</span></div>
+    <div class="data-file">data/meta_learning.json<span>Strategy effectiveness scores (rolling)</span></div>
+  </div>
+</div>
+
+<p class="section-title">Git commit</p>
+<div class="commit-box">
+Step V3 rest + V4-01 complete — Extended Cognition + Autonomous Ecology<br><br>
+[Ag]   agents.py           — 4 sub-agent arbitration (multi-agent internal cognition)<br>
+[W]    world_model.py      — causal edge registry (causes/suppresses/predicts/depends_on)<br>
+[Ev]   evolver.py          — rolling metric observer + heuristic param adaptation<br>
+[PE]   prediction_error.py — Jaccard prediction error + curiosity boost on surprise<br>
+[AI]   active_inference.py — uncertainty/entropy/contradiction drive loop<br>
+[Ab+]  abstractor.py       — hierarchical abstraction tree (build_hierarchy)<br>
+[Bn]   binding.py          — cross-modal semantic bridge detection<br>
+[Sim+] simulator.py        — recursive simulation chains + branch scoring<br>
+[En]   energy.py           — cognitive energy budget with per-activity costs<br>
+[Sm]   self_model.py       — recursive self-prediction + accuracy tracking<br>
+[Id]   identity.py         — 5 persistent cognitive traits with slow drift<br>
+[ML]   meta_learning.py    — strategy effectiveness scoring (meta-learning)<br>
+[Ec]   ecology.py          — V4-01 autonomous cognitive ecology (12-step tick loop)<br><br>
+All 13 nodes smoke-tested OK · wired into teacher.py · protocols.py extended<br>
+config.yaml complete · 8 new data files · tracker HTML: ambiguity-v3-rest-v4 tracker.html
+</div>
+
+</body>
+</html>

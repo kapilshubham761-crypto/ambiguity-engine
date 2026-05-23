@@ -153,6 +153,93 @@ class Simulator:
                   context_concepts[:3], n_steps, len(all_touched))
         return result
 
+    def simulate_chains(self, context_concepts: list[str],
+                        depth: int = 10, branching: int = 3) -> dict:
+        """
+        V3-16: Recursive planning tree.
+
+        Builds a tree of simulation branches up to `depth` steps,
+        expanding `branching` alternatives at each node.
+        Each branch is evaluated by a composite score:
+            score = novelty + goal_alignment - entropy_penalty - contradiction_penalty
+
+        Returns the best branch and the full tree.
+        """
+        depth    = min(depth,     10)
+        branching = min(branching, 5)
+        predictions = self._predict(context_concepts)
+        root_branches = [c for c, _ in predictions[:branching]]
+        if not root_branches:
+            root_branches = context_concepts[:branching]
+
+        best_branch: dict | None = None
+        best_score: float = -1.0
+        tree: list[dict] = []
+
+        for seed in root_branches:
+            branch_result = self.simulate([seed], steps=depth)
+            score = self._evaluate_branch(branch_result)
+            entry = {
+                'seed':    seed,
+                'score':   round(score, 4),
+                'result':  branch_result,
+            }
+            tree.append(entry)
+            if score > best_score:
+                best_score  = score
+                best_branch = entry
+
+        log.debug('simulate_chains: %d branches depth=%d best=%.3f',
+                  len(tree), depth, best_score)
+        return {
+            'context_in':  context_concepts,
+            'best_branch': best_branch,
+            'all_branches': tree,
+            'depth':       depth,
+        }
+
+    @staticmethod
+    def _evaluate_branch(result: dict) -> float:
+        """Score a simulation branch on 4 dimensions."""
+        score = 0.0
+        terminal = result.get('terminal_concepts', [])
+        if not terminal:
+            return 0.0
+
+        # Novelty of terminal concepts
+        try:
+            from novelty import NoveltyTracker
+            nt = NoveltyTracker.get()
+            avg_novelty = sum(nt.novelty_score(c) for c in terminal[:5]) / min(len(terminal), 5)
+            score += avg_novelty * 0.4
+        except Exception:
+            score += 0.2   # neutral default
+
+        # Goal alignment: terminal concepts match current goal keyword
+        try:
+            from goals import GoalEngine
+            goal = GoalEngine.get().current_goal().replace('_', ' ')
+            matches = sum(1 for c in terminal if goal.lower() in c.lower())
+            score += (matches / max(len(terminal), 1)) * 0.3
+        except Exception:
+            pass
+
+        # Contradiction penalty
+        try:
+            from contradiction import ContradictionRegistry
+            cr = ContradictionRegistry.get()
+            unresolved = {c['concept_a'] for c in cr.unresolved()}
+            overlap = sum(1 for c in terminal if c in unresolved)
+            score -= (overlap / max(len(terminal), 1)) * 0.2
+        except Exception:
+            pass
+
+        # Total diversity bonus
+        touched = result.get('total_concepts_touched', 0)
+        score += min(touched / 20.0, 0.1)
+
+        return max(0.0, score)
+
     def simulate_goal(self, goal: str, steps: int | None = None) -> dict:
         """
         Simulate starting from a goal keyword: find its graph neighbours
