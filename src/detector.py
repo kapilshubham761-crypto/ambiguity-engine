@@ -243,6 +243,14 @@ def detect_and_log(input_text: str, concepts: list,
             _t.observe(c.text, result.score)
     except Exception:
         pass
+    # B1 — record concept exposure in novelty tracker
+    try:
+        from novelty import NoveltyTracker
+        _n = NoveltyTracker.get()
+        for c in concepts:
+            _n.observe(c.text)
+    except Exception:
+        pass
     return result
 
 

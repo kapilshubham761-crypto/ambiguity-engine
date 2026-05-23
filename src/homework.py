@@ -107,6 +107,73 @@ class HomeworkTracker:
         except Exception:
             pass
 
+        # B3 — curiosity pull: inject low-familiarity + high-novelty topics
+        try:
+            import yaml
+            with open(os.path.join(_ROOT, 'config.yaml'), encoding='utf-8') as f:
+                hw_cfg = yaml.safe_load(f).get('homework', {})
+            pull_prob = float(hw_cfg.get('curiosity_pull_prob', 0.20))
+        except Exception:
+            pull_prob = 0.20
+
+        if pull_prob > 0.0:
+            try:
+                from novelty import NoveltyTracker
+                from tension import TensionTracker
+                _nov = NoveltyTracker.get()
+                _ten = TensionTracker.get()
+                existing_lower = {a['topic'].lower() for a in assignments}
+                curiosity_slots = max(1, round(15 * pull_prob))
+
+                # candidates: low-familiarity concepts from graph
+                graph_concepts = [data['text'] for _, data in graph._g.nodes(data=True)
+                                  if data.get('text', '') not in existing_lower]
+                # score: novelty × (1 + tension)
+                curiosity_scored = sorted(
+                    graph_concepts,
+                    key=lambda t: _nov.novelty_score(t) * (1.0 + float(_ten.is_hot(t))),
+                    reverse=True
+                )
+                for topic in curiosity_scored[:curiosity_slots]:
+                    if topic.lower() not in existing_lower:
+                        words    = set(topic.lower().split())
+                        coverage = len(words & known) / max(len(words), 1)
+                        assignments.append({
+                            'id':       str(uuid.uuid4()),
+                            'topic':    topic,
+                            'stage':    stage,
+                            'coverage': round(coverage, 2),
+                            'status':   'done' if coverage >= 0.5 else 'pending',
+                            'assigned': datetime.now(tz=timezone.utc).isoformat(),
+                            'due':      'next check-in',
+                            'source':   'curiosity',
+                        })
+                        existing_lower.add(topic.lower())
+            except Exception:
+                pass
+
+        # B4 — escape injection when anti-loop triggers
+        try:
+            from novelty import NoveltyTracker
+            _nov2 = NoveltyTracker.get()
+            if _nov2.check_loop():
+                excl = {a['topic'].lower() for a in assignments}
+                for esc in _nov2.escape_concepts(exclude=excl):
+                    words    = set(esc.lower().split())
+                    coverage = len(words & known) / max(len(words), 1)
+                    assignments.append({
+                        'id':       str(uuid.uuid4()),
+                        'topic':    esc,
+                        'stage':    stage,
+                        'coverage': round(coverage, 2),
+                        'status':   'pending',
+                        'assigned': datetime.now(tz=timezone.utc).isoformat(),
+                        'due':      'next check-in',
+                        'source':   'escape',
+                    })
+        except Exception:
+            pass
+
         # s4-4 — bias topic order by meta pressure + inverse coverage
         from attention import bias_topics
         assignments = bias_topics(assignments, meta)

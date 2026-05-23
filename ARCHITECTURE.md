@@ -24,8 +24,10 @@ AMBIGUITY ENGINE
 │   │       IMetaState                  reinforce(), decay_to(), active(), top(), snapshot()
 │   │       IAttention                  bias(candidates, scores, meta, strength) → list
 │   │       ITension                    observe(concept, score), hot(n), is_hot(concept)
+│   │       INovelty                    observe(concept), novelty_score(concept), snapshot()
 │   │       IRegions                    assign(), active_region(), nodes_in(region)
-│   │       └──► imported by [D][K][M][N][T][R] — all cognition nodes depend on shapes
+│   │       IStability                  tick(meta), entropy(), current_mode(), mode_weights(), snapshot()
+│   │       └──► imported by [D][K][M][N][T][R][V][S] — all cognition nodes depend on shapes
 │   │
 │   ├── curriculum.py        [A]        ← pure data  (zero imports, zero logic)
 │   │       CURRICULUM[]               8 stages: label, description, topics[]
@@ -61,6 +63,10 @@ AMBIGUITY ENGINE
 │   │           scan coverage gaps → assign 15 topics
 │   │           s5-5: inject hot [T] tension concepts as extra assignments
 │   │           s4-4: bias_topics([N]) reranks by pressure + inverse coverage
+│   │           Phase B3: curiosity pull — inject novelty×tension scored concepts
+│   │             curiosity_pull_prob from config; source="curiosity"
+│   │           Phase B4: escape injection — if check_loop(), add escape_concepts()
+│   │             source="escape"
 │   │         tick(topic)              mark done on accept
 │   │         all() → list[dict]
 │   │         pending() → list[dict]
@@ -69,6 +75,7 @@ AMBIGUITY ENGINE
 │   │       └──► injected into [D] Teacher constructor
 │   │             imports [A] curriculum (for topics list)
 │   │             imports [N] attention.bias_topics, [T] TensionTracker
+│   │             imports [V] NoveltyTracker for B3 curiosity + B4 escape
 │   │
 │   ├── teacher.py           [D]        ← ORCHESTRATOR  (runs 24/7)
 │   │       REGIONS{}                  12-region spherical grid
@@ -90,10 +97,12 @@ AMBIGUITY ENGINE
 │   │         │
 │   │         ├── Lesson actions
 │   │         │     accept(lesson_id, graph)
-│   │         │       └─► [B] fetch_content()   lazy full-text fetch
-│   │         │       └─► [E] extract()          concepts
-│   │         │       └─► [G] detect_and_log()   ambiguity score
+│   │         │       └─► [B] fetch_content()       lazy full-text fetch
+│   │         │       └─► [E] extract()              concepts
+│   │         │       └─► [G] detect_and_log()       ambiguity score → [T][V] observers
 │   │         │       └─► [F] graph.update() + graph.save()
+│   │         │       └─► [M] meta.reinforce(all_texts)
+│   │         │       └─► [R] regions.assign()      re-partition after growth (Phase C)
 │   │         │     reject(lesson_id)
 │   │         │
 │   │         ├── Check-in  (every 3 hours)
@@ -110,6 +119,7 @@ AMBIGUITY ENGINE
 │   │         │
 │   │         └── Background thread
 │   │               start(graph)
+│   │               start(graph) injects [R] RegionIndex → [M] set_region_index()
 │   │               loop every 60s:
 │   │                 1. sync paused flag from paused.txt
 │   │                 2. gate on graph size (GRAPH_LIMIT_NODES = 150k)
@@ -118,6 +128,8 @@ AMBIGUITY ENGINE
 │   │                 5. _write_growth() → growth_log.jsonl
 │   │                 6. check_in() if 3h elapsed
 │   │                 7. meta.decay_to() — write back decayed values
+│   │                 8. [V] NoveltyTracker.snapshot_top5(meta) — anti-loop clock (B4)
+│   │                 9. [S] StabilityMonitor.tick(meta) — entropy + mode update (D2/D3)
 │   │
 │   ├── extractor.py         [E]        ← concept extraction
 │   │       Concept(text, embedding, source)   named tuple
@@ -157,6 +169,7 @@ AMBIGUITY ENGINE
 │   │                    score ≥ 0.60 → high
 │   │       detect_and_log(text, concepts, graph) → logs + returns
 │   │         s5-3: observe(concept, score) into [T] TensionTracker for each concept
+│   │         Phase B1: observe(concept) into [V] NoveltyTracker for each concept
 │   │       └──► logs to logs/ambiguity_scores.jsonl
 │   │             called by [D] teacher.accept(), [CLI] feed.py
 │   │
@@ -199,31 +212,45 @@ AMBIGUITY ENGINE
 │   │
 │   ├── meta_state.py        [M]        ← cognitive pressure layer  (ephemeral)
 │   │       MetaState(path)             lazy time-based decay — no thread, crash-safe
-│   │         reinforce(texts, gain)    boost activation; clamp [0.0, 1.0]; atomic save
+│   │         reinforce(texts, gain)    sigmoid gain: a += g*(1-a); fatigue × cooling
+│   │           Phase A1: sigmoid saturation    gain bounded by (1-current)
+│   │           Phase A2: reinforcement fatigue  1/(1+hits*k) within window
+│   │           Phase A3: cooling               r^(t*(1+alpha*a0)) reduces hot concepts faster
 │   │         decay_to(now)            write-back decayed values; prune < 0.001
-│   │         active(threshold) → dict  {text: activation}  — decay computed on read
+│   │         active(threshold, region) → dict  {text: activation}  — decay on read
 │   │         top(n) → list[tuple]     top-n (text, activation) pairs, decay-aware
-│   │         snapshot() → dict        full state for UI / logging
-│   │       Decay formula:  a(t) = a₀ × 0.97^elapsed_minutes  (per config)
-│   │       Storage:        {text: {value: float, stored_at: ISO datetime}}
-│   │       MOOD_META       6 mood labels mapped to activation patterns
+│   │         snapshot() → dict        full state incl. active_region, region_count
+│   │         set_region_index(ri)     DI: inject RegionIndex for spatial pools
+│   │         Phase C: _regional pools per community; _elect_active_region()
+│   │           suppresses non-active region activations by suppression_factor
+│   │           _maybe_revive_dormant(): latent_recall_prob revival from _dormant
+│   │         Phase D1: _maybe_normalise()
+│   │           proportional or softmax rescale when mean activation > threshold
+│   │       Decay formula:  a(t) = a₀ × r^(t*(1+alpha*a₀))  (cooling-adjusted)
+│   │       Storage:        {entries, regional, active_region, dormant}
 │   │       MetaState.get() singleton; direct instantiation for DI
 │   │       └──► updated by [D] teacher.accept() (reinforce) + background tick (decay_to)
-│   │             injected into [K][H] via constructor; persisted → data/meta_state.json
+│   │             [D] start() injects RegionIndex via set_region_index()
+│   │             persisted → data/meta_state.json
 │   │
 │   ├── attention.py         [N]        ← attention biasing  (pure, no side effects)
-│   │       bias(candidates, scores, meta, strength) → list
-│   │         biased = score × (1 + strength × activation)  then normalised
+│   │       bias(candidates, scores, meta, strength,
+│   │            novelty_scores, novelty_strength) → list
+│   │         biased = score × (1 + strength*act + novelty_strength*n_score)
 │   │         strength=0.0 → pure no-op (safe before Pause II ramp)
 │   │         s5-6: hot [T] tension concepts get extra activation bump (mean × 0.5)
+│   │         Phase B2: novelty_strength term boosts unseen concepts
 │   │       bias_neighbours(neighbours, scores, meta) → list[str]   s4-5 call site
+│   │         fetches novelty scores from [V] NoveltyTracker if novelty_strength > 0
 │   │       bias_sources(sources, meta) → list[str]                  s4-3 call site
 │   │         scores by _SOURCE_DOMAINS keyword overlap with active concepts
 │   │       bias_topics(assignments, meta) → list[dict]              s4-4 call site
 │   │         base_score = 1 − coverage  (least-known first, then meta-boosted)
-│   │       _strength()    reads attention.bias_strength from config.yaml live
+│   │       _strength()         reads attention.bias_strength from config.yaml live
+│   │       _novelty_strength() reads attention.novelty_strength from config.yaml live
 │   │       └──► called by [K] modulator, [D] teacher._refill, [H] homework.generate
 │   │             imports [T] TensionTracker for hot-concept boost
+│   │             imports [V] NoveltyTracker for B2 novelty scores
 │   │
 │   ├── tension.py           [T]        ← ambiguity tension tracker  (exploration attractors)
 │   │       TensionTracker(path)        rolling-window per-concept ambiguity scores
@@ -238,14 +265,55 @@ AMBIGUITY ENGINE
 │   │             consumed by [H] homework.generate (s5-5) + [N] attention.bias (s5-6)
 │   │             persisted → data/tension.json
 │   │
-│   ├── regions.py           [R]        ← region index stub  (deferred to ~50k nodes)
-│   │       RegionIndex(graph=None)     implements IRegions; whole-graph mode
-│   │         assign()                  no-op — no partitioning at current scale
-│   │         active_region() → None    always None until real implementation
-│   │         nodes_in(region) → list   returns all node IDs (full graph)
-│   │       Real implementation slot-in: Louvain community detection via DI,
-│   │         no consumer changes needed (all consumers talk to IRegions only)
-│   │       └──► protocol-checked: isinstance(RegionIndex(), IRegions) == True
+│   ├── novelty.py           [V]        ← novelty pressure tracker  (Phase B)
+│   │       NoveltyTracker(path)        exposure counting + loop detection
+│   │         observe(concept)          increment times_seen; atomic save to novelty.json
+│   │         novelty_score(concept)    1 / log(times_seen + e)  → 1.0 unseen, →0 old
+│   │         snapshot_top5(meta)       record meta.top(5) into rolling deque (Phase B4)
+│   │         check_loop()             True if Jaccard ≥ overlap_threshold for ≥ min_repeats
+│   │         escape_concepts(exclude) low-seen concepts for anti-loop injection
+│   │         most_novel(n, exclude)   top-n by novelty score
+│   │       NoveltyTracker.get()       singleton
+│   │       Phase B1 call site: [G] detect_and_log() — observe() after every detection
+│   │       Phase B2 call site: [N] bias_neighbours() — novelty_score() for ranking
+│   │       Phase B3 call site: [H] homework.generate() — curiosity pull
+│   │       Phase B4 call site: [D] background tick — snapshot_top5() + check_loop()
+│   │       └──► persisted → data/novelty.json (atomic write)
+│   │
+│   ├── stability.py         [S]        ← stability monitor + cognitive modes  (Phase D)
+│   │       StabilityMonitor()          entropy monitor + 5-mode cognitive controller
+│   │         tick(meta)               compute Shannon entropy from meta.top(20)
+│   │         entropy() → float        latest normalised entropy [0, 1]
+│   │         mean_entropy() → float   rolling mean over window
+│   │         is_overloaded()          entropy < entropy_min (too focused)
+│   │         is_diffuse()             entropy > entropy_max (too scattered)
+│   │         current_mode(meta, regions) → str
+│   │           exploratory  entropy > max           (scattered)
+│   │           associative  region_count ≥ 3         (multi-domain)
+│   │           focused      entropy < min + tension  (grinding one cluster)
+│   │           exploitative entropy < min, no tension
+│   │           reflective   default stable state
+│   │         mode_weights() → dict    config multipliers for current mode
+│   │         snapshot() → dict        entropy, mode, history_len, is_stable
+│   │       StabilityMonitor.get()     singleton
+│   │       └──► called by [D] background tick every 60s
+│   │             imports [T] TensionTracker for tension level in mode selection
+│   │
+│   ├── regions.py           [R]        ← region index  (Phase C — real Louvain)
+│   │       RegionIndex(graph=None)     implements IRegions
+│   │         assign()                  greedy_modularity_communities; whole-graph fallback
+│   │                                   skips if graph < min_graph_size (200) nodes
+│   │         region_for(concept_text) → region_id | None
+│   │         bridge_score(concept_text) → fraction of neighbours in other regions
+│   │         bridge_nodes(threshold)   list of bridging concept texts
+│   │         nodes_in(region) → list   node IDs; None → all nodes
+│   │         active_region() → str | None
+│   │         set_active_region(id)
+│   │         region_count() → int
+│   │         _compute_bridge_scores()  topology-based; no embeddings needed
+│   │       Whole-graph fallback:       small graph or detection failure → one region
+│   │       └──► injected into [M] MetaState via set_region_index() from [D] start()
+│   │             assign() called in [D] accept() after every graph.save()
 │   │
 │   ├── ── CLI tools ──────────────────────────────────────────────────────────
 │   │   └── feed.py                     ← batch feeder: text file → pipeline
@@ -377,8 +445,9 @@ AMBIGUITY ENGINE
         growth_log.jsonl       append-only node/edge count snapshots
         search_prefs.json      {region, year_from, year_to}
         last_cleaned.txt       date stamp for daily maintenance gate
-        meta_state.json        {entries: {concept: {value, stored_at}}} — lazy decay on read
+        meta_state.json        {entries, regional, active_region, dormant} — lazy decay on read
         tension.json           {concept: [score, …]} — rolling ambiguity windows per concept
+        novelty.json           {exposures: {concept: {times_seen, first/last_seen}}, top5_history}
       logs/
         ambiguity_scores.jsonl  every detect_and_log() output
         ab_log.jsonl            modulated vs control response pairs

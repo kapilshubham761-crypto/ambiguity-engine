@@ -40,11 +40,56 @@ meta_state:
   reinforce_gain: 0.25      # boost added per accepted lesson
   active_threshold: 0.20    # cutoff for "currently active" concept
   max_concepts: 500         # hard cap — drop weakest when exceeded
+  # Phase A — Saturation
+  gain_mode: sigmoid                # "sigmoid" | "linear"
+  fatigue_k: 0.2                    # penalty per repeated hit · 0.0=off
+  fatigue_window_minutes: 15        # window for hit counting
+  cooling_alpha: 0.5                # hot-concept decay speed-up · 0.0=flat
+  # Phase D1 — Normalisation
+  normalisation_mode: proportional  # "proportional" | "softmax"
+  normalisation_threshold: 0.65     # mean activation trigger
 
 attention:
-  bias_strength: 0.0        # start OFF; ramp slowly after Pause II eval
+  bias_strength: 0.0        # meta activation weight · ramp after Pause II
+  novelty_strength: 0.0     # novelty pressure weight · start OFF
 
 tension:
   window_size: 50           # ambiguity observations retained per concept
   hot_threshold: 0.60       # mean ambiguity score to count as hot
   hot_min_observations: 5   # ignore one-off spikes below this count
+
+novelty:
+  enabled: true
+  persist_path: data/novelty.json
+
+homework:
+  curiosity_pull_prob: 0.20  # fraction of slots → curiosity selection
+
+anti_loop:
+  loop_window: 20            # top-5 snapshots to scan
+  loop_min_repeats: 5        # repeated set hits to trigger
+  overlap_threshold: 0.80    # Jaccard similarity for "same set"
+  escape_concepts: 3         # concepts injected on detection
+
+regions:
+  suppression_factor: 0.90   # non-active region decay multiplier
+  bridge_threshold: 0.30     # bridge_score to exempt from suppression
+  bridge_strength: 0.0       # attention boost for bridge nodes · start OFF
+  latent_recall_prob: 0.02   # chance per tick to revive dormant region
+  min_revival_activation: 0.15
+  region_switch_threshold: 0.70  # entropy threshold for region exhaustion
+  min_graph_size: 200            # skip partitioning below this node count
+
+stability:
+  entropy_window: 10         # ticks for rolling entropy average
+  entropy_min: 0.20          # below = fixation alert
+  entropy_max: 0.80          # above = noise/distraction alert
+
+cognitive_mode:
+  enabled: true
+  mode_weights:
+    focused:      {decay: 0.90, suppression: 1.10, novelty: 0.80}
+    exploratory:  {decay: 1.05, novelty: 1.40, curiosity: 1.50}
+    associative:  {bridge: 1.80, suppression: 0.70}
+    exploitative: {bias: 1.40, novelty: 0.60, decay: 0.95}
+    reflective:   {decay: 0.80, tension: 1.30}

@@ -36,6 +36,9 @@ from datetime import datetime, timezone
 from sources import SOURCES, _flesch_score, fetch_content
 from curriculum import CURRICULUM, STAGE_CONFIG
 from protocols import IQueue, IHomework, IMetaState
+from logger import get_logger
+
+log = get_logger('teacher')
 
 
 # ======================================================================== #
@@ -143,6 +146,9 @@ class Teacher:
         self._q:    IQueue     = queue    or LessonQueue()
         self._hw:   IHomework  = homework or HomeworkTracker()
         self._meta: IMetaState = meta     or MetaState.get()
+
+        # Phase C — region index (injected after graph is available in start())
+        self._regions = None
 
         self._thread: threading.Thread | None = None
         self._status       = 'idle'
@@ -361,6 +367,12 @@ class Teacher:
                 self._meta.reinforce(all_texts)
             except Exception as _e:
                 log.debug('meta_state reinforce skipped: %s', _e)
+            # Phase C — re-partition regions after graph grows
+            if self._regions is not None:
+                try:
+                    self._regions.assign()
+                except Exception:
+                    pass
 
         self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
@@ -546,6 +558,15 @@ class Teacher:
         if self._thread and self._thread.is_alive():
             return
 
+        # Phase C — wire region index to meta_state (DI)
+        if graph is not None:
+            try:
+                from regions import RegionIndex
+                self._regions = RegionIndex(graph)
+                self._meta.set_region_index(self._regions)
+            except Exception as e:
+                log.debug('regions init skipped: %s', e)
+
         def _worker():
             while True:
                 try:
@@ -591,6 +612,20 @@ class Teacher:
                         # Keep meta_state.json fresh — write-back decayed values
                         try:
                             self._meta.decay_to()
+                        except Exception:
+                            pass
+
+                        # Phase B4 — snapshot top-5 for anti-loop detection
+                        try:
+                            from novelty import NoveltyTracker
+                            NoveltyTracker.get().snapshot_top5(self._meta)
+                        except Exception:
+                            pass
+
+                        # Phase D2+D3 — stability tick (entropy + cognitive mode)
+                        try:
+                            from stability import StabilityMonitor
+                            StabilityMonitor.get().tick(self._meta)
                         except Exception:
                             pass
 

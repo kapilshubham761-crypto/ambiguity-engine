@@ -59,8 +59,21 @@ def _strength() -> float:
 
 # ─────────────────────────────────────────────────────────── Core ──────
 
+def _novelty_strength() -> float:
+    """Read attention.novelty_strength from config.yaml live."""
+    try:
+        import yaml
+        with open(_CFG_PATH, encoding='utf-8') as f:
+            return float(yaml.safe_load(f).get('attention', {})
+                         .get('novelty_strength', 0.0))
+    except Exception:
+        return 0.0
+
+
 def bias(candidates: list, scores: list[float],
-         meta, strength: float) -> list:
+         meta, strength: float,
+         novelty_scores: list[float] | None = None,
+         novelty_strength: float = 0.0) -> list:
     """
     Pure reranking function. Returns candidates sorted by biased score.
 
@@ -100,7 +113,9 @@ def bias(candidates: list, scores: list[float],
         act = active.get(cand, 0.0) if isinstance(cand, str) else 0.0
         if isinstance(cand, str) and cand in hot_set:
             act = min(1.0, act + _tension.mean(cand) * 0.5)
-        new  = base * (1.0 + strength * act)
+        # B2 — novelty bias term
+        n_score = novelty_scores[i] if novelty_scores and i < len(novelty_scores) else 0.0
+        new = base * (1.0 + strength * act + novelty_strength * n_score)
         biased.append((new, i))
 
     # normalise by max so scores stay in a comparable range
@@ -123,11 +138,21 @@ def bias_neighbours(neighbours: list[str], scores: list[float],
                     meta, strength: float | None = None) -> list[str]:
     """
     s4-5 call site — modulator._get_neighbours.
-    Reranks graph neighbours by edge weight × meta activation.
-    neighbours and scores must be parallel lists.
+    Reranks graph neighbours by edge weight × meta activation × novelty.
     """
-    s = strength if strength is not None else _strength()
-    return bias(neighbours, scores, meta, s)
+    s  = strength if strength is not None else _strength()
+    ns = _novelty_strength()
+    # B2 — fetch novelty scores for each candidate
+    novelty_scores = None
+    if ns > 0.0:
+        try:
+            from novelty import NoveltyTracker
+            _nov = NoveltyTracker.get()
+            novelty_scores = [_nov.novelty_score(nb) for nb in neighbours]
+        except Exception:
+            pass
+    return bias(neighbours, scores, meta, s,
+                novelty_scores=novelty_scores, novelty_strength=ns)
 
 
 def bias_sources(sources: list[str],

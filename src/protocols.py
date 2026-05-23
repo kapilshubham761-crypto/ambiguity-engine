@@ -118,6 +118,18 @@ class ITension(Protocol):
 
 
 # ======================================================================== #
+# INovelty — exposure tracking + novelty scoring                           #
+# Components: novelty.py (NoveltyTracker)  — built in Phase B              #
+# ======================================================================== #
+
+@runtime_checkable
+class INovelty(Protocol):
+    def observe(self, concept: str) -> None: ...
+    def novelty_score(self, concept: str) -> float: ...
+    def snapshot(self) -> dict: ...
+
+
+# ======================================================================== #
 # IRegions — graph region index (stub until ~50k nodes)                   #
 # Components: regions.py (RegionIndex)     — built in Step 06              #
 # ======================================================================== #
@@ -127,3 +139,17 @@ class IRegions(Protocol):
     def assign(self) -> None: ...
     def active_region(self) -> object: ...
     def nodes_in(self, region: object) -> list: ...
+
+
+# ======================================================================== #
+# IStability — entropy monitor + cognitive mode engine                     #
+# Components: stability.py (StabilityMonitor)  — built in Phase D         #
+# ======================================================================== #
+
+@runtime_checkable
+class IStability(Protocol):
+    def tick(self, meta: IMetaState) -> float: ...
+    def entropy(self) -> float: ...
+    def current_mode(self, meta: IMetaState | None, regions: object | None) -> str: ...
+    def mode_weights(self) -> dict: ...
+    def snapshot(self) -> dict: ...
