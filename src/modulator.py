@@ -23,6 +23,7 @@ from typing import Optional
 import requests
 
 from logger import get_logger
+from protocols import IMetaState
 
 log = get_logger('modulator')
 
@@ -102,13 +103,31 @@ def _get_neighbours(concepts: list, graph, top_k: int) -> list[str]:
 
 @dataclass
 class ModulationResult:
-    level:       str
+    level:         str
     system_prompt: str
-    neighbours:  list[str]
-    concept_list: list[str]
+    neighbours:    list[str]
+    concept_list:  list[str]
+    meta_concepts: list[str]   # concepts injected from current cognitive pressure
+
+
+def _meta_pressure(meta: IMetaState | None, n: int,
+                   exclude: set[str]) -> list[str]:
+    """
+    Pull top-n concepts from current cognitive pressure, deduped against
+    `exclude` (input concept_list + graph neighbours already in prompt).
+    Returns empty list when meta is None or has no active pressure.
+    """
+    if meta is None:
+        return []
+    try:
+        return [t for t, _ in meta.top(n + len(exclude))
+                if t not in exclude][:n]
+    except Exception:
+        return []
 
 
 def build_prompt(concepts: list, result, graph=None,
+                 meta: IMetaState | None = None,
                  medium_k: int = 5, high_k: int = 8) -> ModulationResult:
     """
     Build the system prompt for the LLM given an AmbiguityResult.
@@ -118,38 +137,49 @@ def build_prompt(concepts: list, result, graph=None,
     concepts : list[Concept]
     result   : AmbiguityResult
     graph    : SemanticGraph | None
+    meta     : IMetaState | None   — current cognitive pressure (Node [M])
+               medium branch injects 2 pressure concepts
+               high branch injects 3 pressure concepts
     """
     level        = result.level
     concept_list = [c.text for c in concepts]
 
     if level == 'low':
-        # 5.1a
         return ModulationResult(
             level         = 'low',
             system_prompt = _LOW_PROMPT,
             neighbours    = [],
             concept_list  = concept_list,
+            meta_concepts = [],
         )
 
     k          = medium_k if level == 'medium' else high_k
     neighbours = _get_neighbours(concepts, graph, top_k=k)
-    nb_str     = ', '.join(neighbours) if neighbours else 'none yet'
+
+    # s3-2 / s3-3 — append pressure concepts, deduped against input + neighbours
+    exclude       = set(concept_list) | set(neighbours)
+    meta_n        = 2 if level == 'medium' else 3
+    meta_concepts = _meta_pressure(meta, meta_n, exclude)
+    all_nb        = neighbours + meta_concepts
+    nb_str        = ', '.join(all_nb) if all_nb else 'none yet'
 
     if level == 'medium':
-        # 5.1b
         prompt = _MEDIUM_TEMPLATE.format(neighbours=nb_str)
     else:
-        # 5.1c — high
         prompt = _HIGH_TEMPLATE.format(
             concept_list=', '.join(concept_list),
             neighbours=nb_str,
         )
+
+    if meta_concepts:
+        log.debug('meta pressure injected: %s', meta_concepts)
 
     return ModulationResult(
         level         = level,
         system_prompt = prompt,
         neighbours    = neighbours,
         concept_list  = concept_list,
+        meta_concepts = meta_concepts,
     )
 
 
@@ -175,13 +205,14 @@ def call_llm(user_input: str, system_prompt: str, cfg: dict) -> str:
 # --------------------------------------------------------------------------- #
 
 def run_ab(user_input: str, concepts: list, ambiguity_result,
-           graph, cfg: dict) -> dict:
+           graph, cfg: dict,
+           meta: IMetaState | None = None) -> dict:
     """
     5.3 — Run the same input twice: once with modulation, once with the bare
     low prompt (control). Log both outputs side-by-side to ab_log.jsonl.
     Returns the full log entry dict.
     """
-    modulated = build_prompt(concepts, ambiguity_result, graph=graph)
+    modulated = build_prompt(concepts, ambiguity_result, graph=graph, meta=meta)
 
     log.info('A/B run | level=%s | input=%.60s', modulated.level, user_input)
 
@@ -200,6 +231,7 @@ def run_ab(user_input: str, concepts: list, ambiguity_result,
         'ambiguity_level':  ambiguity_result.level,
         'concepts':         modulated.concept_list,
         'neighbours':       modulated.neighbours,
+        'meta_concepts':    modulated.meta_concepts,
         'system_prompt':    modulated.system_prompt,
         'modulated_output': mod_response,
         'control_output':   ctrl_response,

@@ -22,6 +22,7 @@ from graph import SemanticGraph
 from extractor import extract
 from detector import detect_and_log
 from modulator import build_prompt, call_llm
+from meta_state import MetaState
 
 st.title("▶️ Runner")
 st.caption("Send a prompt through the full pipeline and watch the engine think.")
@@ -69,7 +70,7 @@ with st.spinner("Detecting ambiguity…"):
     result = detect_and_log(user_input, concepts, graph=g)
 
 with st.spinner("Building modulation prompt…"):
-    mod = build_prompt(concepts, result, graph=g)
+    mod = build_prompt(concepts, result, graph=g, meta=MetaState.get())
 
 # Update graph and invalidate cache so State page sees the new data
 node_ids = g.update(concepts)
@@ -122,7 +123,10 @@ st.subheader("③ Modulation")
 
 st.markdown(f"**Level:** `{mod.level}`")
 if mod.neighbours:
-    st.markdown("**Injected neighbours:** " + ", ".join(f"`{n}`" for n in mod.neighbours))
+    st.markdown("**Graph neighbours:** " + ", ".join(f"`{n}`" for n in mod.neighbours))
+if mod.meta_concepts:
+    st.markdown("**Pressure concepts** *(from meta-state)*: "
+                + ", ".join(f"`{c}`" for c in mod.meta_concepts))
 with st.expander("System prompt sent to LLM"):
     st.code(mod.system_prompt, language=None)
 
@@ -138,7 +142,7 @@ st.subheader("④ LLM output")
 if ab_btn:
     from modulator import run_ab
     with st.spinner("Running A/B (two LLM calls)…"):
-        entry = run_ab(user_input, concepts, result, g, CFG)
+        entry = run_ab(user_input, concepts, result, g, CFG, meta=MetaState.get())
 
     c_mod, c_ctrl = st.columns(2)
     with c_mod:
