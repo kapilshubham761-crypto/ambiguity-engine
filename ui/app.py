@@ -286,7 +286,7 @@ pages = [
     st.Page("_pages/3_runner.py",      title="Runner",      icon="▶️"),
     st.Page("_pages/4_timeline.py",    title="Timeline",    icon="📅"),
     st.Page("_pages/5_ab.py",          title="A / B",       icon="🔀"),
-    st.Page("_pages/6_discover.py",    title="Learn",       icon="📚"),
+    st.Page("_pages/6_live.py",         title="Live Feed",   icon="⚡"),
     st.Page("_pages/7_learnings.py",   title="Learnings",   icon="📖"),
     st.Page("_pages/9_report_card.py", title="Report Card", icon="📊"),
     st.Page("_pages/0_meta_state.py",  title="Meta-State",  icon="🧠"),
