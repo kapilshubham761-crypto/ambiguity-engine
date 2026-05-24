@@ -36,8 +36,9 @@ _embed_cache: dict[str, list[float]] = {}
 def _get_encoder() -> SentenceTransformer:
     global _encoder
     if _encoder is None:
-        log.info('Loading sentence-transformer %s …', EMBEDDING_MODEL)
-        _encoder = SentenceTransformer(EMBEDDING_MODEL)
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        log.info('Loading sentence-transformer %s on %s …', EMBEDDING_MODEL, device)
+        _encoder = SentenceTransformer(EMBEDDING_MODEL, device=device)
     return _encoder
 
 

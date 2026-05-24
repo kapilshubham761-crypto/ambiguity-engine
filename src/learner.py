@@ -300,7 +300,21 @@ class AutoLearner:
         batch = extract_batch(sentences)
         t_extract = _T() - t1
 
-        for concepts in batch:
+        _cr_path = _DATA / 'currently_reading.json'
+        n_total   = len(sentences)
+        for idx, concepts in enumerate(batch):
+            # Update live bar with current sentence text
+            try:
+                sent_text = sentences[idx][:120] if idx < len(sentences) else ''
+                _cr_path.write_text(json.dumps({
+                    'title':    item.get('title', '')[:160],
+                    'source':   item.get('source', ''),
+                    'sentence': sent_text,
+                    'progress': f'{idx + 1}/{n_total}',
+                    'ts':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+                }), encoding='utf-8')
+            except Exception:
+                pass
             if not concepts:
                 continue
             if self._graph:

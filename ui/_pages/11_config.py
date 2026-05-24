@@ -8,6 +8,8 @@ _CFG_PATH  = _ROOT / "data" / "engine_config.json"
 _CF_BIN    = _ROOT / "cloudflared.exe"
 _CF_LOG    = _ROOT / "data" / "tunnel.log"
 _CF_PID    = _ROOT / "data" / "tunnel.pid"
+_VZ_LOG    = _ROOT / "data" / "viz_tunnel.log"
+_VZ_PID    = _ROOT / "data" / "viz_tunnel.pid"
 
 sys.path.insert(0, str(_ROOT / "src"))
 
@@ -17,8 +19,22 @@ sys.path.insert(0, str(_ROOT / "src"))
 def _tunnel_running() -> bool:
     try:
         pid = int(_CF_PID.read_text())
+    except Exception:
+        return False
+    # psutil first
+    try:
         import psutil
-        return psutil.pid_exists(pid)
+        if psutil.pid_exists(pid):
+            return True
+    except Exception:
+        pass
+    # tasklist fallback (more reliable on Windows for detached processes)
+    try:
+        r = subprocess.run(
+            ['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+            capture_output=True, text=True, timeout=3,
+        )
+        return 'cloudflared' in r.stdout.lower()
     except Exception:
         return False
 
@@ -33,24 +49,109 @@ def _tunnel_url() -> str:
 def _start_tunnel():
     if not _CF_BIN.exists():
         return 'cloudflared.exe not found'
+    # kill any stale process first
+    _stop_tunnel()
     _CF_LOG.write_text('', encoding='utf-8')
+    flags = 0
+    if os.name == 'nt':
+        flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+    log_fh = open(_CF_LOG, 'w', encoding='utf-8')
     proc = subprocess.Popen(
         [str(_CF_BIN), 'tunnel', '--url', 'http://localhost:8501'],
-        stdout=open(_CF_LOG, 'w'), stderr=subprocess.STDOUT,
-        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
+        stdout=log_fh, stderr=subprocess.STDOUT,
+        creationflags=flags,
+        close_fds=True,
     )
+    log_fh.close()
     _CF_PID.write_text(str(proc.pid))
     return ''
 
 def _stop_tunnel():
     try:
         pid = int(_CF_PID.read_text())
-        import psutil, signal
-        p = psutil.Process(pid)
-        p.terminate()
+        r = subprocess.run(['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+                           capture_output=True, text=True, timeout=3)
+        if 'cloudflared' in r.stdout.lower():
+            subprocess.run(['taskkill', '/PID', str(pid), '/F'],
+                           capture_output=True, timeout=5)
+    except Exception:
+        pass
+    try:
+        import psutil
+        pid = int(_CF_PID.read_text())
+        psutil.Process(pid).terminate()
     except Exception:
         pass
     try: _CF_PID.unlink()
+    except Exception: pass
+
+
+# ── Visualizer tunnel helpers (port 8502) ────────────────────────────────────
+
+def _vz_tunnel_running() -> bool:
+    try:
+        pid = int(_VZ_PID.read_text())
+    except Exception:
+        return False
+    try:
+        import psutil
+        if psutil.pid_exists(pid):
+            return True
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(
+            ['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+            capture_output=True, text=True, timeout=3,
+        )
+        return 'cloudflared' in r.stdout.lower()
+    except Exception:
+        return False
+
+def _vz_tunnel_url() -> str:
+    try:
+        log = _VZ_LOG.read_text(encoding='utf-8', errors='ignore')
+        m   = re.search(r'https://[a-z0-9\-]+\.trycloudflare\.com', log)
+        return m.group(0) if m else ''
+    except Exception:
+        return ''
+
+def _start_vz_tunnel():
+    if not _CF_BIN.exists():
+        return 'cloudflared.exe not found'
+    _stop_vz_tunnel()
+    _VZ_LOG.write_text('', encoding='utf-8')
+    flags = 0
+    if os.name == 'nt':
+        flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+    log_fh = open(_VZ_LOG, 'w', encoding='utf-8')
+    proc = subprocess.Popen(
+        [str(_CF_BIN), 'tunnel', '--url', 'http://localhost:8502'],
+        stdout=log_fh, stderr=subprocess.STDOUT,
+        creationflags=flags,
+        close_fds=True,
+    )
+    log_fh.close()
+    _VZ_PID.write_text(str(proc.pid))
+    return ''
+
+def _stop_vz_tunnel():
+    try:
+        pid = int(_VZ_PID.read_text())
+        r = subprocess.run(['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+                           capture_output=True, text=True, timeout=3)
+        if 'cloudflared' in r.stdout.lower():
+            subprocess.run(['taskkill', '/PID', str(pid), '/F'],
+                           capture_output=True, timeout=5)
+    except Exception:
+        pass
+    try:
+        import psutil
+        pid = int(_VZ_PID.read_text())
+        psutil.Process(pid).terminate()
+    except Exception:
+        pass
+    try: _VZ_PID.unlink()
     except Exception: pass
 
 st.markdown("""
@@ -122,8 +223,8 @@ with t_col1:
             if err:
                 st.error(err)
             else:
-                st.info("Starting… URL appears in ~5 seconds.")
-                time.sleep(5)
+                st.info("Starting… URL appears in ~8 seconds.")
+                time.sleep(8)
                 st.rerun()
 
 with t_col2:
@@ -138,6 +239,49 @@ with t_col2:
             st.rerun()
     else:
         st.caption("Creates a free Cloudflare public URL for localhost:8501. No account needed.")
+
+# ── Visualizer Public Access (port 8502) ──────────────────────────────────────
+st.markdown("""
+<div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#505078;
+            border-bottom:1px solid #222238;padding-bottom:6px;margin:18px 0 14px">
+  Visualizer Public Access
+</div>
+""", unsafe_allow_html=True)
+
+vz_running = _vz_tunnel_running()
+vz_col1, vz_col2 = st.columns([1, 3])
+
+with vz_col1:
+    if vz_running:
+        if st.button("Stop Viz Tunnel", width='stretch'):
+            _stop_vz_tunnel()
+            st.success("Visualizer tunnel stopped.")
+            st.rerun()
+    else:
+        if st.button("Start Viz Tunnel", type="primary", width='stretch'):
+            err = _start_vz_tunnel()
+            if err:
+                st.error(err)
+            else:
+                st.info("Starting… URL appears in ~8 seconds.")
+                time.sleep(8)
+                st.rerun()
+
+with vz_col2:
+    if vz_running:
+        vz_url = _vz_tunnel_url()
+        if vz_url:
+            st.success(f"Live: [{vz_url}]({vz_url})")
+            st.caption("Share this link — anyone can view the graph visualizer (port 8502) from outside your network.")
+        else:
+            st.info("Tunnel starting — URL loading…")
+            time.sleep(3)
+            st.rerun()
+    else:
+        if not _CF_BIN.exists():
+            st.caption("cloudflared.exe not found in project root. Download it to enable public access.")
+        else:
+            st.caption("Creates a free Cloudflare public URL for the visualizer on localhost:8502.")
 
 st.divider()
 

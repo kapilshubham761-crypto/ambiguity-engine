@@ -226,15 +226,17 @@ button[aria-label="Open sidebar"],
 # Live feed bar — pinned to top, shows latest AutoLearner entry            #
 # ======================================================================== #
 
-_lv_title = _lv_source = _lv_concepts = ''
+_lv_title = _lv_source = _lv_concepts = _lv_sentence = _lv_progress = ''
 _lv_live = False
 
-# Currently-reading.json: written at start of each article fetch — most live signal
+# Currently-reading.json: written per-sentence inside the fetch loop — most live signal
 try:
     _cr = json.loads(open(os.path.join(_ROOT, 'data', 'currently_reading.json'), encoding='utf-8').read())
-    _lv_title  = _cr.get('title', '')
-    _lv_source = _cr.get('source', '')
-    _lv_live   = True
+    _lv_title    = _cr.get('title', '')
+    _lv_source   = _cr.get('source', '')
+    _lv_sentence = _cr.get('sentence', '')
+    _lv_progress = _cr.get('progress', '')
+    _lv_live     = True
 except Exception:
     pass
 
@@ -254,13 +256,23 @@ if not _lv_title:
         pass
 
 if _lv_title:
+    _lv_progress_part = (
+        f'<span style="color:#404060;margin-left:8px;font-size:10px">[{_lv_progress}]</span>'
+        if _lv_progress else ''
+    )
+    _lv_sentence_part = (
+        f'<span style="color:#6868a0;margin-left:10px;font-style:italic">{_lv_sentence[:100]}{"…" if len(_lv_sentence) > 100 else ""}</span>'
+        if _lv_sentence else ''
+    )
     _lv_conc_part = (f'<span style="color:#333355;margin-left:12px">{_lv_concepts} concepts</span>'
                      if _lv_concepts else '')
     _lv_display = (
         f'<span style="color:#505078;margin-right:8px;text-transform:uppercase;'
         f'font-size:10px;letter-spacing:0.12em">reading</span>'
-        f'<span style="color:#b0b0d8;margin-right:8px">{_lv_title[:160]}{"…" if len(_lv_title) > 160 else ""}</span>'
+        f'<span style="color:#b0b0d8;margin-right:8px">{_lv_title[:120]}{"…" if len(_lv_title) > 120 else ""}</span>'
         f'<span style="color:#404060">({_lv_source})</span>'
+        f'{_lv_progress_part}'
+        f'{_lv_sentence_part}'
         f'{_lv_conc_part}'
     )
 else:

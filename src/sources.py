@@ -282,7 +282,7 @@ def fetch_openalex(url: str, item: dict | None = None) -> list[str]:
     abstract = (item or {}).get('_abstract', '')
     if abstract:
         return _sentences(abstract)
-    raw = trafilatura.fetch_url(url)
+    raw = _fetch_url_safe(url)
     text = trafilatura.extract(raw or '', include_comments=False) or ''
     return _sentences(text)
 
@@ -305,8 +305,19 @@ def search_web(query: str, max_results: int = 10) -> list[dict]:
     return results
 
 
+def _fetch_url_safe(url: str, timeout: int = 12) -> str | None:
+    """trafilatura.fetch_url with a hard timeout (it can hang indefinitely)."""
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as _TE
+    with ThreadPoolExecutor(max_workers=1) as ex:
+        fut = ex.submit(trafilatura.fetch_url, url)
+        try:
+            return fut.result(timeout=timeout)
+        except (_TE, Exception):
+            return None
+
+
 def fetch_web(url: str, item: dict | None = None) -> list[str]:
-    raw  = trafilatura.fetch_url(url)
+    raw  = _fetch_url_safe(url)
     text = trafilatura.extract(raw or '', include_comments=False, include_tables=False) or ''
     return _sentences(text)
 
