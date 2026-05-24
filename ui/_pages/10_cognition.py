@@ -31,10 +31,18 @@ body, .stApp { background: #070709 !important; }
 *, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
 [data-testid="stExpanderToggleIcon"],
 [data-testid="stExpanderToggleIcon"] *,
-[data-baseweb="icon"], [data-baseweb="icon"] *,
-.material-icons, .material-symbols-rounded,
+[data-testid="stExpanderToggleIcon"] span,
+[data-baseweb="icon"] span,
+.material-icons, .material-symbols-rounded, .material-symbols-outlined,
+span[class*="material-symbols"], span[class*="material-icons"],
 [class*="MaterialIcon"], [class*="materialIcon"] {
-    font-family: 'Material Symbols Rounded','Material Icons Rounded','Material Icons',sans-serif !important;
+    font-family: 'Material Symbols Rounded','Material Symbols Outlined','Material Icons',sans-serif !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    font-feature-settings: 'liga' !important;
+    -webkit-font-smoothing: antialiased !important;
 }
 h2, h3 {
     font-size: 12px !important; letter-spacing: 0.2em !important;

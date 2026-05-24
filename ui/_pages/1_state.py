@@ -167,6 +167,34 @@ last_source = feed[0].get('source', '—') if feed else '—'
 now_s  = datetime.now().strftime('%H:%M:%S')
 date_s = datetime.now().strftime('%Y-%m-%d')
 
+# AIQ — learning rate from recent feed entries
+aiq_cpm    = 0.0   # concepts per minute
+aiq_aph    = 0.0   # articles per hour
+aiq_str    = '—'
+aiq_aph_str = '—'
+try:
+    ok_feed = [e for e in feed if e.get('status') == 'ok'
+               and e.get('ts') and e.get('concepts', 0) > 0][:30]
+    if len(ok_feed) >= 2:
+        def _parse_ts(s):
+            dt = datetime.fromisoformat(s)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        newest  = _parse_ts(ok_feed[0]['ts'])
+        oldest  = _parse_ts(ok_feed[-1]['ts'])
+        span_s  = max(1.0, (newest - oldest).total_seconds())
+        total_c = sum(e.get('concepts', 0) for e in ok_feed)
+        aiq_cpm = total_c / (span_s / 60)
+        aiq_aph = len(ok_feed) / (span_s / 3600)
+        aiq_str     = f'{aiq_cpm:.1f}/min'
+        aiq_aph_str = f'{aiq_aph:.0f}/hr'
+except Exception:
+    pass
+
+# AIQ colour — dim when low, bright when active
+aiq_col = '#44ff88' if aiq_cpm > 20 else '#f59e0b' if aiq_cpm > 5 else '#505078'
+
 
 # ── Boot learner ──────────────────────────────────────────────────────────────
 
@@ -245,11 +273,18 @@ body, .stApp {{
 /* Restore Streamlit's icon glyph font — prevents "arrow_right" literal text */
 [data-testid="stExpanderToggleIcon"],
 [data-testid="stExpanderToggleIcon"] *,
-[data-baseweb="icon"],
-[data-baseweb="icon"] *,
-.material-icons, .material-symbols-rounded,
+[data-testid="stExpanderToggleIcon"] span,
+[data-baseweb="icon"] span,
+.material-icons, .material-symbols-rounded, .material-symbols-outlined,
+span[class*="material-symbols"], span[class*="material-icons"],
 [class*="MaterialIcon"], [class*="materialIcon"] {{
-    font-family: 'Material Symbols Rounded', 'Material Icons Rounded', 'Material Icons', sans-serif !important;
+    font-family: 'Material Symbols Rounded','Material Symbols Outlined','Material Icons',sans-serif !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    font-feature-settings: 'liga' !important;
+    -webkit-font-smoothing: antialiased !important;
 }}
 
 /* ── STATUS BAR ── */
@@ -299,8 +334,8 @@ body, .stApp {{
 }}
 .ae-diag {{
     display: inline-grid;
-    grid-template-columns: repeat(4, 150px);
-    gap: 0 24px;
+    grid-template-columns: repeat(5, 130px);
+    gap: 0 20px;
     text-align: center;
 }}
 .ae-diag-cell {{ }}
@@ -447,6 +482,8 @@ st.markdown(f"""
   <span class="ae-sb-dim">coherence</span>&nbsp;<span class="ae-sb-val">{coherence:.2f}</span>
   <span class="ae-sb-sep">│</span>
   <span class="ae-sb-dim">nodes</span>&nbsp;<span class="ae-sb-val">{n_nodes:,}</span>
+  <span class="ae-sb-sep">│</span>
+  <span class="ae-sb-dim">aiq</span>&nbsp;<span style="color:{aiq_col}">{aiq_str}</span>
   <span class="ae-sb-right">{date_s}&nbsp;&nbsp;{now_s}</span>
 </div>
 """, unsafe_allow_html=True)
@@ -478,6 +515,10 @@ st.markdown(f"""
     <div class="ae-diag-cell">
       <span class="ae-diag-label">pressure</span>
       <span class="ae-diag-val" style="color:{pressure_col};font-size:22px">{pressure}</span>
+    </div>
+    <div class="ae-diag-cell">
+      <span class="ae-diag-label">aiq</span>
+      <span class="ae-diag-val" style="color:{aiq_col};font-size:28px">{aiq_str}</span>
     </div>
   </div>
 </div>
@@ -572,6 +613,14 @@ st.markdown(f"""
       <span class="ae-pkey">growth</span>
       <span class="ae-pval-ok">{growth_str}</span>
     </div>
+    <div class="ae-prow">
+      <span class="ae-pkey">learn rate</span>
+      <span class="ae-pval" style="color:{aiq_col}">{aiq_str} concepts</span>
+    </div>
+    <div class="ae-prow">
+      <span class="ae-pkey">articles</span>
+      <span class="ae-pval">{aiq_aph_str} ingested</span>
+    </div>
     <div style="margin-top:8px;border-top:1px solid #1a1a28;padding-top:6px">
       <div class="ae-ptitle" style="margin-bottom:6px">identity traits</div>
       {id_rows}
@@ -654,6 +703,115 @@ st.markdown(f"""
   <span class="ae-tel-label">growth</span><span class="ae-tel-val-ok">{growth_str}</span>
 </div>
 """, unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PIPELINE EFFICIENCY — block diagram
+# ══════════════════════════════════════════════════════════════════════════════
+
+perf = _j(DATA / 'perf_profile.json', {})
+_pa  = perf.get('process_avg_s', {})
+_pp  = perf.get('process_pct',   {})
+_cyc = perf.get('cycle',         {})
+_ns  = perf.get('n_samples',     0)
+
+def _blk(label, secs, pct, flag=''):
+    """Render one pipeline block with bar fill."""
+    bar_w  = max(1, int(pct * 0.6))   # max 60 chars wide
+    col    = '#ef4444' if pct > 40 else '#f59e0b' if pct > 20 else '#4a9eff'
+    if flag == 'bottleneck':
+        col = '#ef4444'
+    bar    = '█' * bar_w + '░' * (60 - bar_w)
+    return (
+        f'<div style="margin:4px 0;font-size:13px">'
+        f'<span style="color:#505078;min-width:80px;display:inline-block;'
+        f'text-transform:uppercase;letter-spacing:0.1em;font-size:11px">{label}</span>'
+        f'<span style="color:{col};letter-spacing:-1px;font-size:10px">{bar[:bar_w]}'
+        f'<span style="color:#1a1a28">{bar[bar_w:]}</span></span>'
+        f'&nbsp;<span style="color:{col}">{secs:.2f}s</span>'
+        f'&nbsp;<span style="color:#383858">({pct:.0f}%)</span>'
+        f'{"&nbsp;<span style=\\'color:#ef4444;font-size:11px\\'>◀ bottleneck</span>" if flag=="bottleneck" else ""}'
+        f'</div>'
+    )
+
+if _pa:
+    _steps   = ['fetch', 'extract', 'detect', 'graph', 'save', 'subsys']
+    _labels  = ['fetch', 'extract (nlp)', 'detect', 'graph update', 'graph save', 'subsystems']
+    _max_pct = max((_pp.get(k, 0) for k in _steps), default=1)
+    _bottleneck = max(_steps, key=lambda k: _pp.get(k, 0))
+
+    blocks_html = ''.join(
+        _blk(_labels[i], _pa.get(s, 0), _pp.get(s, 0),
+             flag='bottleneck' if s == _bottleneck else '')
+        for i, s in enumerate(_steps)
+    )
+
+    _ok_rate   = f"{_cyc.get('items_ok', 0)}/{_cyc.get('items_found', 0)}"
+    _workers   = _cyc.get('workers', '—')
+    _t_search  = _cyc.get('t_search_s', 0)
+    _t_process = _cyc.get('t_process_s', 0)
+    _t_ticks   = _cyc.get('t_ticks_s', 0)
+    _t_total   = _cyc.get('t_total_s', 0)
+    _efficiency = round(_cyc.get('items_ok', 0) / max(_cyc.get('items_found', 1), 1) * 100)
+
+    perf_html = f"""
+<div style="padding:16px 28px;background:#07070b;border-bottom:1px solid #181828">
+  <div style="font-size:12px;letter-spacing:0.2em;color:#505078;text-transform:uppercase;
+              border-bottom:1px solid #1a1a28;padding-bottom:6px;margin-bottom:14px">
+    pipeline efficiency  ·  <span style="color:#6868a0">{_ns} samples</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px">
+    <div>
+      <div style="font-size:11px;color:#404060;letter-spacing:0.12em;
+                  text-transform:uppercase;margin-bottom:8px">per-article  (avg across {_ns} articles)</div>
+      {blocks_html}
+      <div style="margin-top:8px;font-size:12px;color:#303050;border-top:1px solid #111120;padding-top:6px">
+        total per article: <span style="color:#7878a8">{_pa.get('total', 0):.2f}s</span>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;color:#404060;letter-spacing:0.12em;
+                  text-transform:uppercase;margin-bottom:8px">last cycle  (wall clock)</div>
+      <div style="font-size:13px;line-height:2">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#505078">search phase</span>
+          <span style="color:#9898c8">{_t_search:.1f}s</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#505078">process phase ({_workers} workers)</span>
+          <span style="color:#9898c8">{_t_process:.1f}s</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#505078">cognitive ticks</span>
+          <span style="color:#9898c8">{_t_ticks:.1f}s</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid #1a1a28;
+                    margin-top:4px;padding-top:4px">
+          <span style="color:#505078">total cycle</span>
+          <span style="color:#b0b0d8">{_t_total:.1f}s</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px">
+          <span style="color:#505078">articles ok/found</span>
+          <span style="color:#44ff88">{_ok_rate}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#505078">yield efficiency</span>
+          <span style="color:{'#44ff88' if _efficiency > 60 else '#f59e0b'}">{_efficiency}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+else:
+    perf_html = (
+        '<div style="padding:12px 28px;background:#07070b;border-bottom:1px solid #181828;'
+        'font-size:12px;color:#303050">pipeline profiler warming up — data after first cycle</div>'
+    )
+
+st.markdown(perf_html, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

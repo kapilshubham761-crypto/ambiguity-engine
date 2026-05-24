@@ -61,10 +61,18 @@ body, .stApp { background: #070709 !important; }
 *, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
 [data-testid="stExpanderToggleIcon"],
 [data-testid="stExpanderToggleIcon"] *,
-[data-baseweb="icon"], [data-baseweb="icon"] *,
-.material-icons, .material-symbols-rounded,
+[data-testid="stExpanderToggleIcon"] span,
+[data-baseweb="icon"] span,
+.material-icons, .material-symbols-rounded, .material-symbols-outlined,
+span[class*="material-symbols"], span[class*="material-icons"],
 [class*="MaterialIcon"], [class*="materialIcon"] {
-    font-family: 'Material Symbols Rounded','Material Icons Rounded','Material Icons',sans-serif !important;
+    font-family: 'Material Symbols Rounded','Material Symbols Outlined','Material Icons',sans-serif !important;
+    font-weight: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    font-feature-settings: 'liga' !important;
+    -webkit-font-smoothing: antialiased !important;
 }
 h2, h3 {
     font-size: 12px !important; letter-spacing: 0.2em !important;
@@ -234,125 +242,7 @@ if ego_names:
 
 st.divider()
 
-# ── Learning Pipeline ─────────────────────────────────────────────────────────
-st.subheader("Learning Pipeline")
-st.caption("cycle_time and n_workers require a Streamlit restart to apply.")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    v = st.number_input("Cycle time (s)", 3, 120, int(_get("learning","cycle_time",10)), help="Seconds between cycles.")
-    _set("learning","cycle_time",v)
-    v = st.number_input("Parallel workers", 1, 16, int(_get("learning","n_workers",4)), help="Thread pool size.")
-    _set("learning","n_workers",v)
-
-with col2:
-    v = st.number_input("Topics per cycle", 1, 30, int(_get("learning","topics_per_cycle",6)))
-    _set("learning","topics_per_cycle",v)
-    v = st.number_input("Min sentences", 1, 20, int(_get("learning","min_sentences",3)), help="Skip content with fewer sentences.")
-    _set("learning","min_sentences",v)
-
-with col3:
-    v = st.number_input("Fetch timeout (s)", 5, 60, int(_get("learning","fetch_timeout",18)))
-    _set("learning","fetch_timeout",v)
-    v = st.number_input("Search timeout (s)", 3, 30, int(_get("learning","search_timeout",7)))
-    _set("learning","search_timeout",v)
-
-st.divider()
-
-# ── Energy Budget ─────────────────────────────────────────────────────────────
-st.subheader("Energy Budget")
-col_e1, col_e2 = st.columns(2)
-
-with col_e1:
-    v = st.slider("Replenish per tick", 0.01, 0.30, float(_get("energy","replenish_per_tick",0.08)), 0.01)
-    _set("energy","replenish_per_tick",v)
-    v = st.slider("Cost: simulation/step", 0.01, 0.25, float(_get("energy","cost_simulation",0.04)), 0.01)
-    _set("energy","cost_simulation",v)
-    v = st.slider("Cost: exploration", 0.01, 0.25, float(_get("energy","cost_exploration",0.06)), 0.01)
-    _set("energy","cost_exploration",v)
-
-with col_e2:
-    v = st.slider("Cost: region switch", 0.01, 0.25, float(_get("energy","cost_region_switch",0.05)), 0.01)
-    _set("energy","cost_region_switch",v)
-    v = st.slider("Cost: abstraction run", 0.01, 0.30, float(_get("energy","cost_abstraction",0.10)), 0.01)
-    _set("energy","cost_abstraction",v)
-
-st.divider()
-
-# ── Attention and Goals ───────────────────────────────────────────────────────
-st.subheader("Attention & Goal Drives")
-col_a1, col_a2 = st.columns(2)
-
-with col_a1:
-    v = st.slider("Bias strength", 0.0, 1.0, float(_get("attention","bias_strength",0.0)), 0.05)
-    _set("attention","bias_strength",v)
-    v = st.slider("Novelty strength", 0.0, 1.0, float(_get("attention","novelty_strength",0.0)), 0.05)
-    _set("attention","novelty_strength",v)
-
-with col_a2:
-    st.caption("Goal drive weights")
-    drives = {"reduce_uncertainty":0.30,"increase_novelty":0.25,"resolve_contradiction":0.20,"maintain_stability":0.15,"expand_regions":0.10}
-    for k, dv in drives.items():
-        v = st.slider(k.replace("_"," ").title(), 0.0, 1.0, float(_get("goals",k,dv)), 0.05, key="goal_"+k)
-        _set("goals",k,v)
-
-st.divider()
-
-# ── Personality ───────────────────────────────────────────────────────────────
-st.subheader("Personality")
-col_p1, col_p2 = st.columns(2)
-
-with col_p1:
-    st.markdown("**Identity drift**")
-    v = st.slider("Drift rate", 0.001, 0.10, float(_get("identity","drift_rate",0.02)), 0.001, format="%.3f")
-    _set("identity","drift_rate",v)
-
-    st.markdown("**Evolver**")
-    v = st.number_input("Adapt every N ticks", 5, 200, int(_get("evolver","adapt_every",30)))
-    _set("evolver","adapt_every",v)
-    v = st.slider("Max delta per adaptation", 0.01, 0.20, float(_get("evolver","max_delta",0.05)), 0.01)
-    _set("evolver","max_delta",v)
-
-with col_p2:
-    st.markdown("**Meta-state**")
-    v = st.slider("Concept decay rate", 0.90, 0.999, float(_get("meta_state","decay_rate",0.97)), 0.001, format="%.3f")
-    _set("meta_state","decay_rate",v)
-    v = st.slider("Reinforce gain", 0.05, 0.80, float(_get("meta_state","reinforce_gain",0.25)), 0.05)
-    _set("meta_state","reinforce_gain",v)
-    v = st.slider("Fatigue (repetition penalty)", 0.0, 1.0, float(_get("meta_state","fatigue_k",0.2)), 0.05)
-    _set("meta_state","fatigue_k",v)
-    v = st.slider("Cooling alpha", 0.0, 1.0, float(_get("meta_state","cooling_alpha",0.5)), 0.05)
-    _set("meta_state","cooling_alpha",v)
-
-st.divider()
-
-# ── Save / Reset ──────────────────────────────────────────────────────────────
-col_save, col_reset = st.columns([1, 3])
-
-with col_save:
-    if st.button("Save & Apply", type="primary", width='stretch'):
-        _save(cfg)
-        st.success("Saved. Changes apply within the next learner cycle.")
-
-with col_reset:
-    if st.button("Reset to defaults", width='stretch'):
-        egos_backup = cfg.get("egos", {})
-        active_backup = cfg.get("active_ego", "")
-        defaults = {
-            "learning":   {"cycle_time":10,"n_workers":4,"topics_per_cycle":6,"min_sentences":3,"fetch_timeout":18,"search_timeout":7,"checkin_every":10800,"feed_max":200},
-            "energy":     {"total":1.0,"replenish_per_tick":0.08,"cost_simulation":0.04,"cost_exploration":0.06,"cost_region_switch":0.05,"cost_abstraction":0.10},
-            "identity":   {"drift_rate":0.02},
-            "evolver":    {"adapt_every":30,"max_delta":0.05},
-            "attention":  {"bias_strength":0.0,"novelty_strength":0.0},
-            "meta_state": {"decay_rate":0.97,"reinforce_gain":0.25,"fatigue_k":0.2,"cooling_alpha":0.5},
-            "goals":      {"reduce_uncertainty":0.30,"increase_novelty":0.25,"resolve_contradiction":0.20,"maintain_stability":0.15,"expand_regions":0.10},
-            "egos":       egos_backup,
-            "active_ego": active_backup,
-        }
-        _save(defaults)
-        st.success("Reset to defaults. Egos preserved.")
-        st.rerun()
+st.caption("All engine parameters (learning speed, goals, energy, personality) are in the YTP page.")
 
 with st.expander("Raw engine_config.json"):
     try:

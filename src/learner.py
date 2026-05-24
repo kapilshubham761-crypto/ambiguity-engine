@@ -55,28 +55,49 @@ _FSTATUS     = _DATA / 'fetch_status.json'
 TOPICS = [
     'consciousness perception cognition', 'quantum mechanics wave particle',
     'evolution natural selection adaptation', 'language syntax semantics meaning',
-    'thermodynamics entropy energy systems', 'machine learning neural networks',
-    'philosophy of mind identity self', 'mathematics topology abstract algebra',
-    'ecology ecosystems biodiversity', 'astrophysics black holes spacetime',
-    'economics game theory decision making', 'genetics DNA protein expression',
-    'history civilisation collapse empire', 'psychology behaviour motivation',
-    'computer science algorithms complexity', 'climate change atmospheric physics',
+    'thermodynamics entropy energy systems', 'philosophy of mind identity self',
+    'mathematics topology abstract algebra', 'ecology ecosystems biodiversity',
+    'astrophysics black holes spacetime', 'economics game theory decision making',
+    'genetics DNA protein expression', 'history civilisation collapse empire',
+    'psychology behaviour motivation', 'climate change atmospheric physics',
     'neuroscience memory learning brain', 'sociology culture social structures',
     'ethics morality free will determinism', 'chemistry molecular bonds reactions',
     'literature narrative symbolism metaphor', 'music harmony rhythm acoustics',
     'art perception aesthetics creativity', 'political theory power governance',
     'medicine disease immunity biology', 'physics relativity spacetime curvature',
-    'robotics automation embodied intelligence', 'oceanography fluid dynamics tides',
-    'anthropology human origins culture', 'logic inference formal systems',
-    'optics light photons electromagnetism', 'materials science crystalline structure',
-    'epidemiology population health risk', 'linguistics phonology grammar pragmatics',
-    'information theory entropy signal noise', 'cognitive science mental models',
+    'oceanography fluid dynamics tides', 'anthropology human origins culture',
+    'logic inference formal systems', 'optics light photons electromagnetism',
+    'materials science crystalline structure', 'epidemiology population health risk',
+    'linguistics phonology grammar pragmatics', 'cognitive science mental models',
     'mythology symbolism archetype narrative', 'architecture space form structure',
     'food systems agriculture soil microbiome', 'sleep dreams unconscious mind',
     'time perception duration memory', 'emergence complexity self-organisation',
     'chaos theory dynamical systems bifurcation', 'topology knots manifolds geometry',
     'geopolitics power conflict diplomacy', 'biochemistry metabolism pathways',
+    'ancient history religion ritual belief', 'poetry verse language rhythm',
+    'human emotion grief joy love longing', 'philosophy of language meaning truth',
+    'evolutionary biology animal behaviour', 'social psychology group identity',
 ]
+
+# Keywords that flag content as computer-code-related — skip these items entirely
+_CODE_KEYWORDS = {
+    'programming', 'coding', 'source code', 'github', 'repository', 'javascript',
+    'typescript', 'nodejs', 'reactjs', 'angularjs', 'vuejs', 'webpack', 'npm ',
+    ' pip ', 'docker', 'kubernetes', 'devops', 'software development', 'web development',
+    'stack overflow', 'stackoverflow', 'api documentation', 'code tutorial',
+    'learn to code', 'how to program', 'programming language', 'software engineering',
+    'machine learning library', 'deep learning framework', 'neural network library',
+    'python library', 'python package', 'java tutorial', 'c++ tutorial',
+    'html css', 'css framework', 'rest api', 'graphql', 'microservices',
+    'database schema', 'sql tutorial', 'git tutorial', 'debugging',
+    'open source project', 'code review', 'pull request', 'version control',
+}
+
+
+def _is_code_content(item: dict) -> bool:
+    """Return True if this item is about programming/code and should be skipped."""
+    text = (item.get('title', '') + ' ' + item.get('snippet', '')).lower()
+    return any(kw in text for kw in _CODE_KEYWORDS)
 
 
 def _fstatus_write(fetching: bool) -> None:
@@ -102,6 +123,8 @@ class AutoLearner:
             cls._instance = cls()
         return cls._instance
 
+    _PERF_PATH = _DATA / 'perf_profile.json'
+
     def __init__(self):
         _DATA.mkdir(exist_ok=True)
         self._stats        = self._load_stats()
@@ -110,6 +133,8 @@ class AutoLearner:
         self._graph        = None
         self._known_urls: set = set()
         self._feed_lock    = threading.Lock()
+        self._perf_lock    = threading.Lock()
+        self._perf_samples: list[dict] = []   # per-article timings (last 50)
 
     def _ensure_graph(self) -> None:
         if self._graph is None:
@@ -165,6 +190,7 @@ class AutoLearner:
     def _process(self, item: dict) -> dict:
         from extractor import extract
         from detector  import detect_and_log
+        _T = time.perf_counter
 
         entry = {
             'ts':      datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
@@ -177,24 +203,28 @@ class AutoLearner:
             'status':  'ok',
         }
 
+        t0 = _T()
         try:
             sentences = fetch_content(item)
         except Exception:
             sentences = _sentences(item.get('snippet', ''), min_len=20)
+        t_fetch = _T() - t0
 
         if len(sentences) < _lcfg('min_sentences', MIN_SENTENCES):
             entry['status'] = 'skip:short'
             return entry
 
-        all_texts = []
+        all_texts  = []
         n_concepts = 0
+        t_extract = t_detect = t_graph = 0.0
+
         for sent in sentences:
-            concepts = extract(sent)
+            t1 = _T(); concepts = extract(sent); t_extract += _T() - t1
             if not concepts:
                 continue
-            detect_and_log(sent, concepts, graph=self._graph)
+            t1 = _T(); detect_and_log(sent, concepts, graph=self._graph); t_detect += _T() - t1
             if self._graph:
-                self._graph.update(concepts)
+                t1 = _T(); self._graph.update(concepts); t_graph += _T() - t1
             n_concepts += len(concepts)
             all_texts.extend(c.text for c in concepts)
 
@@ -202,19 +232,21 @@ class AutoLearner:
             entry['status'] = 'skip:no-concepts'
             return entry
 
+        t1 = _T()
         if self._graph:
             self._graph.save()
+        t_save = _T() - t1
 
         def _s(fn):
             try: fn()
             except Exception: pass
 
+        t1 = _T()
         _s(lambda: __import__('meta_state').MetaState.get().reinforce(all_texts))
         _s(lambda: __import__('memory').TemporalMemory.get().reinforce(all_texts))
         _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(all_texts))
         _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(all_texts))
         _s(lambda: __import__('ecology').CognitiveEcology.get().tick(all_texts))
-
         try:
             from episodes  import EpisodeStore
             from predictor import Predictor
@@ -223,6 +255,9 @@ class AutoLearner:
             Predictor.get().pre_activate(all_texts, TemporalMemory.get())
         except Exception:
             pass
+        t_subsys = _T() - t1
+
+        t_total = _T() - t0
 
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
         self._stats['total_concepts']  = self._stats.get('total_concepts', 0) + n_concepts
@@ -230,9 +265,51 @@ class AutoLearner:
 
         entry['concepts']  = n_concepts
         entry['sentences'] = len(sentences)
+
+        # Record timing sample (thread-safe)
+        sample = {
+            'fetch':    round(t_fetch,   3),
+            'extract':  round(t_extract, 3),
+            'detect':   round(t_detect,  3),
+            'graph':    round(t_graph,   3),
+            'save':     round(t_save,    3),
+            'subsys':   round(t_subsys,  3),
+            'total':    round(t_total,   3),
+            'sentences': len(sentences),
+            'concepts':  n_concepts,
+            'source':    item.get('source', ''),
+        }
+        with self._perf_lock:
+            self._perf_samples.append(sample)
+            if len(self._perf_samples) > 50:
+                self._perf_samples = self._perf_samples[-50:]
+
         return entry
 
     # ── one full cycle ────────────────────────────────────────────────────────
+
+    def _write_perf_profile(self, cycle: dict) -> None:
+        try:
+            with self._perf_lock:
+                samples = list(self._perf_samples)
+            if not samples:
+                return
+            keys = ('fetch', 'extract', 'detect', 'graph', 'save', 'subsys', 'total')
+            avg  = {k: round(sum(s[k] for s in samples) / len(samples), 3) for k in keys}
+            tot  = avg['total'] or 1
+            pct  = {k: round(avg[k] / tot * 100, 1) for k in keys if k != 'total'}
+            profile = {
+                'updated':      datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+                'n_samples':    len(samples),
+                'process_avg_s': avg,
+                'process_pct':   pct,
+                'cycle':         cycle,
+            }
+            tmp = self._PERF_PATH.with_suffix('.tmp')
+            tmp.write_text(json.dumps(profile, indent=2), encoding='utf-8')
+            tmp.replace(self._PERF_PATH)
+        except Exception:
+            pass
 
     def _cycle(self) -> None:
         self._ensure_graph()
@@ -261,21 +338,25 @@ class AutoLearner:
         items_to_process = []
         _fstatus_write(True)
 
+        tc0 = time.perf_counter()
         with ThreadPoolExecutor(max_workers=n_workers) as pool:
             for fut in as_completed([pool.submit(_search, t) for t in topics],
                                     timeout=search_timeout * 2):
                 try:
                     for item in fut.result():
                         url = item.get('url', '')
-                        if url and url not in self._known_urls:
+                        if url and url not in self._known_urls and not _is_code_content(item):
                             items_to_process.append(item)
                             self._known_urls.add(url)
                 except Exception:
                     pass
+        t_search = time.perf_counter() - tc0
 
         if len(self._known_urls) > 5000:
             self._known_urls = set(list(self._known_urls)[-2000:])
 
+        n_ok = 0
+        tp0 = time.perf_counter()
         with ThreadPoolExecutor(max_workers=n_workers) as pool:
             futs = {pool.submit(self._process, item): item
                     for item in items_to_process}
@@ -285,11 +366,13 @@ class AutoLearner:
                 try:
                     entry = fut.result()
                     if entry['status'] == 'ok':
+                        n_ok += 1
                         self._feed_append(entry)
                         log.info('learned: %s [%s] +%d concepts',
                                  entry['title'], entry['source'], entry['concepts'])
                 except Exception:
                     pass
+        t_process = time.perf_counter() - tp0
 
         _fstatus_write(False)
 
@@ -325,6 +408,7 @@ class AutoLearner:
             try: fn()
             except Exception: pass
 
+        tt0 = time.perf_counter()
         _t(lambda: __import__('stability').StabilityMonitor.get().tick(
             __import__('meta_state').MetaState.get()))
         _t(lambda: __import__('goals').GoalEngine.get().tick())
@@ -338,6 +422,18 @@ class AutoLearner:
         _t(lambda: __import__('novelty').NoveltyTracker.get().snapshot_top5(
             __import__('meta_state').MetaState.get()))
         _t(lambda: __import__('meta_state').MetaState.get().decay_to())
+        t_ticks = time.perf_counter() - tt0
+
+        # Write performance profile
+        self._write_perf_profile({
+            't_search_s':  round(t_search,  2),
+            't_process_s': round(t_process, 2),
+            't_ticks_s':   round(t_ticks,   2),
+            't_total_s':   round(t_search + t_process + t_ticks, 2),
+            'items_found': len(items_to_process),
+            'items_ok':    n_ok,
+            'workers':     n_workers,
+        })
 
         # Write cog_status for overlay
         try:

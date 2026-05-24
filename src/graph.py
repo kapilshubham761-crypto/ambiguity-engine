@@ -98,12 +98,70 @@ class SemanticGraph:
         self._g: nx.Graph = nx.Graph()
         self._con: sqlite3.Connection = _connect()
         _ensure_schema(self._con)
+
+        # Fast lookup structures — rebuilt on load, updated incrementally
+        self._text_index:   dict[str, str] = {}        # text → node_id  (O(1))
+        self._emb_node_ids: list[str]      = []        # row i → node_id
+        self._emb_matrix:   np.ndarray | None = None  # (N,384) normalised rows
+
+        # Dirty tracking — only write changed rows on save()
+        self._dirty_nodes: set[str]         = set()
+        self._dirty_edges: set[tuple[str,str]] = set()
+
         self._load_from_db()
         log.info('Graph ready: %d nodes, %d edges', self.node_count, self.edge_count)
 
         # 6.5 — run decay/pruning at most once per calendar day
         from maintenance import run_maintenance
         run_maintenance(self)
+
+    # ------------------------------------------------------------------ #
+    # Embedding matrix helpers                                             #
+    # ------------------------------------------------------------------ #
+
+    def _rebuild_matrix(self) -> None:
+        """Build normalised embedding matrix from all current nodes."""
+        ids, rows = [], []
+        for nid, data in self._g.nodes(data=True):
+            emb = data.get('embedding')
+            if emb:
+                ids.append(nid)
+                rows.append(emb)
+        if rows:
+            mat = np.array(rows, dtype=np.float32)
+            norms = np.linalg.norm(mat, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
+            self._emb_matrix   = mat / norms
+            self._emb_node_ids = ids
+        else:
+            self._emb_matrix   = None
+            self._emb_node_ids = []
+
+    def _append_to_matrix(self, node_id: str, embedding: list) -> None:
+        """Incrementally add one normalised row — avoids full rebuild."""
+        v = np.array(embedding, dtype=np.float32)
+        n = np.linalg.norm(v)
+        if n > 0:
+            v = v / n
+        row = v.reshape(1, -1)
+        if self._emb_matrix is None:
+            self._emb_matrix = row
+        else:
+            self._emb_matrix = np.vstack([self._emb_matrix, row])
+        self._emb_node_ids.append(node_id)
+
+    def _batch_cosine(self, embedding: list) -> tuple[str | None, float]:
+        """Return (best_node_id, best_cosine) using one matrix multiply."""
+        if self._emb_matrix is None or len(self._emb_node_ids) == 0:
+            return None, 0.0
+        q = np.array(embedding, dtype=np.float32)
+        n = np.linalg.norm(q)
+        if n == 0:
+            return None, 0.0
+        q = q / n
+        sims = self._emb_matrix @ q          # (N,) — one BLAS call
+        idx  = int(np.argmax(sims))
+        return self._emb_node_ids[idx], float(sims[idx])
 
     # ------------------------------------------------------------------ #
     # Public read properties                                               #
@@ -167,27 +225,20 @@ class SemanticGraph:
     # ------------------------------------------------------------------ #
 
     def _resolve_or_create(self, concept, now: str) -> str:
-        # 3.2a — try string match first (fast path)
-        for nid, data in self._g.nodes(data=True):
-            if data['text'] == concept.text:
-                self._touch_node(nid, now)
-                return nid
+        # O(1) text index lookup
+        if concept.text in self._text_index:
+            nid = self._text_index[concept.text]
+            self._touch_node(nid, now)
+            return nid
 
-        # 3.2a — embedding similarity match
-        best_id, best_sim = None, 0.0
-        for nid, data in self._g.nodes(data=True):
-            sim = _cosine(data['embedding'], concept.embedding)
-            if sim > best_sim:
-                best_sim = sim
-                best_id = nid
+        # One batch matrix multiply instead of N individual cosine calls
+        best_id, best_sim = self._batch_cosine(concept.embedding)
 
-        if best_sim >= self.MERGE_THRESHOLD:
-            # 3.2b — match found: reinforce the existing node
+        if best_sim >= self.MERGE_THRESHOLD and best_id is not None:
             self._touch_node(best_id, now)
             log.debug('Merged "%s" → node %s (sim=%.3f)', concept.text, best_id, best_sim)
             return best_id
 
-        # 3.2c — no match: new node
         return self._create_node(concept, now)
 
     def _create_node(self, concept, now: str) -> str:
@@ -200,53 +251,63 @@ class SemanticGraph:
             'activation_count': 1,
         }
         self._g.add_node(node_id, **attrs)
+        self._text_index[concept.text] = node_id
+        self._append_to_matrix(node_id, concept.embedding)
+        self._dirty_nodes.add(node_id)
         log.debug('New node: "%s" (%s)', concept.text, node_id)
         return node_id
 
     def _touch_node(self, node_id: str, now: str) -> None:
-        # 3.2b
         self._g.nodes[node_id]['last_seen'] = now
         self._g.nodes[node_id]['activation_count'] += 1
+        self._dirty_nodes.add(node_id)
 
     # ------------------------------------------------------------------ #
     # Edge update                                                          #
     # ------------------------------------------------------------------ #
 
     def _update_edges(self, node_ids: list[str], now: str) -> None:
-        for i, a in enumerate(node_ids):
-            for b in node_ids[i + 1:]:
-                emb_a = self._g.nodes[a]['embedding']
-                emb_b = self._g.nodes[b]['embedding']
-                sim = _cosine(emb_a, emb_b)
+        if len(node_ids) < 2:
+            return
+        # Batch cosine for all pairs in one shot
+        embs = np.array(
+            [self._g.nodes[nid]['embedding'] for nid in node_ids],
+            dtype=np.float32,
+        )
+        norms = np.linalg.norm(embs, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        normed = embs / norms
+        sim_matrix = normed @ normed.T  # (k,k) all pairwise cosines at once
 
+        for i, a in enumerate(node_ids):
+            for j in range(i + 1, len(node_ids)):
+                b   = node_ids[j]
+                sim = float(sim_matrix[i, j])
                 if sim < self.EDGE_THRESHOLD:
                     continue
-
                 if self._g.has_edge(a, b):
-                    # 3.3c — reinforce existing edge
                     old = self._g[a][b]['weight']
-                    new = old * self.REINFORCE
-                    self._g[a][b]['weight']       = new
+                    self._g[a][b]['weight']       = old * self.REINFORCE
                     self._g[a][b]['last_updated'] = now
-                    log.debug('Reinforced edge %s–%s: %.3f → %.3f', a, b, old, new)
                 else:
-                    # 3.3a/b — new edge seeded at cosine similarity
-                    self._g.add_edge(a, b,
-                                     weight=sim,
+                    self._g.add_edge(a, b, weight=sim,
                                      edge_type='co-occurrence',
                                      last_updated=now)
-                    log.debug('New edge %s–%s (sim=%.3f)', a, b, sim)
+                self._dirty_edges.add((a, b))
 
     # ------------------------------------------------------------------ #
     # Persistence                                                          #
     # ------------------------------------------------------------------ #
 
     def save(self) -> None:
-        """3.4b — persist graph to SQLite after every run."""
-        now = datetime.utcnow().isoformat(timespec='seconds')
+        """Persist only dirty nodes/edges — skips unchanged rows entirely."""
+        if not self._dirty_nodes and not self._dirty_edges:
+            return
         with self._con:
-            # nodes
-            for nid, data in self._g.nodes(data=True):
+            for nid in self._dirty_nodes:
+                if nid not in self._g:
+                    continue
+                data     = self._g.nodes[nid]
                 emb_json = json.dumps(data['embedding'])
                 self._con.execute("""
                     INSERT INTO nodes (id, text, embedding, first_seen, last_seen, activation_count)
@@ -259,8 +320,10 @@ class SemanticGraph:
                       data['first_seen'], data['last_seen'],
                       data['activation_count']))
 
-            # edges
-            for u, v, data in self._g.edges(data=True):
+            for (u, v) in self._dirty_edges:
+                if not self._g.has_edge(u, v):
+                    continue
+                data = self._g[u][v]
                 self._con.execute("""
                     INSERT INTO edges (source, target, weight, edge_type, last_updated)
                     VALUES (?, ?, ?, ?, ?)
@@ -269,7 +332,10 @@ class SemanticGraph:
                         last_updated = excluded.last_updated
                 """, (u, v, data['weight'], data['edge_type'], data['last_updated']))
 
-        log.info('Saved: %d nodes, %d edges → %s', self.node_count, self.edge_count, _DB_PATH)
+        n_n, n_e = len(self._dirty_nodes), len(self._dirty_edges)
+        self._dirty_nodes.clear()
+        self._dirty_edges.clear()
+        log.debug('Saved %d nodes, %d edges (dirty only)', n_n, n_e)
 
     def snapshot(self) -> str:
         """3.4c — write a dated JSON snapshot to snapshots/."""
@@ -298,17 +364,19 @@ class SemanticGraph:
     # ------------------------------------------------------------------ #
 
     def _load_from_db(self) -> None:
-        """3.4b — reconstruct in-memory graph from SQLite on startup."""
+        """Reconstruct in-memory graph from SQLite and build lookup structures."""
         cur = self._con.execute("SELECT * FROM nodes")
         for row in cur.fetchall():
+            emb = json.loads(row['embedding'])
             self._g.add_node(
                 row['id'],
                 text             = row['text'],
-                embedding        = json.loads(row['embedding']),
+                embedding        = emb,
                 first_seen       = row['first_seen'],
                 last_seen        = row['last_seen'],
                 activation_count = row['activation_count'],
             )
+            self._text_index[row['text']] = row['id']
 
         cur = self._con.execute("SELECT * FROM edges")
         for row in cur.fetchall():
@@ -319,4 +387,6 @@ class SemanticGraph:
                     edge_type    = row['edge_type'],
                     last_updated = row['last_updated'],
                 )
+
+        self._rebuild_matrix()
         log.debug('Loaded from DB: %d nodes, %d edges', self.node_count, self.edge_count)

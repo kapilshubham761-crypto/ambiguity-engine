@@ -129,7 +129,6 @@ st.markdown("""
 
 # Global CSS — injected from main page so it always applies
 st.markdown("""
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
 body, .stApp { background: #070709 !important; }
 *, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
@@ -219,6 +218,78 @@ button[aria-label="Open sidebar"],
     background: #0d1a2a !important; border-color: #4a9eff !important; color: #4a9eff !important;
 }
 </style>
+""", unsafe_allow_html=True)
+
+
+# ======================================================================== #
+# Live feed bar — pinned to top, shows latest AutoLearner entry            #
+# ======================================================================== #
+
+_live_entry = {}
+try:
+    _lf_path = os.path.join(_ROOT, 'data', 'live_feed.jsonl')
+    with open(_lf_path, encoding='utf-8') as _lf:
+        for _ln in _lf:
+            _ln = _ln.strip()
+            if _ln:
+                _live_entry = json.loads(_ln)
+except Exception:
+    pass
+
+_lv_topic    = _live_entry.get('topic', '')
+_lv_title    = _live_entry.get('title', '')
+_lv_source   = _live_entry.get('source', '')
+_lv_concepts = _live_entry.get('concepts', '')
+_lv_status   = _live_entry.get('status', 'ok')
+_lv_dot_col  = '#44ff88' if _lv_status == 'ok' else '#ff4444'
+
+if _lv_title:
+    _lv_display = (
+        f'<span style="color:#505078;margin-right:6px;text-transform:uppercase;'
+        f'font-size:10px;letter-spacing:0.12em">reading</span>'
+        f'<span style="color:#6868a0;margin-right:8px">{_lv_topic}</span>'
+        f'<span style="color:#4a4a70;margin-right:8px">→</span>'
+        f'<span style="color:#9898c8;margin-right:8px">{_lv_title[:80]}{"…" if len(_lv_title) > 80 else ""}</span>'
+        f'<span style="color:#404060">({_lv_source})</span>'
+        f'<span style="color:#333355;margin-left:12px">{_lv_concepts} concepts</span>'
+    )
+else:
+    _lv_display = '<span style="color:#303050">no feed yet — start the learner</span>'
+
+st.markdown(f"""
+<style>
+#ae-livebar {{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 99999;
+    height: 26px;
+    background: #050507;
+    border-bottom: 1px solid #141420;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+}}
+#ae-livebar-dot {{
+    width: 6px; height: 6px; border-radius: 50%;
+    background: {_lv_dot_col};
+    margin-right: 10px;
+    flex-shrink: 0;
+    animation: ae-pulse 1.6s ease-in-out infinite;
+}}
+/* Push all page content below the bar */
+.stApp > header {{ top: 26px !important; }}
+.block-container {{ padding-top: 2.5rem !important; }}
+[data-testid="stSidebar"] {{ top: 26px !important; height: calc(100vh - 26px) !important; }}
+</style>
+<div id="ae-livebar">
+  <div id="ae-livebar-dot"></div>
+  {_lv_display}
+</div>
 """, unsafe_allow_html=True)
 
 
@@ -390,6 +461,7 @@ pages = [
     st.Page("_pages/3_runner.py",      title="Runner"),
     st.Page("_pages/0_meta_state.py",  title="Meta-State"),
     st.Page("_pages/10_cognition.py",  title="Cognition"),
+    st.Page("_pages/12_ytp.py",        title="YTP"),
     st.Page("_pages/11_config.py",     title="Settings"),
 ]
 
