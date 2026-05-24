@@ -38,7 +38,7 @@ start "" "%~dp0ambiguity-engine-tracker.html"
 :: Start Streamlit
 echo  [5/5] Starting engine...
 set PYTHONDONTWRITEBYTECODE=1
-start "" cmd /k "cd /d "%~dp0ui" && ..\.venv\Scripts\streamlit run app.py --server.runOnSave true --server.port 8501 --server.headless true"
+start "" cmd /k "cd /d "%~dp0ui" && ..\.venv\Scripts\streamlit run app.py --server.port 8501 --server.headless true"
 
 echo.
 echo  Waiting for engine to come online...

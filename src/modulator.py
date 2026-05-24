@@ -1,14 +1,14 @@
 """
-Node [K] — Modulator
-====================
+Modulation Layer.
+
 Translates an AmbiguityResult + SemanticGraph into a system prompt that
 shapes how the LLM responds. Three regimes:
 
   low    → clean, direct system prompt, no graph injection
   medium → inject 3-5 highest-weighted graph neighbours as context
-  high   → explicit tension framing + up to 8 neighbours
+  high   → explicit tension framing + up to 8 neighbours + meta-state pressure
 
-Also provides A/B logging: run the same input with and without modulation
+Provides A/B logging: run the same input with and without modulation
 and store both outputs side-by-side in logs/ab_log.jsonl.
 """
 
@@ -16,22 +16,18 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 import requests
 
 from logger import get_logger
-from protocols import IMetaState
 
 log = get_logger('modulator')
 
 _AB_LOG = os.path.join(os.path.dirname(__file__), '..', 'logs', 'ab_log.jsonl')
 
-# --------------------------------------------------------------------------- #
-# System prompt templates                                                      #
-# --------------------------------------------------------------------------- #
+# ── Prompt templates ──────────────────────────────────────────────────────────
 
 _LOW_PROMPT = """\
 You are a clear, direct assistant. Answer the user's question concisely and accurately."""
@@ -47,45 +43,31 @@ pull in different directions: {concept_list}.
 These tensions are worth acknowledging. Before converging on an answer, briefly \
 map the conceptual territory — where do these ideas agree, where do they diverge, \
 and what sits at the bridge between them?
-Related concepts from prior context: {neighbours}"""
+Related concepts from prior context: {neighbours}
+Currently active pressure concepts: {meta_concepts}"""
 
 
-# --------------------------------------------------------------------------- #
-# Neighbour retrieval                                                          #
-# --------------------------------------------------------------------------- #
+# ── Neighbour retrieval ───────────────────────────────────────────────────────
 
-def _get_neighbours(concepts: list, graph, top_k: int,
-                    meta=None) -> list[str]:
-    """
-    5.2a — For each input concept, find the closest graph node and pull its
-    top-k highest-weighted neighbours.
-    5.2b — Deduplicate and rank by combined edge weight.
-    5.2c — Rerank by attention bias (meta-state pressure) before slicing.
-    """
+def _get_neighbours(concepts: list, graph, top_k: int) -> list[str]:
     if graph is None or graph.node_count == 0:
         return []
 
     import numpy as np
-    from attention import bias_neighbours
 
-    node_ids   = list(graph._g.nodes())
-    node_embs  = {nid: graph._g.nodes[nid]['embedding'] for nid in node_ids}
-    all_embs   = np.array([node_embs[nid] for nid in node_ids], dtype=np.float32)
-
+    node_ids  = list(graph._g.nodes())
+    node_embs = {nid: graph._g.nodes[nid]['embedding'] for nid in node_ids}
+    all_embs  = np.array([node_embs[nid] for nid in node_ids], dtype=np.float32)
     input_texts = {c.text for c in concepts}
-
     scored: dict[str, float] = {}
 
     for concept in concepts:
         emb = np.array(concept.embedding, dtype=np.float32)
-        norm_emb = np.linalg.norm(emb)
-        if norm_emb == 0:
+        norm = np.linalg.norm(emb)
+        if norm == 0:
             continue
-        sims = all_embs @ emb / (
-            np.linalg.norm(all_embs, axis=1) * norm_emb + 1e-8
-        )
-        closest_idx = int(np.argmax(sims))
-        closest_id  = node_ids[closest_idx]
+        sims = all_embs @ emb / (np.linalg.norm(all_embs, axis=1) * norm + 1e-8)
+        closest_id = node_ids[int(np.argmax(sims))]
 
         for nb in graph._g.neighbors(closest_id):
             nb_text   = graph._g.nodes[nb]['text']
@@ -95,18 +77,11 @@ def _get_neighbours(concepts: list, graph, top_k: int,
             if nb_text not in scored or scored[nb_text] < nb_weight:
                 scored[nb_text] = nb_weight
 
-    ranked  = sorted(scored.items(), key=lambda x: x[1], reverse=True)
-    texts   = [t for t, _ in ranked]
-    weights = [w for _, w in ranked]
-
-    # s4-5 — rerank warm neighbours to the front before slicing to top_k
-    texts = bias_neighbours(texts, weights, meta=meta)
-    return texts[:top_k]
+    ranked = sorted(scored.items(), key=lambda x: x[1], reverse=True)
+    return [text for text, _ in ranked[:top_k]]
 
 
-# --------------------------------------------------------------------------- #
-# Prompt builder                                                               #
-# --------------------------------------------------------------------------- #
+# ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
 class ModulationResult:
@@ -114,61 +89,34 @@ class ModulationResult:
     system_prompt: str
     neighbours:    list[str]
     concept_list:  list[str]
-    meta_concepts: list[str]   # concepts injected from current cognitive pressure
+    meta_concepts: list[str] = field(default_factory=list)
 
 
-def _meta_pressure(meta: IMetaState | None, n: int,
-                   exclude: set[str]) -> list[str]:
-    """
-    Pull top-n concepts from current cognitive pressure, deduped against
-    `exclude` (input concept_list + graph neighbours already in prompt).
-    Returns empty list when meta is None or has no active pressure.
-    """
-    if meta is None:
-        return []
-    try:
-        return [t for t, _ in meta.top(n + len(exclude))
-                if t not in exclude][:n]
-    except Exception:
-        return []
-
+# ── Prompt builder ────────────────────────────────────────────────────────────
 
 def build_prompt(concepts: list, result, graph=None,
-                 meta: IMetaState | None = None,
-                 medium_k: int = 5, high_k: int = 8) -> ModulationResult:
-    """
-    Build the system prompt for the LLM given an AmbiguityResult.
-
-    Parameters
-    ----------
-    concepts : list[Concept]
-    result   : AmbiguityResult
-    graph    : SemanticGraph | None
-    meta     : IMetaState | None   — current cognitive pressure (Node [M])
-               medium branch injects 2 pressure concepts
-               high branch injects 3 pressure concepts
-    """
+                 medium_k: int = 5, high_k: int = 8,
+                 meta=None) -> ModulationResult:
     level        = result.level
     concept_list = [c.text for c in concepts]
 
+    meta_concepts: list[str] = []
+    if meta is not None:
+        try:
+            meta_concepts = [t for t, _ in meta.top(n=5)]
+        except Exception:
+            pass
+
     if level == 'low':
         return ModulationResult(
-            level         = 'low',
-            system_prompt = _LOW_PROMPT,
-            neighbours    = [],
-            concept_list  = concept_list,
-            meta_concepts = [],
+            level='low', system_prompt=_LOW_PROMPT,
+            neighbours=[], concept_list=concept_list, meta_concepts=meta_concepts,
         )
 
     k          = medium_k if level == 'medium' else high_k
     neighbours = _get_neighbours(concepts, graph, top_k=k)
-
-    # s3-2 / s3-3 — append pressure concepts, deduped against input + neighbours
-    exclude       = set(concept_list) | set(neighbours)
-    meta_n        = 2 if level == 'medium' else 3
-    meta_concepts = _meta_pressure(meta, meta_n, exclude)
-    all_nb        = neighbours + meta_concepts
-    nb_str        = ', '.join(all_nb) if all_nb else 'none yet'
+    nb_str     = ', '.join(neighbours) if neighbours else 'none yet'
+    mc_str     = ', '.join(meta_concepts) if meta_concepts else 'none'
 
     if level == 'medium':
         prompt = _MEDIUM_TEMPLATE.format(neighbours=nb_str)
@@ -176,60 +124,36 @@ def build_prompt(concepts: list, result, graph=None,
         prompt = _HIGH_TEMPLATE.format(
             concept_list=', '.join(concept_list),
             neighbours=nb_str,
+            meta_concepts=mc_str,
         )
 
-    if meta_concepts:
-        log.debug('meta pressure injected: %s', meta_concepts)
-
     return ModulationResult(
-        level         = level,
-        system_prompt = prompt,
-        neighbours    = neighbours,
-        concept_list  = concept_list,
-        meta_concepts = meta_concepts,
+        level=level, system_prompt=prompt,
+        neighbours=neighbours, concept_list=concept_list, meta_concepts=meta_concepts,
     )
 
 
-# --------------------------------------------------------------------------- #
-# LLM call                                                                     #
-# --------------------------------------------------------------------------- #
+# ── LLM call ─────────────────────────────────────────────────────────────────
 
 def call_llm(user_input: str, system_prompt: str, cfg: dict) -> str:
-    """Send a modulated prompt to Ollama and return the response text."""
     full_prompt = f"[SYSTEM]\n{system_prompt}\n\n[USER]\n{user_input}"
     payload = {
         'model':  cfg['model']['name'],
         'prompt': full_prompt,
-        'stream': cfg['model']['stream'],
+        'stream': cfg['model'].get('stream', False),
     }
     resp = requests.post(cfg['model']['endpoint'], json=payload, timeout=120)
     resp.raise_for_status()
     return resp.json()['response'].strip()
 
 
-# --------------------------------------------------------------------------- #
-# A/B logging                                                                  #
-# --------------------------------------------------------------------------- #
+# ── A/B logging ───────────────────────────────────────────────────────────────
 
 def run_ab(user_input: str, concepts: list, ambiguity_result,
-           graph, cfg: dict,
-           meta: IMetaState | None = None) -> dict:
-    """
-    5.3 — Run the same input twice: once with modulation, once with the bare
-    low prompt (control). Log both outputs side-by-side to ab_log.jsonl.
-    Returns the full log entry dict.
-    """
-    modulated = build_prompt(concepts, ambiguity_result, graph=graph, meta=meta)
-
-    log.info('A/B run | level=%s | input=%.60s', modulated.level, user_input)
-
-    # Modulated call
-    mod_response = call_llm(user_input, modulated.system_prompt, cfg)
-    log.debug('Modulated response: %.80s', mod_response)
-
-    # Control call (always bare low prompt)
+           graph, cfg: dict, meta=None) -> dict:
+    modulated     = build_prompt(concepts, ambiguity_result, graph=graph, meta=meta)
+    mod_response  = call_llm(user_input, modulated.system_prompt, cfg)
     ctrl_response = call_llm(user_input, _LOW_PROMPT, cfg)
-    log.debug('Control  response: %.80s', ctrl_response)
 
     entry = {
         'timestamp':        datetime.utcnow().isoformat(timespec='seconds'),

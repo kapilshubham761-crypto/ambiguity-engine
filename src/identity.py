@@ -169,11 +169,18 @@ class IdentityTracker:
         signals = self._behavioral_signals()
         self._observe_count += 1
 
+        try:
+            from config import Config
+            v = Config.get_instance().get('identity', 'drift_rate')
+            drift = float(v) if v is not None else self._drift_rate
+        except Exception:
+            drift = self._drift_rate
+
         for trait, target in signals.items():
             if trait in self._traits:
                 current = self._traits[trait]
                 self._traits[trait] = round(
-                    current + self._drift_rate * (target - current), 4)
+                    current + drift * (target - current), 4)
 
         if self._observe_count % 5 == 0:
             self._save()

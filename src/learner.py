@@ -21,54 +21,62 @@ _ROOT = Path(__file__).parent.parent
 _DATA = _ROOT / 'data'
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sources   import SOURCES, _flesch_score, fetch_content, _sentences
-from curriculum import CURRICULUM, STAGE_CONFIG
-from logger    import get_logger
+from sources import SOURCES, fetch_content, _sentences
+from logger  import get_logger
 
 log = get_logger('learner')
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Config — defaults (overridden at runtime by engine_config.json) ───────────
 CYCLE_TIME       = 10
-N_WORKERS        = 4
-TOPICS_PER_CYCLE = 6
+N_WORKERS        = 8
+TOPICS_PER_CYCLE = 12
 MIN_SENTENCES    = 3
-FETCH_TIMEOUT    = 18
+FETCH_TIMEOUT    = 12
 SEARCH_TIMEOUT   = 7
 CHECKIN_EVERY    = 3 * 3600
 FEED_MAX         = 200
 
+def _lcfg(key: str, default):
+    """Read a learning param from live config, fall back to module default."""
+    try:
+        from config import Config
+        v = Config.get_instance().get('learning', key)
+        return type(default)(v) if v is not None else default
+    except Exception:
+        return default
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 _STATS_PATH  = _DATA / 'learner_stats.json'
 _FEED_PATH   = _DATA / 'live_feed.jsonl'
-_STAGE_PATH  = _DATA / 'discovery_stage.json'
-_PREFS_PATH  = _DATA / 'search_prefs.json'
 _PAUSED_PATH = _DATA / 'paused.txt'
 _FSTATUS     = _DATA / 'fetch_status.json'
 
-REGIONS = {
-    'global':      {'label': 'Global',       'terms': []},
-    'mohali':      {'label': 'Mohali',        'terms': ['Mohali', 'Punjab India', 'Chandigarh']},
-    'n_america':   {'label': 'N. America',   'terms': ['North America', 'United States', 'Canada']},
-    'w_europe':    {'label': 'W. Europe',    'terms': ['Western Europe', 'UK', 'France', 'Germany']},
-    'e_europe':    {'label': 'E. Europe',    'terms': ['Eastern Europe', 'Russia', 'Poland']},
-    'n_asia':      {'label': 'N./C. Asia',   'terms': ['Central Asia', 'Siberia', 'Kazakhstan']},
-    'c_america':   {'label': 'C. America',   'terms': ['Latin America', 'Mexico', 'Caribbean']},
-    'n_africa_me': {'label': 'N. Africa/ME', 'terms': ['North Africa', 'Middle East']},
-    'e_asia':      {'label': 'E. Asia',      'terms': ['China', 'Japan', 'Korea']},
-    'india':       {'label': 'India',         'terms': ['India', 'South Asia', 'Hindi']},
-    's_america':   {'label': 'S. America',   'terms': ['South America', 'Brazil', 'Argentina']},
-    'sub_africa':  {'label': 'Sub-Saharan',  'terms': ['Sub-Saharan Africa', 'West Africa']},
-    'oceania':     {'label': 'Oceania',       'terms': ['Australia', 'New Zealand', 'Pacific']},
-}
-
-def load_prefs() -> dict:
-    try:
-        return json.loads(_PREFS_PATH.read_text(encoding='utf-8'))
-    except Exception:
-        return {'region': 'global'}
-
-def save_prefs(p: dict) -> None:
-    _PREFS_PATH.write_text(json.dumps(p), encoding='utf-8')
+# ── Flat topic list — searched in random order each cycle ─────────────────────
+TOPICS = [
+    'consciousness perception cognition', 'quantum mechanics wave particle',
+    'evolution natural selection adaptation', 'language syntax semantics meaning',
+    'thermodynamics entropy energy systems', 'machine learning neural networks',
+    'philosophy of mind identity self', 'mathematics topology abstract algebra',
+    'ecology ecosystems biodiversity', 'astrophysics black holes spacetime',
+    'economics game theory decision making', 'genetics DNA protein expression',
+    'history civilisation collapse empire', 'psychology behaviour motivation',
+    'computer science algorithms complexity', 'climate change atmospheric physics',
+    'neuroscience memory learning brain', 'sociology culture social structures',
+    'ethics morality free will determinism', 'chemistry molecular bonds reactions',
+    'literature narrative symbolism metaphor', 'music harmony rhythm acoustics',
+    'art perception aesthetics creativity', 'political theory power governance',
+    'medicine disease immunity biology', 'physics relativity spacetime curvature',
+    'robotics automation embodied intelligence', 'oceanography fluid dynamics tides',
+    'anthropology human origins culture', 'logic inference formal systems',
+    'optics light photons electromagnetism', 'materials science crystalline structure',
+    'epidemiology population health risk', 'linguistics phonology grammar pragmatics',
+    'information theory entropy signal noise', 'cognitive science mental models',
+    'mythology symbolism archetype narrative', 'architecture space form structure',
+    'food systems agriculture soil microbiome', 'sleep dreams unconscious mind',
+    'time perception duration memory', 'emergence complexity self-organisation',
+    'chaos theory dynamical systems bifurcation', 'topology knots manifolds geometry',
+    'geopolitics power conflict diplomacy', 'biochemistry metabolism pathways',
+]
 
 
 def _fstatus_write(fetching: bool) -> None:
@@ -101,6 +109,15 @@ class AutoLearner:
         self._thread: threading.Thread | None = None
         self._graph        = None
         self._known_urls: set = set()
+        self._feed_lock    = threading.Lock()
+
+    def _ensure_graph(self) -> None:
+        if self._graph is None:
+            try:
+                from graph import SemanticGraph
+                self._graph = SemanticGraph()
+            except Exception:
+                pass
 
     # ── persistence ───────────────────────────────────────────────────────────
 
@@ -108,7 +125,7 @@ class AutoLearner:
         try:
             return json.loads(_STATS_PATH.read_text(encoding='utf-8'))
         except Exception:
-            return {'total_accepted': 0, 'total_concepts': 0, 'total_sentences': 0}
+            return {'total_concepts': 0, 'total_sentences': 0}
 
     def _save_stats(self) -> None:
         tmp = _STATS_PATH.with_suffix('.tmp')
@@ -117,23 +134,14 @@ class AutoLearner:
 
     def _feed_append(self, entry: dict) -> None:
         try:
-            existing = _FEED_PATH.read_text(encoding='utf-8').splitlines() if _FEED_PATH.exists() else []
-            existing.append(json.dumps(entry, ensure_ascii=False))
-            _FEED_PATH.write_text('\n'.join(existing[-FEED_MAX:]), encoding='utf-8')
+            with self._feed_lock:
+                existing = _FEED_PATH.read_text(encoding='utf-8').splitlines() if _FEED_PATH.exists() else []
+                existing.append(json.dumps(entry, ensure_ascii=False))
+                _FEED_PATH.write_text('\n'.join(existing[-FEED_MAX:]), encoding='utf-8')
         except Exception:
             pass
 
     def _load_last_checkin(self) -> float:
-        try:
-            from assessor import load_cards
-            cards = load_cards()
-            if cards:
-                dt = datetime.fromisoformat(cards[-1]['timestamp'])
-                if dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=timezone.utc)
-                return dt.timestamp()
-        except Exception:
-            pass
         return 0.0
 
     # ── pause / resume ────────────────────────────────────────────────────────
@@ -148,25 +156,13 @@ class AutoLearner:
     def pause(self)  -> None: _PAUSED_PATH.write_text('1')
     def resume(self) -> None: _PAUSED_PATH.write_text('0')
 
-    # ── stage ─────────────────────────────────────────────────────────────────
-
-    def current_stage(self) -> int:
-        try:
-            return int(json.loads(_STAGE_PATH.read_text(encoding='utf-8')).get('stage', 0))
-        except Exception:
-            return 0
-
-    def set_stage(self, idx: int) -> None:
-        idx = max(0, min(idx, len(CURRICULUM) - 1))
-        _STAGE_PATH.write_text(json.dumps({'stage': idx}), encoding='utf-8')
-
     @property
     def stats(self) -> dict:
         return dict(self._stats)
 
     # ── process one search result ─────────────────────────────────────────────
 
-    def _process(self, item: dict, stage: int) -> dict:
+    def _process(self, item: dict) -> dict:
         from extractor import extract
         from detector  import detect_and_log
 
@@ -186,7 +182,7 @@ class AutoLearner:
         except Exception:
             sentences = _sentences(item.get('snippet', ''), min_len=20)
 
-        if len(sentences) < MIN_SENTENCES:
+        if len(sentences) < _lcfg('min_sentences', MIN_SENTENCES):
             entry['status'] = 'skip:short'
             return entry
 
@@ -228,7 +224,6 @@ class AutoLearner:
         except Exception:
             pass
 
-        self._stats['total_accepted']  = self._stats.get('total_accepted', 0) + 1
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
         self._stats['total_concepts']  = self._stats.get('total_concepts', 0) + n_concepts
         self._save_stats()
@@ -240,29 +235,22 @@ class AutoLearner:
     # ── one full cycle ────────────────────────────────────────────────────────
 
     def _cycle(self) -> None:
-        stage     = self.current_stage()
-        cfg       = STAGE_CONFIG[min(stage, len(STAGE_CONFIG) - 1)]
-        min_read  = cfg['min_readability']
-        sources   = [s for s in cfg['sources'] if s != 'web'] or cfg['sources']
-        modifiers = cfg.get('modifiers', [])
+        self._ensure_graph()
+        n_workers        = _lcfg('n_workers',        N_WORKERS)
+        topics_per_cycle = _lcfg('topics_per_cycle', TOPICS_PER_CYCLE)
+        fetch_timeout    = _lcfg('fetch_timeout',     FETCH_TIMEOUT)
+        search_timeout   = _lcfg('search_timeout',    SEARCH_TIMEOUT)
 
-        prefs        = load_prefs()
-        region_key   = prefs.get('region', 'global')
-        region_terms = REGIONS.get(region_key, REGIONS['global'])['terms']
+        all_sources = list(SOURCES.keys())
+        topics = random.sample(TOPICS, min(topics_per_cycle, len(TOPICS)))
 
-        topics = list(CURRICULUM[stage]['topics'])
-        random.shuffle(topics)
-        topics = topics[:TOPICS_PER_CYCLE]
+        _src_weights = [3 if s == 'wikipedia' else 1 for s in all_sources]
 
         def _search(topic):
-            parts = [topic]
-            if modifiers:   parts.append(random.choice(modifiers))
-            if region_terms: parts.append(random.choice(region_terms))
-            query = ' '.join(parts)
-            src = random.choice(sources)
+            src = random.choices(all_sources, weights=_src_weights, k=1)[0]
             try:
                 search_fn, _ = SOURCES[src]
-                results = search_fn(query, max_results=3)
+                results = search_fn(topic, max_results=3)
                 for r in results:
                     r['topic']  = topic
                     r['source'] = src
@@ -273,27 +261,25 @@ class AutoLearner:
         items_to_process = []
         _fstatus_write(True)
 
-        with ThreadPoolExecutor(max_workers=N_WORKERS) as pool:
+        with ThreadPoolExecutor(max_workers=n_workers) as pool:
             for fut in as_completed([pool.submit(_search, t) for t in topics],
-                                    timeout=SEARCH_TIMEOUT * 2):
+                                    timeout=search_timeout * 2):
                 try:
                     for item in fut.result():
                         url = item.get('url', '')
                         if url and url not in self._known_urls:
-                            score = _flesch_score(item.get('snippet', ''))
-                            if min_read <= 0 or score >= min_read:
-                                items_to_process.append(item)
-                                self._known_urls.add(url)
+                            items_to_process.append(item)
+                            self._known_urls.add(url)
                 except Exception:
                     pass
 
         if len(self._known_urls) > 5000:
             self._known_urls = set(list(self._known_urls)[-2000:])
 
-        with ThreadPoolExecutor(max_workers=N_WORKERS) as pool:
-            futs = {pool.submit(self._process, item, stage): item
+        with ThreadPoolExecutor(max_workers=n_workers) as pool:
+            futs = {pool.submit(self._process, item): item
                     for item in items_to_process}
-            for fut in as_completed(futs, timeout=FETCH_TIMEOUT * 3):
+            for fut in as_completed(futs, timeout=fetch_timeout * 3):
                 if self.is_paused:
                     break
                 try:
@@ -321,29 +307,18 @@ class AutoLearner:
             except Exception:
                 pass
 
-        # Check-in
-        if time.time() - self._last_checkin >= CHECKIN_EVERY and self._graph:
+        # Abstractor + Worldview periodic run (replaces old check-in)
+        checkin_every = _lcfg('checkin_every', CHECKIN_EVERY)
+        if time.time() - self._last_checkin >= checkin_every and self._graph:
             try:
-                from assessor   import assess, save_card, load_cards, Assessment
                 from abstractor import Abstractor
                 from worldview  import Worldview
-                from homework   import HomeworkTracker
-                from meta_state import MetaState
-                stage_now = self.current_stage()
-                prev = None
-                cards = load_cards()
-                if cards:
-                    try: prev = Assessment(**cards[-1])
-                    except Exception: pass
-                card = assess(self._graph, stage_now, prev)
-                save_card(card)
-                HomeworkTracker().generate(stage_now, self._graph, meta=MetaState.get())
                 Abstractor.get().run()
                 Worldview.get().update()
                 self._last_checkin = time.time()
-                log.info('check-in complete grade=%s', card.grade)
+                log.info('abstractor + worldview refresh complete')
             except Exception as e:
-                log.debug('check-in error: %s', e)
+                log.debug('refresh error: %s', e)
 
         # Cognitive ticks
         def _t(fn):
@@ -364,20 +339,27 @@ class AutoLearner:
             __import__('meta_state').MetaState.get()))
         _t(lambda: __import__('meta_state').MetaState.get().decay_to())
 
+        # Write cog_status for overlay
+        try:
+            _mode = __import__('stability').StabilityMonitor.get()._current_mode
+            _goal = __import__('goals').GoalEngine.get().current_goal().replace('_', ' ')
+            _cs = _DATA / 'cog_status.json'
+            _tmp = _cs.with_suffix('.tmp')
+            _tmp.write_text(json.dumps({'mode': _mode, 'goal': _goal}), encoding='utf-8')
+            _tmp.replace(_cs)
+        except Exception:
+            pass
+
     # ── background thread ─────────────────────────────────────────────────────
 
     def start(self, graph=None) -> None:
         if self._thread and self._thread.is_alive():
             return
-        self._graph = graph
+        if graph is not None:
+            self._graph = graph
 
         def _worker():
             log.info('AutoLearner started (cycle=%ds workers=%d)', CYCLE_TIME, N_WORKERS)
-            try:
-                from assessor import ensure_birthdate
-                ensure_birthdate()
-            except Exception:
-                pass
             while True:
                 try:
                     if self.is_paused:
@@ -387,7 +369,7 @@ class AutoLearner:
                 except Exception as e:
                     log.debug('cycle error: %s', e)
                     _fstatus_write(False)
-                time.sleep(CYCLE_TIME)
+                time.sleep(_lcfg('cycle_time', CYCLE_TIME))
 
         self._thread = threading.Thread(target=_worker, daemon=True, name='learner')
         self._thread.start()

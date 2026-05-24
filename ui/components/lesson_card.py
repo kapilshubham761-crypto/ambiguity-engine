@@ -62,12 +62,12 @@ def render_lesson_card(lesson: dict, teacher, graph,
 
         c1, c2, _ = st.columns([1, 1, 4])
         action = None
-        if c1.button("✅ Accept", key=f"acc_{lid}{key_suffix}", use_container_width=True):
+        if c1.button("✅ Accept", key=f"acc_{lid}{key_suffix}", width='stretch'):
             with st.spinner("Fetching + extracting…"):
                 n = teacher.accept(lid, graph)
             st.toast(f"Absorbed {n} sentences", icon="🧠")
             action = 'accepted'
-        if c2.button("❌ Reject", key=f"rej_{lid}{key_suffix}", use_container_width=True):
+        if c2.button("❌ Reject", key=f"rej_{lid}{key_suffix}", width='stretch'):
             teacher.reject(lid)
             action = 'rejected'
 

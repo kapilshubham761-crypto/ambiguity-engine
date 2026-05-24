@@ -67,21 +67,6 @@ def _sentences(text: str, min_len: int = 40, max_len: int = 400) -> list[str]:
     return out
 
 
-def _flesch_score(text: str) -> float:
-    """Flesch Reading Ease approximation. 100=very easy, 0=very hard."""
-    if not text:
-        return 50.0
-    sentences = [s for s in re.split(r'[.!?]+', text) if s.strip()]
-    words = text.split()
-    if not sentences or not words:
-        return 50.0
-    syllables = sum(max(1, len(re.findall(r'[aeiouAEIOU]+', w))) for w in words)
-    asl = len(words) / len(sentences)
-    asw = syllables / len(words)
-    score = 206.835 - 1.015 * asl - 84.6 * asw
-    return max(0.0, min(100.0, score))
-
-
 # ======================================================================== #
 # Wikipedia                                                                 #
 # ======================================================================== #
@@ -118,44 +103,6 @@ def fetch_wikipedia(url: str) -> list[str]:
     pages = r.json().get('query', {}).get('pages', {})
     text  = next(iter(pages.values()), {}).get('extract', '')
     return _sentences(text)
-
-
-# ======================================================================== #
-# Simple English Wikipedia (children / ESL audience)                        #
-# ======================================================================== #
-
-def search_simple_wikipedia(query: str, max_results: int = 10) -> list[dict]:
-    url = 'https://simple.wikipedia.org/w/api.php'
-    params = {
-        'action': 'query', 'list': 'search',
-        'srsearch': query, 'srlimit': max_results,
-        'utf8': 1, 'format': 'json',
-    }
-    r = _get(url, params=params)
-    results = []
-    for item in r.json().get('query', {}).get('search', []):
-        snippet = re.sub(r'<[^>]+>', '', item.get('snippet', ''))
-        results.append({
-            'title':   item['title'],
-            'url':     f"https://simple.wikipedia.org/wiki/{item['title'].replace(' ', '_')}",
-            'snippet': snippet,
-            'source':  'simple_wiki',
-        })
-    return results
-
-
-def fetch_simple_wikipedia(url: str) -> list[str]:
-    title = url.split('/wiki/')[-1].replace('_', ' ')
-    api = 'https://simple.wikipedia.org/w/api.php'
-    params = {
-        'action': 'query', 'prop': 'extracts',
-        'exintro': False, 'explaintext': True,
-        'titles': title, 'format': 'json',
-    }
-    r = _get(api, params=params)
-    pages = r.json().get('query', {}).get('pages', {})
-    text  = next(iter(pages.values()), {}).get('extract', '')
-    return _sentences(text, min_len=20)
 
 
 # ======================================================================== #
@@ -372,33 +319,12 @@ def fetch_web(url: str, item: dict | None = None) -> list[str]:
 # ======================================================================== #
 
 SOURCES = {
-    'wikipedia':    (search_wikipedia,        fetch_wikipedia),
-    'simple_wiki':  (search_simple_wikipedia, fetch_simple_wikipedia),
-    'arxiv':        (search_arxiv,            fetch_arxiv),
-    'gutenberg':    (search_gutenberg,        fetch_gutenberg),
-    'reddit':       (search_reddit,           fetch_reddit),
-    'openalex':     (search_openalex,         fetch_openalex),
-    'web':          (search_web,              fetch_web),
-}
-
-SOURCE_LABELS = {
-    'wikipedia':   '📖 Wikipedia',
-    'simple_wiki': '🟦 Simple Wiki',
-    'arxiv':       '🔬 arXiv',
-    'gutenberg':   '📚 Gutenberg',
-    'reddit':      '💬 Reddit',
-    'openalex':    '🎓 OpenAlex',
-    'web':         '🌐 Web',
-}
-
-SOURCE_DESCRIPTIONS = {
-    'wikipedia':   'Encyclopaedic articles — factual, structured prose',
-    'simple_wiki': 'Simple English Wikipedia — written for children and ESL readers',
-    'arxiv':       'Academic preprints — CS, physics, biology, economics',
-    'gutenberg':   'Public-domain books — literature, poetry, philosophy',
-    'reddit':      'Forum posts — conversational, opinion-heavy',
-    'openalex':    'Academic abstracts from 200M+ open-access papers',
-    'web':         'General web pages via DuckDuckGo',
+    'wikipedia': (search_wikipedia, fetch_wikipedia),
+    'arxiv':     (search_arxiv,     fetch_arxiv),
+    'gutenberg': (search_gutenberg, fetch_gutenberg),
+    'reddit':    (search_reddit,    fetch_reddit),
+    'openalex':  (search_openalex,  fetch_openalex),
+    'web':       (search_web,       fetch_web),
 }
 
 

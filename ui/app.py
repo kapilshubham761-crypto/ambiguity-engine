@@ -141,7 +141,7 @@ try:
         _m, _s   = divmod(_elapsed, 60)
         _fetch_elapsed_str = f"{_m}m {_s:02d}s" if _m else f"{_s}s"
         _THOUGHTS = ["searching sources", "reading content",
-                     "scoring readability", "extracting sentences", "saving to queue"]
+                     "extracting concepts", "updating graph", "reinforcing memory"]
         _t         = int(time.time())
         _thinking_line = f"{_THOUGHTS[(_t // 3) % len(_THOUGHTS)]} {'·  ·· ···'.split()[_t % 3]}"
 except Exception:
@@ -158,12 +158,12 @@ _paused_file = os.path.join(_ROOT, 'data', 'paused.txt')
 
 with st.sidebar:
     if _paused:
-        if st.button("▶️ Resume", use_container_width=True, type="primary"):
+        if st.button("▶️ Resume", width='stretch', type="primary"):
             with open(_paused_file, 'w') as _f:
                 _f.write('0')
             st.rerun()
     else:
-        if st.button("⏹ Stop all", use_container_width=True):
+        if st.button("⏹ Stop all", width='stretch'):
             os.makedirs(os.path.dirname(_paused_file), exist_ok=True)
             with open(_paused_file, 'w') as _f:
                 _f.write('1')
@@ -281,16 +281,11 @@ if _goal_html:
 # ======================================================================== #
 
 pages = [
-    st.Page("_pages/1_state.py",       title="State",       icon="🔮"),
-    st.Page("_pages/2_graph.py",       title="Graph",       icon="🕸️"),
+    st.Page("_pages/1_state.py",       title="Core",        icon="🧬"),
     st.Page("_pages/3_runner.py",      title="Runner",      icon="▶️"),
-    st.Page("_pages/4_timeline.py",    title="Timeline",    icon="📅"),
-    st.Page("_pages/5_ab.py",          title="A / B",       icon="🔀"),
-    st.Page("_pages/6_live.py",         title="Live Feed",   icon="⚡"),
-    st.Page("_pages/7_learnings.py",   title="Learnings",   icon="📖"),
-    st.Page("_pages/9_report_card.py", title="Report Card", icon="📊"),
     st.Page("_pages/0_meta_state.py",  title="Meta-State",  icon="🧠"),
     st.Page("_pages/10_cognition.py",  title="Cognition",   icon="💡"),
+    st.Page("_pages/11_config.py",     title="Settings",    icon="⚙️"),
 ]
 
 pg = st.navigation(pages)

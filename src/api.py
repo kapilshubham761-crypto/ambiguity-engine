@@ -119,10 +119,7 @@ def graph(max_nodes: int = 300):
 
 @app.get("/api/reflection")
 def reflection():
-    rc = _safe(lambda: __import__("report_card").ReportCard.get(), None)
-    if not rc:
-        return {}
-    return _safe(lambda: rc.latest(), {})
+    return _safe(lambda: __import__("reflection").ReflectionMonitor.get().report(), {})
 
 
 @app.get("/api/energy")

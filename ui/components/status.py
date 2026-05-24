@@ -84,12 +84,12 @@ def render_status_dot() -> None:
 
     _paused_file = os.path.join(_ROOT, 'data', 'paused.txt')
     if is_paused:
-        if st.sidebar.button("▶️ Resume", use_container_width=True, type="primary"):
+        if st.sidebar.button("▶️ Resume", width='stretch', type="primary"):
             os.makedirs(os.path.dirname(_paused_file), exist_ok=True)
             open(_paused_file, 'w').write('0')
             st.rerun()
     else:
-        if st.sidebar.button("⏹ Stop all", use_container_width=True):
+        if st.sidebar.button("⏹ Stop all", width='stretch'):
             os.makedirs(os.path.dirname(_paused_file), exist_ok=True)
             open(_paused_file, 'w').write('1')
             st.rerun()

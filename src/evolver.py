@@ -186,6 +186,22 @@ class Evolver:
     # Public API                                                           #
     # ------------------------------------------------------------------ #
 
+    def _live_int(self, key: str, fallback: int) -> int:
+        try:
+            from config import Config
+            v = Config.get_instance().get('evolver', key)
+            return int(v) if v is not None else fallback
+        except Exception:
+            return fallback
+
+    def _live_float(self, key: str, fallback: float) -> float:
+        try:
+            from config import Config
+            v = Config.get_instance().get('evolver', key)
+            return float(v) if v is not None else fallback
+        except Exception:
+            return fallback
+
     def tick(self) -> None:
         """Called from the background loop."""
         self._tick_count += 1
@@ -193,7 +209,9 @@ class Evolver:
         if m:
             self._history.append(m)
 
-        if self._tick_count % self._adapt_every == 0:
+        adapt_every = self._live_int('adapt_every', self._adapt_every)
+        if self._tick_count % adapt_every == 0:
+            self._max_delta = self._live_float('max_delta', self._max_delta)
             self._adapt()
 
     def current_params(self) -> dict:

@@ -1,13 +1,12 @@
 """
 Ambiguity Engine — always-on-top stats overlay.
 Run: python overlay.py
-Drag to reposition. Double-click to toggle compact/full mode.
+Drag to reposition. Click ⊟ to toggle compact/full.
 """
 
 import json
 import os
 import sys
-import time
 import tkinter as tk
 from datetime import datetime, timezone
 
@@ -17,37 +16,47 @@ try:
 except ImportError:
     HAS_PSUTIL = False
 
+try:
+    import pynvml
+    pynvml.nvmlInit()
+    _GPU_HANDLE = pynvml.nvmlDeviceGetHandleByIndex(0)
+    HAS_NVML = True
+except Exception:
+    HAS_NVML = False
+    _GPU_HANDLE = None
+
 _ROOT = os.path.dirname(os.path.abspath(__file__))
 _DATA = os.path.join(_ROOT, 'data')
 
-# ------------------------------------------------------------------ #
-# Colour palette                                                       #
-# ------------------------------------------------------------------ #
+# ── Palette ───────────────────────────────────────────────────────────────────
 BG        = '#0d0d0d'
 FG        = '#cccccc'
-DIM       = '#555555'
+DIM       = '#444444'
 ACCENT    = '#4a9eff'
 GREEN     = '#44ff88'
 RED       = '#ff4444'
 ORANGE    = '#ffaa44'
 PURPLE    = '#bb88ff'
 FONT_MONO = ('Consolas', 9)
-FONT_LG   = ('Consolas', 11, 'bold')
 FONT_SM   = ('Consolas', 8)
+FONT_XS   = ('Consolas', 7)
 
 STATUS_COLOURS = {
-    'fetching':  ACCENT,
-    'learning':  GREEN,
-    'filtering': ORANGE,
-    'assessing': PURPLE,
-    'paused':    RED,
-    'idle':      DIM,
+    'fetching': ACCENT,
+    'paused':   RED,
+    'idle':     DIM,
+}
+
+MODE_COLOURS = {
+    'focused':      '#f59e0b',
+    'exploratory':  '#3b82f6',
+    'associative':  '#8b5cf6',
+    'exploitative': '#ef4444',
+    'reflective':   '#10b981',
 }
 
 
-# ------------------------------------------------------------------ #
-# Data readers                                                         #
-# ------------------------------------------------------------------ #
+# ── Data readers ──────────────────────────────────────────────────────────────
 
 def _read(path):
     try:
@@ -59,52 +68,14 @@ def _read(path):
 
 def _engine_status():
     try:
-        if _read(os.path.join(_DATA, 'paused.txt')) is None:
-            raw = open(os.path.join(_DATA, 'paused.txt')).read().strip()
-            if raw == '1':
-                return 'paused'
-    except Exception:
-        pass
-    try:
         with open(os.path.join(_DATA, 'paused.txt')) as f:
             if f.read().strip() == '1':
                 return 'paused'
     except Exception:
         pass
-
-    q = _read(os.path.join(_DATA, 'teacher_queue.json'))
-    queue_size = len(q) if isinstance(q, list) else -1
-
-    stats = _read(os.path.join(_DATA, 'teacher_stats.json'))
-    if stats:
-        sessions = stats.get('sessions', [])
-        if sessions:
-            last = sessions[-1]
-            try:
-                last_dt = datetime.fromisoformat(last['ts'])
-                age = (datetime.now(tz=timezone.utc) - last_dt).total_seconds()
-                if age < 300:
-                    return 'learning' if last['action'] == 'accept' else 'filtering'
-            except Exception:
-                pass
-
-    cards = _read(os.path.join(_DATA, 'report_cards.json'))
-    if cards:
-        try:
-            last_dt = datetime.fromisoformat(cards[-1]['timestamp'])
-            age = (datetime.now(tz=timezone.utc) - last_dt).total_seconds()
-            if age < 120:
-                return 'assessing'
-        except Exception:
-            pass
-
     fs = _read(os.path.join(_DATA, 'fetch_status.json'))
     if fs and fs.get('fetching'):
         return 'fetching'
-
-    if queue_size == 0 or (0 < queue_size < 4):
-        return 'fetching'
-
     return 'idle'
 
 
@@ -123,181 +94,154 @@ def _fetch_elapsed():
     return None
 
 
+def _cog_status():
+    cs = _read(os.path.join(_DATA, 'cog_status.json'))
+    if cs:
+        return cs.get('mode', '—'), cs.get('goal', '—')
+    return '—', '—'
+
+
 def _stats():
     out = {}
-
-    # Queue
-    q = _read(os.path.join(_DATA, 'teacher_queue.json'))
-    out['queue'] = len(q) if isinstance(q, list) else 0
-
-    # Teacher stats
-    ts = _read(os.path.join(_DATA, 'teacher_stats.json'))
-    if ts:
-        out['accepted']  = ts.get('total_accepted', 0)
-        out['sentences'] = ts.get('total_sentences', 0)
-    else:
-        out['accepted'] = out['sentences'] = 0
-
-    # Graph — read from DB metadata or count nodes in queue
-    # Quick proxy: teacher_stats total_sentences ≈ graph richness
-    # Try graph node count via SQLite
-    db_path = os.path.join(_DATA, 'graph.db')
+    ls = _read(os.path.join(_DATA, 'learner_stats.json'))
+    out['sentences'] = ls.get('total_sentences', 0) if ls else 0
     try:
         import sqlite3
-        with sqlite3.connect(db_path) as con:
+        with sqlite3.connect(os.path.join(_DATA, 'graph.db')) as con:
             out['nodes'] = con.execute("SELECT COUNT(*) FROM nodes").fetchone()[0]
             out['edges'] = con.execute("SELECT COUNT(*) FROM edges").fetchone()[0]
     except Exception:
         out['nodes'] = out['edges'] = '?'
-
-    # Stage
-    stage_data = _read(os.path.join(_DATA, 'discovery_stage.json'))
-    out['stage'] = stage_data.get('stage', 0) if stage_data else 0
-
     return out
 
 
-# ------------------------------------------------------------------ #
-# Overlay window                                                       #
-# ------------------------------------------------------------------ #
+# ── Overlay ───────────────────────────────────────────────────────────────────
 
 class Overlay:
-    FULL_H    = 225
-    COMPACT_H = 54
+    FULL_H    = 290
+    COMPACT_H = 28
     WIDTH     = 220
 
     def __init__(self):
-        self.root = tk.Tk()
+        self.root    = tk.Tk()
         self.compact = False
         self._drag_x = self._drag_y = 0
 
         r = self.root
         r.title('')
-        r.overrideredirect(True)          # no title bar
-        r.wm_attributes('-topmost', True) # always on top
-        r.wm_attributes('-alpha', 0.88)   # slight transparency
+        r.overrideredirect(True)
+        r.wm_attributes('-topmost', True)
+        r.wm_attributes('-alpha', 0.90)
         r.configure(bg=BG)
         r.resizable(False, False)
 
-        # Position bottom-right of primary screen
         sw = r.winfo_screenwidth()
         sh = r.winfo_screenheight()
-        x  = sw - self.WIDTH - 16
-        y  = sh - self.FULL_H - 48
-        r.geometry(f'{self.WIDTH}x{self.FULL_H}+{x}+{y}')
+        r.geometry(f'{self.WIDTH}x{self.FULL_H}+{sw - self.WIDTH - 16}+{sh - self.FULL_H - 48}')
 
         self._build_ui()
         self._bind_drag()
-
-        # Start update loop
         self._update()
-
-    # -------------------------------------------------------------- #
-    # UI construction                                                  #
-    # -------------------------------------------------------------- #
 
     def _build_ui(self):
         r = self.root
 
-        # Top bar: status dot + label + close button
-        bar = tk.Frame(r, bg='#1a1a1a', height=28)
+        # ── Top bar ───────────────────────────────────────────────────
+        bar = tk.Frame(r, bg='#111111', height=28)
         bar.pack(fill='x')
         bar.pack_propagate(False)
 
-        self._dot = tk.Label(bar, text='●', font=('Consolas', 10),
-                             bg='#1a1a1a', fg=DIM)
-        self._dot.pack(side='left', padx=(8, 4), pady=4)
+        self._dot = tk.Label(bar, text='●', font=('Consolas', 9),
+                             bg='#111111', fg=DIM)
+        self._dot.pack(side='left', padx=(8, 3), pady=4)
 
         self._status_lbl = tk.Label(bar, text='idle', font=FONT_SM,
-                                    bg='#1a1a1a', fg=DIM)
+                                    bg='#111111', fg=DIM)
         self._status_lbl.pack(side='left', pady=4)
 
-        self._elapsed_lbl = tk.Label(bar, text='', font=FONT_SM,
-                                     bg='#1a1a1a', fg='#444444')
+        self._elapsed_lbl = tk.Label(bar, text='', font=FONT_XS,
+                                     bg='#111111', fg='#333333')
         self._elapsed_lbl.pack(side='left', padx=2)
 
-        close_btn = tk.Label(bar, text='✕', font=FONT_SM,
-                             bg='#1a1a1a', fg='#444444', cursor='hand2')
-        close_btn.pack(side='right', padx=8)
-        close_btn.bind('<Button-1>', lambda e: self.root.destroy())
+        tk.Label(bar, text='✕', font=FONT_SM, bg='#111111', fg='#333333',
+                 cursor='hand2').pack(side='right', padx=8).bind(
+                     '<Button-1>', lambda e: self.root.destroy()) if False else None
+        _close = tk.Label(bar, text='✕', font=FONT_SM, bg='#111111', fg='#333333', cursor='hand2')
+        _close.pack(side='right', padx=8)
+        _close.bind('<Button-1>', lambda e: self.root.destroy())
 
-        toggle_btn = tk.Label(bar, text='⊟', font=FONT_SM,
-                              bg='#1a1a1a', fg='#444444', cursor='hand2')
-        toggle_btn.pack(side='right', padx=4)
-        toggle_btn.bind('<Button-1>', lambda e: self._toggle_compact())
+        _tog = tk.Label(bar, text='⊟', font=FONT_SM, bg='#111111', fg='#333333', cursor='hand2')
+        _tog.pack(side='right', padx=2)
+        _tog.bind('<Button-1>', lambda e: self._toggle_compact())
 
-        # Body
+        # ── Body ──────────────────────────────────────────────────────
         self._body = tk.Frame(r, bg=BG)
-        self._body.pack(fill='both', expand=True, padx=10, pady=6)
+        self._body.pack(fill='both', expand=True, padx=10, pady=4)
 
-        # Row builder helper
-        def row(label, attr):
+        def row(label, attr, fg=FG):
             f = tk.Frame(self._body, bg=BG)
             f.pack(fill='x', pady=1)
-            tk.Label(f, text=label, font=FONT_SM, bg=BG, fg=DIM,
+            tk.Label(f, text=label, font=FONT_XS, bg=BG, fg='#555555',
                      width=10, anchor='w').pack(side='left')
-            lbl = tk.Label(f, text='—', font=FONT_MONO, bg=BG, fg=FG, anchor='e')
+            lbl = tk.Label(f, text='—', font=FONT_MONO, bg=BG, fg=fg, anchor='e')
             lbl.pack(side='right')
             setattr(self, attr, lbl)
 
-        # System
-        tk.Label(self._body, text='SYSTEM', font=FONT_SM,
-                 bg=BG, fg='#333333').pack(anchor='w', pady=(2, 0))
-        row('CPU', '_cpu_lbl')
-        row('RAM', '_ram_lbl')
+        def sep():
+            tk.Frame(self._body, bg='#1e1e1e', height=1).pack(fill='x', pady=3)
 
-        tk.Frame(self._body, bg='#222222', height=1).pack(fill='x', pady=4)
+        # Cognitive mode + goal
+        tk.Label(self._body, text='COGNITION', font=FONT_XS,
+                 bg=BG, fg='#2a2a2a').pack(anchor='w', pady=(2, 0))
+        row('mode',  '_mode_lbl', PURPLE)
+        row('goal',  '_goal_lbl', ACCENT)
+
+        sep()
+
+        # System
+        tk.Label(self._body, text='SYSTEM', font=FONT_XS,
+                 bg=BG, fg='#2a2a2a').pack(anchor='w')
+        row('CPU',  '_cpu_lbl')
+        row('RAM',  '_ram_lbl')
+        row('GPU',  '_gpu_lbl')
+
+        sep()
 
         # Engine
-        tk.Label(self._body, text='ENGINE', font=FONT_SM,
-                 bg=BG, fg='#333333').pack(anchor='w', pady=(0, 0))
-        row('nodes', '_nodes_lbl')
-        row('edges', '_edges_lbl')
-        row('queue', '_queue_lbl')
-        row('accepted', '_accepted_lbl')
+        tk.Label(self._body, text='ENGINE', font=FONT_XS,
+                 bg=BG, fg='#2a2a2a').pack(anchor='w')
+        row('nodes',     '_nodes_lbl')
+        row('edges',     '_edges_lbl')
         row('sentences', '_sentences_lbl')
-        row('stage', '_stage_lbl')
-        row('growth', '_growth_lbl')
+        row('growth',    '_growth_lbl')
 
-        self._warn_lbl = tk.Label(self._body, text='', font=FONT_SM,
+        sep()
+
+        self._updated_lbl = tk.Label(self._body, text='', font=FONT_XS,
+                                     bg=BG, fg='#2a2a2a', anchor='e')
+        self._updated_lbl.pack(fill='x')
+
+        self._warn_lbl = tk.Label(self._body, text='', font=FONT_XS,
                                   bg=BG, fg=RED, wraplength=190, justify='left')
-        self._warn_lbl.pack(anchor='w', pady=(2, 0))
-
-    # -------------------------------------------------------------- #
-    # Drag to reposition                                               #
-    # -------------------------------------------------------------- #
+        self._warn_lbl.pack(anchor='w')
 
     def _bind_drag(self):
-        self.root.bind('<ButtonPress-1>',   self._drag_start)
-        self.root.bind('<B1-Motion>',       self._drag_move)
-
-    def _drag_start(self, e):
-        self._drag_x = e.x
-        self._drag_y = e.y
+        self.root.bind('<ButtonPress-1>', lambda e: setattr(self, '_drag_x', e.x) or setattr(self, '_drag_y', e.y))
+        self.root.bind('<B1-Motion>',     self._drag_move)
 
     def _drag_move(self, e):
         x = self.root.winfo_x() + (e.x - self._drag_x)
         y = self.root.winfo_y() + (e.y - self._drag_y)
         self.root.geometry(f'+{x}+{y}')
 
-    # -------------------------------------------------------------- #
-    # Compact toggle                                                   #
-    # -------------------------------------------------------------- #
-
     def _toggle_compact(self):
         self.compact = not self.compact
         h = self.COMPACT_H if self.compact else self.FULL_H
-        x = self.root.winfo_x()
-        y = self.root.winfo_y()
-        self.root.geometry(f'{self.WIDTH}x{h}+{x}+{y}')
+        self.root.geometry(f'{self.WIDTH}x{h}+{self.root.winfo_x()}+{self.root.winfo_y()}')
         if self.compact:
             self._body.pack_forget()
         else:
-            self._body.pack(fill='both', expand=True, padx=10, pady=6)
-
-    # -------------------------------------------------------------- #
-    # Periodic update                                                  #
-    # -------------------------------------------------------------- #
+            self._body.pack(fill='both', expand=True, padx=10, pady=4)
 
     def _update(self):
         try:
@@ -310,54 +254,64 @@ class Overlay:
             self._elapsed_lbl.config(text=elapsed or '')
 
             if not self.compact:
-                # System stats
+                # Cognition
+                mode, goal = _cog_status()
+                mc = MODE_COLOURS.get(mode, PURPLE)
+                self._mode_lbl.config(text=mode, fg=mc)
+                self._goal_lbl.config(text=goal, fg=ACCENT)
+
+                # System
                 if HAS_PSUTIL:
                     cpu = psutil.cpu_percent(interval=None)
                     ram = psutil.virtual_memory()
-                    cpu_col = RED if cpu > 80 else ORANGE if cpu > 50 else GREEN
-                    ram_col = RED if ram.percent > 85 else ORANGE if ram.percent > 65 else FG
-                    self._cpu_lbl.config(text=f'{cpu:.1f}%', fg=cpu_col)
+                    self._cpu_lbl.config(
+                        text=f'{cpu:.1f}%',
+                        fg=RED if cpu > 80 else ORANGE if cpu > 50 else GREEN)
                     self._ram_lbl.config(
-                        text=f'{ram.percent:.1f}%  {ram.used/1e9:.1f}G', fg=ram_col)
+                        text=f'{ram.percent:.1f}%  {ram.used/1e9:.1f}G',
+                        fg=RED if ram.percent > 85 else ORANGE if ram.percent > 65 else FG)
                 else:
                     self._cpu_lbl.config(text='no psutil', fg=DIM)
-                    self._ram_lbl.config(text='pip install psutil', fg=DIM)
+                    self._ram_lbl.config(text='—', fg=DIM)
 
-                # Engine stats
+                if HAS_NVML and _GPU_HANDLE:
+                    try:
+                        util    = pynvml.nvmlDeviceGetUtilizationRates(_GPU_HANDLE)
+                        temp    = pynvml.nvmlDeviceGetTemperature(_GPU_HANDLE, pynvml.NVML_TEMPERATURE_GPU)
+                        mem     = pynvml.nvmlDeviceGetMemoryInfo(_GPU_HANDLE)
+                        gpu_pct = util.gpu
+                        self._gpu_lbl.config(
+                            text=f'{gpu_pct}%  {mem.used/1e9:.1f}G  {temp}°C',
+                            fg=RED if gpu_pct > 80 else ORANGE if gpu_pct > 50 else GREEN)
+                    except Exception:
+                        self._gpu_lbl.config(text='nvml err', fg=DIM)
+                else:
+                    self._gpu_lbl.config(text='no nvml', fg=DIM)
+
+                # Engine
                 s = _stats()
-                self._nodes_lbl.config(text=str(s['nodes']))
-                self._edges_lbl.config(text=str(s['edges']))
-
-                q_col = GREEN if s['queue'] >= 5 else ORANGE if s['queue'] > 0 else RED
-                self._queue_lbl.config(text=str(s['queue']), fg=q_col)
-                self._accepted_lbl.config(text=str(s['accepted']))
+                self._nodes_lbl.config(text=f"{s['nodes']:,}" if isinstance(s['nodes'], int) else '?')
+                self._edges_lbl.config(text=f"{s['edges']:,}" if isinstance(s['edges'], int) else '?')
                 self._sentences_lbl.config(text=f"{s['sentences']:,}")
 
-                from auto_discover import CURRICULUM
-                stage_label = CURRICULUM[s['stage']]['label'] if s['stage'] < len(CURRICULUM) else str(s['stage'])
-                self._stage_lbl.config(text=stage_label[:18])
-
-                # Growth rate from log
                 growth_str = '—'
                 try:
-                    glog = os.path.join(_DATA, 'growth_log.jsonl')
-                    lines = open(glog, encoding='utf-8').readlines()
+                    lines = open(os.path.join(_DATA, 'growth_log.jsonl'), encoding='utf-8').readlines()
                     if len(lines) >= 2:
-                        first = json.loads(lines[0])
-                        last  = json.loads(lines[-1])
-                        delta_nodes = last['nodes'] - first['nodes']
-                        growth_str  = f"+{delta_nodes:,} total"
+                        delta = json.loads(lines[-1])['nodes'] - json.loads(lines[0])['nodes']
+                        growth_str = f"+{delta:,} nodes"
                 except Exception:
                     pass
                 self._growth_lbl.config(text=growth_str)
 
-                # Graph size warning
+                self._updated_lbl.config(text=f"updated {datetime.now().strftime('%H:%M:%S')}")
+
                 warn = ''
                 if isinstance(s['nodes'], int):
                     if s['nodes'] >= 150_000:
-                        warn = f"CRITICAL: {s['nodes']:,} nodes — pause learning!"
+                        warn = f"CRITICAL: {s['nodes']:,} nodes!"
                     elif s['nodes'] >= 50_000:
-                        warn = f"Large: {s['nodes']:,} nodes — monitor RAM"
+                        warn = f"Large: {s['nodes']:,} nodes"
                 self._warn_lbl.config(text=warn)
 
         except Exception:
@@ -368,10 +322,6 @@ class Overlay:
     def run(self):
         self.root.mainloop()
 
-
-# ------------------------------------------------------------------ #
-# Entry point                                                          #
-# ------------------------------------------------------------------ #
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.join(_ROOT, 'src'))

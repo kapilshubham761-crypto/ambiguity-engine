@@ -113,12 +113,27 @@ class EnergyBudget:
     # Public API                                                           #
     # ------------------------------------------------------------------ #
 
+    def _live_cost(self, activity: str) -> float:
+        """Read activity cost from live config, fall back to init value."""
+        try:
+            from config import Config
+            key_map = {
+                'simulation_per_step': 'cost_simulation',
+                'exploration':         'cost_exploration',
+                'region_switch':       'cost_region_switch',
+                'abstraction_run':     'cost_abstraction',
+            }
+            v = Config.get_instance().get('energy', key_map.get(activity, ''))
+            return float(v) if v is not None else self._costs.get(activity, 0.05)
+        except Exception:
+            return self._costs.get(activity, 0.05)
+
     def spend(self, activity: str, units: int = 1) -> bool:
         """
         Attempt to spend energy for activity.
         Returns True if affordable; deducts cost.  False = skip.
         """
-        cost = self._costs.get(activity, 0.05) * units
+        cost = self._live_cost(activity) * units
         if self._current < cost:
             self._denied_count += 1
             log.debug('energy: DENIED %s (have=%.3f need=%.3f)',
@@ -132,7 +147,13 @@ class EnergyBudget:
 
     def replenish(self) -> None:
         """Called each background tick to restore energy."""
-        self._current = min(self._total, self._current + self._replenish_rate)
+        try:
+            from config import Config
+            rate = Config.get_instance().get('energy', 'replenish_per_tick')
+            rate = float(rate) if rate is not None else self._replenish_rate
+        except Exception:
+            rate = self._replenish_rate
+        self._current = min(self._total, self._current + rate)
         self._save()
 
     def level(self) -> float:

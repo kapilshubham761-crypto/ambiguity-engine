@@ -1,590 +1,533 @@
-# Ambiguity Engine — Architecture Node Tree
+# Ambiguity Engine — Cognitive Architecture
 
-This file IS the structural guide.
-Every node = one file with one job.
-Every arrow (──►) = an actual import.
-If it is not in this tree, it does not belong in the project.
+## Overview
+
+8 layers · 24 modules · 20 data files  
+Closed loop: raw text → concepts → graph → working memory → reasoning → stability → goals → identity → adaptation
+
+**LLM:** Qwen 2.5 via Ollama (`localhost:11434`) — wired into Runner page  
+**Graph layout:** UMAP on 384-dim embeddings (semantic proximity, not spiral)  
+**GPU monitoring:** pynvml overlay (load % · VRAM · temp)  
+**Ego system:** up to 3 named personality presets, saved in engine_config.json
+
+---
+
+## Quick Process Map (as shown on Dashboard)
 
 ```
-AMBIGUITY ENGINE
-│
-├── config.yaml                         ← weights, model, decay, embedding settings
-│
-├── ══ PIPELINE (src/) ══════════════════════════════════════════════════════════
-│   │
-│   ├── logger.py            [L]        ← shared structured logger
-│   │       get_logger(name)            returns a file+console Logger
-│   │       └──► used by [E][F][G][I][J]
-│   │
-│   ├── protocols.py         [0]        ← abstract interfaces (DIP contracts)
-│   │       IGraph                      node_count, edge_count, update(), save()
-│   │       IQueue                      add(), remove(), list(), size(), known_urls()
-│   │       IHomework                   generate(), tick(), all(), pending()
-│   │       ILessonSource               search(), fetch()
-│   │       IMetaState                  reinforce(), decay_to(), active(), top(), snapshot()
-│   │       IAttention                  bias(candidates, scores, meta, strength) → list
-│   │       ITension                    observe(concept, score), hot(n), is_hot(concept)
-│   │       INovelty                    observe(concept), novelty_score(concept), snapshot()
-│   │       IRegions                    assign(), active_region(), nodes_in(region)
-│   │       IStability                  tick(meta), entropy(), current_mode(), mode_weights(), snapshot()
-│   │       └──► imported by [D][K][M][N][T][R][V][S] — all cognition nodes depend on shapes
-│   │
-│   ├── curriculum.py        [A]        ← pure data  (zero imports, zero logic)
-│   │       CURRICULUM[]               8 stages: label, description, topics[]
-│   │       STAGE_CONFIG[]             per-stage: sources, modifiers, min_readability
-│   │       STAGE_TARGETS{}            min nodes + edges per stage (for grading)
-│   │       └──► imported by [D][H][I] and shims
-│   │
-│   ├── sources.py           [B]        ← search + fetch  (7 source adapters)
-│   │       SOURCES{}                  {name: (search_fn, fetch_fn)}
-│   │       SOURCE_LABELS{}            emoji-prefixed display names
-│   │       SOURCE_DESCRIPTIONS{}      one-liner per source
-│   │       search_sources(q, srcs)    run search across selected sources
-│   │       fetch_content(item)        lazy full-text fetch for one result
-│   │       _flesch_score(text)        Flesch Reading Ease (readability gate)
-│   │       _sentences(text)           spaCy sentence splitter
-│   │       └──► imported by [D]
-│   │
-│   ├── queue_mgr.py         [C]        ← lesson queue CRUD
-│   │       class LessonQueue          implements IQueue
-│   │         add(lesson)
-│   │         remove(lesson_id)
-│   │         list() → list[dict]
-│   │         size() → int
-│   │         known_urls() → set[str]
-│   │         get(lesson_id) → dict|None
-│   │         clear()
-│   │         reload()
-│   │       └──► injected into [D] Teacher constructor
-│   │
-│   ├── homework.py          [H]        ← homework tracking
-│   │       class HomeworkTracker      implements IHomework
-│   │         generate(stage, graph, meta=None)
-│   │           scan coverage gaps → assign 15 topics
-│   │           s5-5: inject hot [T] tension concepts as extra assignments
-│   │           s4-4: bias_topics([N]) reranks by pressure + inverse coverage
-│   │           Phase B3: curiosity pull — inject novelty×tension scored concepts
-│   │             curiosity_pull_prob from config; source="curiosity"
-│   │           Phase B4: escape injection — if check_loop(), add escape_concepts()
-│   │             source="escape"
-│   │         tick(topic)              mark done on accept
-│   │         all() → list[dict]
-│   │         pending() → list[dict]
-│   │         pending_topics() → list[str]
-│   │         reload()
-│   │       └──► injected into [D] Teacher constructor
-│   │             imports [A] curriculum (for topics list)
-│   │             imports [N] attention.bias_topics, [T] TensionTracker
-│   │             imports [V] NoveltyTracker for B3 curiosity + B4 escape
-│   │
-│   ├── teacher.py           [D]        ← ORCHESTRATOR  (runs 24/7)
-│   │       REGIONS{}                  12-region spherical grid
-│   │       _GRID[]                    3×4 display layout
-│   │       load_prefs() / save_prefs()
-│   │       class Teacher(queue: IQueue, homework: IHomework)
-│   │         │
-│   │         ├── Pause / Resume
-│   │         │     is_paused (property)  reads paused.txt on every call
-│   │         │     pause() / resume()
-│   │         │
-│   │         ├── Stage control
-│   │         │     _current_stage()      reads discovery_stage.json
-│   │         │     set_stage(index)      clears queue on stage change
-│   │         │     advance_stage()
-│   │         │
-│   │         ├── Public read
-│   │         │     .queue .status .stats .homework
-│   │         │
-│   │         ├── Lesson actions
-│   │         │     accept(lesson_id, graph)
-│   │         │       └─► [B] fetch_content()       lazy full-text fetch
-│   │         │       └─► [E] extract()              concepts
-│   │         │       └─► [G] detect_and_log()       ambiguity score → [T][V] observers
-│   │         │       └─► [F] graph.update() + graph.save()
-│   │         │       └─► [M] meta.reinforce(all_texts)
-│   │         │       └─► [R] regions.assign()      re-partition after growth (Phase C)
-│   │         │     reject(lesson_id)
-│   │         │
-│   │         ├── Check-in  (every 3 hours)
-│   │         │     check_in(graph)
-│   │         │       └─► [I] assess() + save_card()
-│   │         │       └─► [H] homework.generate()
-│   │         │     next_checkin_in() → str
-│   │         │
-│   │         ├── Refill  (fast path — search only, no full fetch)
-│   │         │     _refill()
-│   │         │       s4-3: bias_sources([N]) reranks sources by active concepts
-│   │         │       └─► [B] SOURCES[src](query)   parallel threads
-│   │         │       └─► writes fetch_status.json
-│   │         │
-│   │         └── Background thread
-│   │               start(graph)
-│   │               start(graph) injects [R] RegionIndex → [M] set_region_index()
-│   │               loop every 60s:
-│   │                 1. sync paused flag from paused.txt
-│   │                 2. gate on graph size (GRAPH_LIMIT_NODES = 150k)
-│   │                 3. _refill() if queue < MIN_LESSONS (5)
-│   │                 4. auto-accept all queued lessons (if enabled)
-│   │                 5. _write_growth() → growth_log.jsonl
-│   │                 6. check_in() if 3h elapsed
-│   │                 7. meta.decay_to() — write back decayed values
-│   │                 8. [V] NoveltyTracker.snapshot_top5(meta) — anti-loop clock (B4)
-│   │                 9. [S] StabilityMonitor.tick(meta) — entropy + mode update (D2/D3)
-│   │
-│   ├── extractor.py         [E]        ← concept extraction
-│   │       Concept(text, embedding, source)   named tuple
-│   │       extract(text) → list[Concept]
-│   │         step 1  noun chunks         spaCy en_core_web_sm
-│   │         step 2  named entities      PERSON, ORG, GPE, LOC …
-│   │         step 3  fallback tokens     for short / abstract inputs
-│   │         step 4  deduplicate + filter generics
-│   │         step 5  batch embed         MiniLM all-MiniLM-L6-v2 (384-dim, cached)
-│   │       └──► called by [D] teacher.accept(), [CLI] feed.py
-│   │
-│   ├── graph.py             [F]        ← semantic graph
-│   │       class SemanticGraph          implements IGraph
-│   │         update(concepts)           resolve/create nodes, update edges
-│   │           _resolve_or_create()
-│   │             string match           fast path
-│   │             cosine ≥ 0.85         merge node
-│   │             no match              new node (uuid)
-│   │           _update_edges()
-│   │             cosine < 0.05         skip
-│   │             edge exists           weight × 1.10
-│   │             new edge              weight = cosine similarity
-│   │         save()                    → SQLite (nodes + edges tables)
-│   │         snapshot()                → snapshots/YYYY-MM-DD.json
-│   │         _load_from_db()           on startup
-│   │       └──► called by [D] teacher, [J] maintenance, [CLI] feed.py
-│   │             triggers [J] maintenance on __init__
-│   │
-│   ├── detector.py          [G]        ← ambiguity detection
-│   │       AmbiguityResult(score, level, variance, cluster, bridge, …)
-│   │       detect(concepts, graph) → AmbiguityResult
-│   │         variance   mean pairwise cosine distance    weight 0.45
-│   │         cluster    k=2 KMeans centroid separation   weight 0.45
-│   │         bridge     graph neighbourhood divergence   weight 0.10
-│   │         level      score < 0.30 → low
-│   │                    score < 0.60 → medium
-│   │                    score ≥ 0.60 → high
-│   │       detect_and_log(text, concepts, graph) → logs + returns
-│   │         s5-3: observe(concept, score) into [T] TensionTracker for each concept
-│   │         Phase B1: observe(concept) into [V] NoveltyTracker for each concept
-│   │       └──► logs to logs/ambiguity_scores.jsonl
-│   │             called by [D] teacher.accept(), [CLI] feed.py
-│   │
-│   ├── modulator.py         [K]        ← prompt modulation + A/B
-│   │       ModulationResult(level, system_prompt, neighbours, concept_list, meta_concepts)
-│   │       build_prompt(concepts, result, graph, meta=None) → ModulationResult
-│   │         low    → bare clean prompt
-│   │         medium → inject 5 graph neighbours + 2 [M] pressure concepts
-│   │         high   → tension framing + 8 neighbours + 3 [M] pressure concepts
-│   │         s4-5: _get_neighbours() calls bias_neighbours([N]) before slicing
-│   │       call_llm(input, prompt, cfg) → str
-│   │         └─► POST localhost:11434 (Ollama / Qwen 2.5 3B)
-│   │       run_ab(input, concepts, result, graph, meta=None) → dict
-│   │         └──► logs to logs/ab_log.jsonl (includes meta_concepts field)
-│   │       └──► called by [UI] 3_runner.py, 5_ab.py
-│   │             imports [N] attention.bias_neighbours, [0] IMetaState
-│   │
-│   ├── assessor.py          [I]        ← assessment + grading
-│   │       Assessment(dataclass)        all fields typed
-│   │       assess(graph, stage, prev) → Assessment
-│   │         breadth      nodes / stage_target
-│   │         depth        edge density + avg weight
-│   │         activation   avg activation_count
-│   │         calibration  ambiguity score spread (std-dev)
-│   │         velocity     node/edge growth since last check-in
-│   │         overall      GPA average → A+ … F
-│   │         narrative    one-sentence teacher comment
-│   │       save_card(assessment) / load_cards() → list[dict]
-│   │       ensure_birthdate()
-│   │       └──► imports STAGE_TARGETS from [A] curriculum
-│   │             called by [D] teacher.check_in()
-│   │
-│   ├── maintenance.py       [J]        ← decay + pruning  (daily gate)
-│   │       run_maintenance(graph, force=False) → summary dict
-│   │         apply_decay()             weight × 0.99 ^ days_since_update
-│   │         prune_weak_edges()        drop weight < 0.10
-│   │         prune_orphan_nodes()      no edges for ≥ 14 days
-│   │       preview_maintenance(graph) → dry-run dict (no changes)
-│   │       └──► called by [F] graph.__init__() (daily gate via stamp file)
-│   │
-│   ├── meta_state.py        [M]        ← cognitive pressure layer  (ephemeral)
-│   │       MetaState(path)             lazy time-based decay — no thread, crash-safe
-│   │         reinforce(texts, gain)    sigmoid gain: a += g*(1-a); fatigue × cooling
-│   │           Phase A1: sigmoid saturation    gain bounded by (1-current)
-│   │           Phase A2: reinforcement fatigue  1/(1+hits*k) within window
-│   │           Phase A3: cooling               r^(t*(1+alpha*a0)) reduces hot concepts faster
-│   │         decay_to(now)            write-back decayed values; prune < 0.001
-│   │         active(threshold, region) → dict  {text: activation}  — decay on read
-│   │         top(n) → list[tuple]     top-n (text, activation) pairs, decay-aware
-│   │         snapshot() → dict        full state incl. active_region, region_count
-│   │         set_region_index(ri)     DI: inject RegionIndex for spatial pools
-│   │         Phase C: _regional pools per community; _elect_active_region()
-│   │           suppresses non-active region activations by suppression_factor
-│   │           _maybe_revive_dormant(): latent_recall_prob revival from _dormant
-│   │         Phase D1: _maybe_normalise()
-│   │           proportional or softmax rescale when mean activation > threshold
-│   │       Decay formula:  a(t) = a₀ × r^(t*(1+alpha*a₀))  (cooling-adjusted)
-│   │       Storage:        {entries, regional, active_region, dormant}
-│   │       MetaState.get() singleton; direct instantiation for DI
-│   │       └──► updated by [D] teacher.accept() (reinforce) + background tick (decay_to)
-│   │             [D] start() injects RegionIndex via set_region_index()
-│   │             persisted → data/meta_state.json
-│   │
-│   ├── attention.py         [N]        ← attention biasing  (pure, no side effects)
-│   │       bias(candidates, scores, meta, strength,
-│   │            novelty_scores, novelty_strength) → list
-│   │         biased = score × (1 + strength*act + novelty_strength*n_score)
-│   │         strength=0.0 → pure no-op (safe before Pause II ramp)
-│   │         s5-6: hot [T] tension concepts get extra activation bump (mean × 0.5)
-│   │         Phase B2: novelty_strength term boosts unseen concepts
-│   │       bias_neighbours(neighbours, scores, meta) → list[str]   s4-5 call site
-│   │         fetches novelty scores from [V] NoveltyTracker if novelty_strength > 0
-│   │       bias_sources(sources, meta) → list[str]                  s4-3 call site
-│   │         scores by _SOURCE_DOMAINS keyword overlap with active concepts
-│   │       bias_topics(assignments, meta) → list[dict]              s4-4 call site
-│   │         base_score = 1 − coverage  (least-known first, then meta-boosted)
-│   │       _strength()         reads attention.bias_strength from config.yaml live
-│   │       _novelty_strength() reads attention.novelty_strength from config.yaml live
-│   │       └──► called by [K] modulator, [D] teacher._refill, [H] homework.generate
-│   │             imports [T] TensionTracker for hot-concept boost
-│   │             imports [V] NoveltyTracker for B2 novelty scores
-│   │
-│   ├── tension.py           [T]        ← ambiguity tension tracker  (exploration attractors)
-│   │       TensionTracker(path)        rolling-window per-concept ambiguity scores
-│   │         observe(concept, score)   append to deque(maxlen=window_size); atomic save
-│   │         hot(n) → list[str]        top-n where mean ≥ hot_threshold AND obs ≥ min_obs
-│   │         is_hot(concept) → bool    single-concept hot check
-│   │         mean(concept) → float     mean ambiguity score for a concept
-│   │         observations(concept) → int
-│   │         snapshot() → dict         full window state for UI
-│   │       TensionTracker.get()        singleton
-│   │       └──► fed by [G] detect_and_log() (s5-3) after every detection
-│   │             consumed by [H] homework.generate (s5-5) + [N] attention.bias (s5-6)
-│   │             persisted → data/tension.json
-│   │
-│   ├── novelty.py           [V]        ← novelty pressure tracker  (Phase B)
-│   │       NoveltyTracker(path)        exposure counting + loop detection
-│   │         observe(concept)          increment times_seen; atomic save to novelty.json
-│   │         novelty_score(concept)    1 / log(times_seen + e)  → 1.0 unseen, →0 old
-│   │         snapshot_top5(meta)       record meta.top(5) into rolling deque (Phase B4)
-│   │         check_loop()             True if Jaccard ≥ overlap_threshold for ≥ min_repeats
-│   │         escape_concepts(exclude) low-seen concepts for anti-loop injection
-│   │         most_novel(n, exclude)   top-n by novelty score
-│   │       NoveltyTracker.get()       singleton
-│   │       Phase B1 call site: [G] detect_and_log() — observe() after every detection
-│   │       Phase B2 call site: [N] bias_neighbours() — novelty_score() for ranking
-│   │       Phase B3 call site: [H] homework.generate() — curiosity pull
-│   │       Phase B4 call site: [D] background tick — snapshot_top5() + check_loop()
-│   │       └──► persisted → data/novelty.json (atomic write)
-│   │
-│   ├── stability.py         [S]        ← stability monitor + cognitive modes  (Phase D)
-│   │       StabilityMonitor()          entropy monitor + 5-mode cognitive controller
-│   │         tick(meta)               compute Shannon entropy from meta.top(20)
-│   │         entropy() → float        latest normalised entropy [0, 1]
-│   │         mean_entropy() → float   rolling mean over window
-│   │         is_overloaded()          entropy < entropy_min (too focused)
-│   │         is_diffuse()             entropy > entropy_max (too scattered)
-│   │         current_mode(meta, regions) → str
-│   │           exploratory  entropy > max           (scattered)
-│   │           associative  region_count ≥ 3         (multi-domain)
-│   │           focused      entropy < min + tension  (grinding one cluster)
-│   │           exploitative entropy < min, no tension
-│   │           reflective   default stable state
-│   │         mode_weights() → dict    config multipliers for current mode
-│   │         snapshot() → dict        entropy, mode, history_len, is_stable
-│   │       StabilityMonitor.get()     singleton
-│   │       └──► called by [D] background tick every 60s
-│   │             imports [T] TensionTracker for tension level in mode selection
-│   │
-│   ├── regions.py           [R]        ← region index  (Phase C — real Louvain)
-│   │       RegionIndex(graph=None)     implements IRegions
-│   │         assign()                  greedy_modularity_communities; whole-graph fallback
-│   │                                   skips if graph < min_graph_size (200) nodes
-│   │         region_for(concept_text) → region_id | None
-│   │         bridge_score(concept_text) → fraction of neighbours in other regions
-│   │         bridge_nodes(threshold)   list of bridging concept texts
-│   │         nodes_in(region) → list   node IDs; None → all nodes
-│   │         active_region() → str | None
-│   │         set_active_region(id)
-│   │         region_count() → int
-│   │         _compute_bridge_scores()  topology-based; no embeddings needed
-│   │       Whole-graph fallback:       small graph or detection failure → one region
-│   │       └──► injected into [M] MetaState via set_region_index() from [D] start()
-│   │             assign() called in [D] accept() after every graph.save()
-│   │
-│   ├── ── V3 — Deep Memory & Reasoning ──────────────────────────────────────
-│   │   │
-│   │   ├── memory.py            [Mem]  ← temporal memory layers  (V3 Step 1)
-│   │   │     TemporalMemory(path)      3-layer memory: working / episodic / semantic
-│   │   │       reinforce(concepts)     always→working; promote to episodic→semantic
-│   │   │         working decay:   0.97^min  (fast — recency)
-│   │   │         episodic decay:  0.9997^min (~4h half-life)
-│   │   │         semantic decay:  0.99997^min (~7-day half-life)
-│   │   │       value(concept)     weighted aggregate [working=0.5, ep=0.35, sem=0.15]
-│   │   │       top_working(n)     most recent attention
-│   │   │       top_semantic(n)    deepest consolidated knowledge
-│   │   │       decay_to(now)      prune dead entries across all layers
-│   │   │     TemporalMemory.get() singleton
-│   │   │     └──► reinforced by [D] teacher.accept() alongside meta_state
-│   │   │           read by [P] Predictor, [Sim] Simulator, [Rf] ReflectionMonitor
-│   │   │           persisted → data/memory.json
-│   │   │
-│   │   ├── episodes.py          [Ep]   ← episodic trace graph  (V3 Step 2)
-│   │   │     EpisodeStore()            persists episodes + directed transition graph
-│   │   │       record(concepts, ambiguity, region, outcome)
-│   │   │         → saves episode to episodes.jsonl (rolling 1000)
-│   │   │         → updates transition edges: A→B weight += 1 × decay EMA
-│   │   │       transitions_from(concept) → dict[next, weight]
-│   │   │       recent(n) → last n episodes
-│   │   │       strongest_paths(n) → top transition edges
-│   │   │       cooccurrence_matrix() → dict for [Ab] cluster detection
-│   │   │     EpisodeStore.get() singleton
-│   │   │     └──► fed by [D] teacher.accept() after each lesson
-│   │   │           read by [P] Predictor, [Ab] Abstractor
-│   │   │           persisted → data/episodes.jsonl + data/transitions.json
-│   │   │
-│   │   ├── predictor.py         [P]    ← predictive activation engine  (V3 Step 3)
-│   │   │     Predictor()               reads [Ep] transitions, outputs next-concept probs
-│   │   │       predict(context_concepts) → list[(concept, probability)]
-│   │   │         aggregate transition weights from all context concepts
-│   │   │         normalise to probability distribution
-│   │   │       pre_activate(context, memory)
-│   │   │         push top-K predictions into [Mem] working with pre_activation_gain
-│   │   │     Predictor.get() singleton
-│   │   │     └──► called by [D] teacher.accept() after episode recording
-│   │   │           called by [Sim] Simulator for trajectory propagation
-│   │   │
-│   │   ├── contradiction.py     [X]    ← contradiction registry  (V3 Step 4)
-│   │   │     ContradictionRegistry()   detects + preserves incompatible activations
-│   │   │       observe(concepts)       detect: hot(A) ∧ hot(B) ∧ A→B ∧ B→A (bidirectional)
-│   │   │       register(a, b, type)    manual contradiction injection
-│   │   │       unresolved() → list     active open contradictions
-│   │   │       resolve(id)             mark resolved
-│   │   │       snapshot() → dict       {total, open, resolved, top_open}
-│   │   │     ContradictionRegistry.get() singleton
-│   │   │     └──► fed by [D] teacher.accept() on every lesson
-│   │   │           read by [Rf] ReflectionMonitor, [Go] GoalEngine
-│   │   │           persisted → data/contradictions.json
-│   │   │
-│   │   ├── simulator.py         [Sim]  ← internal simulation space  (V3 Step 5)
-│   │   │     Simulator()               pure-functional sandbox cognition
-│   │   │       simulate(context_concepts, steps) → SimResult
-│   │   │         copies working memory snapshot → scratchpad (no mutation)
-│   │   │         runs [P] predict() propagation for steps iterations
-│   │   │         records concept trajectory at each step
-│   │   │         returns {steps:[], total_concepts_touched, terminal_concepts}
-│   │   │       simulate_goal(goal_keyword) → SimResult
-│   │   │     Simulator.get() singleton
-│   │   │     └──► stateless — safe to call any time without side effects
-│   │   │           used by UI / reflection / future planning layer
-│   │   │
-│   │   ├── reflection.py        [Rf]   ← self-reflection layer  (V3 Step 6)
-│   │   │     ReflectionMonitor()       aggregates metrics from all cognitive subsystems
-│   │   │       report() → dict         {mode, entropy, active_count, novelty_balance,
-│   │   │                                ambiguity_load, open_contradictions,
-│   │   │                                semantic_depth, goal, flags[]}
-│   │   │       describe() → str        one-line natural language cognitive summary
-│   │   │       Pathology flags:
-│   │   │         over_fixating   entropy < 0.20
-│   │   │         drifting        entropy > 0.80
-│   │   │         looping         repetition_rate > 0.80
-│   │   │         stuck           contradictions > 5 and low novelty
-│   │   │     ReflectionMonitor.get() singleton
-│   │   │     └──► called by [D] background tick every tick_every=5 cycles
-│   │   │           reads [S][M][V][T][X][Mem][Go]  — non-invasive, read-only
-│   │   │           persisted → data/reflection.json
-│   │   │
-│   │   ├── abstractor.py        [Ab]   ← concept abstractor  (V3 Step 7)
-│   │   │     Abstractor()              detects recurring co-occurrence clusters
-│   │   │       run() → list[AbstractConcept]
-│   │   │         reads [Ep] cooccurrence_matrix()
-│   │   │         greedy cluster detection (union-find on co-occurrence graph)
-│   │   │         emergence_score = internal edge density / max_edges
-│   │   │         AbstractConcept: {name="~"+central, members, emergence_score,
-│   │   │                            stability, reuse_frequency}
-│   │   │         stability = fraction of members still in [Mem] semantic layer
-│   │   │       stable(min_stability) → subset list
-│   │   │     Abstractor.get() singleton
-│   │   │     └──► called by [D] check_in() every 3h
-│   │   │           persisted → data/abstractions.json
-│   │   │
-│   │   └── goals.py             [Go]   ← goal formation engine  (V3 Step 8)
-│   │         GoalEngine()              emergent intrinsic drives via score competition
-│   │           Five drives:
-│   │             reduce_uncertainty    signal = ambiguity_load
-│   │             increase_novelty      signal = 1 − novelty_balance
-│   │             resolve_contradiction signal = open_contradictions / 10
-│   │             maintain_stability    signal = |entropy − 0.5| × 2
-│   │             expand_regions        signal = 1 / region_count
-│   │           goal = argmax(weight × signal)
-│   │           current_goal() → str
-│   │           drive_scores() → dict
-│   │           tick() → str   (recomputes every update_every=10 ticks)
-│   │         GoalEngine.get() singleton
-│   │         └──► ticked by [D] background loop every 60s
-│   │               read by [Rf] ReflectionMonitor for describe()
-│   │
-│   ├── ── CLI tools ──────────────────────────────────────────────────────────
-│   │   └── feed.py                     ← batch feeder: text file → pipeline
-│   │         feed(path, label)
-│   │           for each line: [E]extract → [G]detect_and_log → [F]update
-│   │           then [F]save + snapshot
-│   │
-│   ├── ── Shims (backward-compat re-exports) ─────────────────────────────────
-│   │   ├── discover.py                 → from sources import *
-│   │   ├── report_card.py              → from assessor import *
-│   │   └── auto_discover.py            → imports [A][B], keeps AutoDiscovery class
-│   │
-│   └── ── Tests + Validation ─────────────────────────────────────────────────
-│       ├── smoke_test.py
-│       ├── validate_extractor.py
-│       ├── validate_graph.py
-│       ├── validate_detector.py
-│       ├── validate_modulator.py
-│       ├── validate_maintenance.py
-│       ├── validate_meta_state.py      14 cases: decay math, cap, clamp, atomic write
-│       ├── eval_baseline.py            Pause II: 30-prompt A/B suite at bias_strength=0
-│       ├── test_discover.py
-│       └── eval_prompts.py
-│
-├── ══ UI (ui/) ══════════════════════════════════════════════════════════════
-│   │
-│   ├── _path.py                        ← sys.path bootstrap (imported by all pages)
-│   │
-│   ├── app.py                          ← ENTRY POINT + ROUTER
-│   │     boot splash                   4s CSS animation, once per browser session
-│   │     status detection              reads data/ files → (word, colour)
-│   │     sidebar                       Stop/Resume + animated dot + fetch timer
-│   │     st.navigation()               routes to _pages/
-│   │     └──► uses components/status.py for status_word_and_colour()
-│   │
-│   ├── components/                     ← SHARED WIDGETS  (ISP: one concern per file)
-│   │   │
-│   │   ├── status.py                   ← engine status display
-│   │   │     status_word_and_colour()  reads paused.txt + fetch_status.json
-│   │   │     render_status_dot()       sidebar dot + Stop/Resume button
-│   │   │     render_fetch_elapsed()    sidebar fetch timer line
-│   │   │
-│   │   ├── lesson_card.py              ← lesson card widget
-│   │   │     render_lesson_card(lesson, teacher, graph)
-│   │   │       Accept → teacher.accept() | Reject → teacher.reject()
-│   │   │
-│   │   └── grade_card.py               ← report card widgets
-│   │         render_grade_row(card)    6-column grade metrics
-│   │         render_syllabus(g, t)     curriculum milestone bars
-│   │         render_homework_board(t)  pending + done assignments
-│   │
-│   └── _pages/
-│         │
-│         ├── 0_meta_state.py 🧠 Meta-State
-│         │     mood banner · tensions · attractors · drift · momentum
-│         │     auto-refresh 30s · reads [M] MetaStateEngine.current()
-│         │
-│         ├── 1_state.py     🔮 State
-│         │     ① counters          nodes, edges, avg degree, last cleaned
-│         │     ② ambiguity chart   last 60 scores from ambiguity_scores.jsonl
-│         │     ③ maintenance       decay/prune sliders + dry-run preview
-│         │     ④ top concepts      most-activated nodes table
-│         │
-│         ├── 2_graph.py     🕸️ Graph
-│         │     controls      min-weight, max-nodes, brain filter, 3D, Split, Reset
-│         │     subgraph      filter → slice → prune low edges
-│         │     layout        spring_layout (2D) / random+z (3D large graphs)
-│         │     split mode    remap x by brain side → LEFT | BRIDGE | RIGHT
-│         │     figure        Plotly force-directed (2D or 3D)
-│         │
-│         ├── 3_runner.py    ▶️ Runner
-│         │     ① extract     concepts via [E] extractor
-│         │     ② detect      ambiguity via [G] detector
-│         │     ③ modulate    system prompt via [K] modulator
-│         │     ④ output      single LLM call or A/B side-by-side
-│         │
-│         ├── 4_timeline.py  📅 Timeline
-│         │     ① growth chart   growth_log.jsonl → line chart
-│         │     ② snapshot       browse any snapshots/YYYY-MM-DD.json
-│         │
-│         ├── 5_ab.py        🔀 A/B Evaluation
-│         │     tab 1  Run Suite     30 eval prompts → ab_log.jsonl
-│         │     tab 2  Blind Judge   random pair, no labels, pick winner
-│         │     tab 3  Results       win rate by level (low/medium/high)
-│         │     tab 4  Log           raw ab_log entries
-│         │
-│         ├── 6_discover.py  📚 Learn                (PRIMARY LESSON PAGE)
-│         │     stage selector   8 curriculum stages + progress bar
-│         │     location grid    12-region spherical map
-│         │     year filter      publication year range
-│         │     auto-accept      toggle autonomous graph growth
-│         │     lesson queue     card grid → accept / reject
-│         │     manual search    query any source → add to queue
-│         │     teaching log     recent session history
-│         │
-│         ├── 7_learnings.py 📖 Learnings
-│         │     tab 1  Concepts      searchable sortable node table
-│         │     tab 2  Connections   weighted edges + strongest pairs
-│         │     tab 3  Clusters      greedy modularity communities
-│         │     tab 4  Ambiguity     every scored input with metrics
-│         │
-│         └── 9_report_card.py 📊 Report Card
-│               birth certificate   age in days + node/edge totals
-│               grade row           6 letter grades (uses grade_card)
-│               teacher comment     one-line narrative
-│               tab 1  Progress     node/edge growth + GPA line chart
-│               tab 2  Syllabus     8 milestone cards (uses grade_card)
-│               tab 3  Homework     pending/done assignments (uses grade_card)
-│               tab 4  History      full card ledger table
-│
-├── ══ SUPPORT ══════════════════════════════════════════════════════════════
-│   ├── overlay.py                      ← always-on-top stats window (tkinter)
-│   │     CPU / RAM / nodes / edges / queue / stage / growth rate
-│   │     updates every 2s from data/ files
-│   ├── launch.bat                      ← overlay + Streamlit + open browser
-│   └── restart.bat                     ← quick restart (no overlay, no browser)
-│
-└── ══ DATA  (runtime files, all gitignored) ════════════════════════════════
-      data/
-        graph.db               SQLite: nodes table + edges table
-        teacher_queue.json     pre-fetched lesson queue (sentences lazy)
-        teacher_stats.json     session history, totals (last 500)
-        discovery_stage.json   current curriculum stage index {stage: N}
-        homework.json          topic assignments + coverage scores
-        report_cards.json      all assessment results (ledger)
-        paused.txt             "1" = paused  |  "0" = running
-        auto_accept.txt        "1" = autonomous  |  "0" = manual review
-        fetch_status.json      {fetching, started_at, needed}
-        growth_log.jsonl       append-only node/edge count snapshots
-        search_prefs.json      {region, year_from, year_to}
-        last_cleaned.txt       date stamp for daily maintenance gate
-        meta_state.json        {entries, regional, active_region, dormant} — lazy decay on read
-        tension.json           {concept: [score, …]} — rolling ambiguity windows per concept
-        novelty.json           {exposures: {concept: {times_seen, first/last_seen}}, top5_history}
-        memory.json            {working, episodic, semantic} — 3-layer temporal memory
-        episodes.jsonl         rolling 1000-episode sequence log
-        transitions.json       directed transition graph {A__SEP__B: {weight, count}}
-        contradictions.json    list of Contradiction objects
-        abstractions.json      list of AbstractConcept objects
-        reflection.json        last ReflectionMonitor.report() snapshot
-      logs/
-        ambiguity_scores.jsonl  every detect_and_log() output
-        ab_log.jsonl            modulated vs control response pairs
-        ab_judgments.jsonl      blind judge decisions
-        YYYY-MM-DD.log          structured pipeline logs
-      snapshots/
-        YYYY-MM-DD.json         daily graph exports
+ SOURCES          EXTRACTION          KNOWLEDGE            COGNITION             OUTPUT
+ ───────          ──────────          ─────────            ─────────             ──────
+ Wikipedia  ─┐                       SemanticGraph        MetaState             Runner
+ arXiv      ─┤                       (NetworkX +          (attention pool)  ──► (Qwen /
+ Gutenberg  ─┼─► fetch ─► sentences ─► SQLite)    ──────► TemporalMemory        Ollama)
+ Reddit     ─┤    10s                 nodes merge          (3 layers)
+ OpenAlex   ─┤    cycle               cosine≥0.85          Contradiction    ─┐
+ Web        ─┘                                             WorldModel        │
+                  spaCy NLP                                NoveltyTracker    │  graph.db
+                  (noun chunks)      episodes.jsonl        StabilityMonitor  │  grows each
+                  MiniLM embed  ───► transitions.json ───► GoalEngine   ─────┘  cycle
+                  384-dim            Abstractor (3h)       EnergyBudget
+                                                           SelfModel
+                                                           IdentityTracker
+                                                           Evolver  (adapt)
+                                                           Reflection
+                                                           CognitiveEcology
 ```
 
 ---
 
-## Rules for this tree
+## Structure Map
 
-1. **One node = one file = one job.** If a file has two jobs, split it.
-2. **Every arrow is an import.** If you add an import not shown above, add the arrow.
-3. **Shims are not nodes.** `discover.py`, `report_card.py`, `auto_discover.py` are
-   thin re-export wrappers — they have no logic of their own.
-4. **Tests live in their own branch.** They import from nodes but nothing imports them.
-5. **UI pages import from `src/` via `sys.path`.** No page imports another page.
-6. **UI components are shared widgets only.** No business logic inside `components/`.
-7. **`data/` is the only shared state.** No module writes to another module's file.
-8. **`config.yaml` is the only tuneable config.** No magic numbers scattered in code.
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                        AMBIGUITY ENGINE                                  ║
+║                    Cognitive Architecture Map                            ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 0 — INPUT / DISCOVERY                                            │
+│                                                                         │
+│  [sources.py]                                                           │
+│  Wikipedia · arXiv · Gutenberg · Reddit · OpenAlex · Web               │
+│      │ raw text                                                         │
+│      ▼                                                                  │
+│  [learner.py] AutoLearner                                               │
+│  Background thread · 10s cycles · 4 parallel workers                   │
+│  Reads: TOPICS[46] → random search → fetch per source                  │
+│  Writes: live_feed.jsonl · learner_stats.json · fetch_status.json       │
+│          growth_log.jsonl · paused.txt                                  │
+└───────────────────────────────┬─────────────────────────────────────────┘
+                                │ sentences
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 1 — EXTRACTION                                                   │
+│                                                                         │
+│  [extractor.py]                                                         │
+│  spaCy en_core_web_sm → noun chunks + named entities                   │
+│  → normalise/lemmatise → deduplicate                                    │
+│  → SentenceTransformer (all-MiniLM-L6-v2, 384-dim)                     │
+│  Output: list[Concept(text, embedding, source)]                         │
+│                                                                         │
+│  [detector.py]                                                          │
+│  3-metric ambiguity score on concept embeddings:                        │
+│   • variance  (pairwise cosine distance)                                │
+│   • cluster   (k=2 centroid separation)                                 │
+│   • bridge    (graph neighbourhood pull)                                │
+│  → feeds tension.TensionTracker · novelty.NoveltyTracker                │
+│  Writes: logs/ambiguity_scores.jsonl                                    │
+└───────────────────────────────┬─────────────────────────────────────────┘
+                                │ concepts + embeddings
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 2 — KNOWLEDGE STORE                                              │
+│                                                                         │
+│  [graph.py] SemanticGraph                                               │
+│  NetworkX (in-memory) + SQLite (data/graph.db)                         │
+│  • update(concepts) — merge if cosine ≥0.85, else new node             │
+│  • edge reinforce (weight × 1.10 on co-occurrence)                     │
+│  • daily snapshots → snapshots/*.json                                   │
+│                                                                         │
+│  [episodes.py] EpisodeStore                                             │
+│  • record(concepts) → data/episodes.jsonl                              │
+│  • transition graph (directed, weighted) → data/transitions.json        │
+│  • cooccurrence_matrix / strongest_paths for abstractor                │
+└──────────┬──────────────────────────┬───────────────────────────────────┘
+           │                          │
+           ▼                          ▼
+┌──────────────────┐     ┌────────────────────────────┐
+│  [predictor.py]  │     │  [abstractor.py]  (3h)     │
+│  Predictor       │     │  Co-occurrence clusters →   │
+│  transitions →   │     │  abstract concepts L0/L1/L2 │
+│  pre-activates   │     │  Writes: abstractions.json  │
+│  next concepts   │     └────────────────────────────┘
+└────────┬─────────┘
+         │ pre-activation
+         ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 3 — ATTENTION / WORKING MEMORY                                   │
+│                                                                         │
+│  [meta_state.py] MetaState                                              │
+│  500-concept activation pool · exp decay                                │
+│   A1: sigmoid saturation                                                │
+│   A2: fatigue (repetition penalty)                                      │
+│   A3: hot-concept cooling                                               │
+│   C:  regional spatial pools                                            │
+│   D1: normalisation                                                     │
+│  Writes: data/meta_state.json                                           │
+│                                                                         │
+│  [memory.py] TemporalMemory                                             │
+│  Three-layer store:                                                     │
+│   working  (decay 0.97)   ──threshold──▶  episodic (0.9997)            │
+│   episodic                ──threshold──▶  semantic (0.99997)           │
+│  Writes: data/memory.json                                               │
+└────────────┬────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 4 — REASONING                                                    │
+│                                                                         │
+│  [contradiction.py] ContradictionRegistry                               │
+│  Bidirectional conflict detection between active concepts               │
+│  Writes: data/contradictions.json                                       │
+│                                                                         │
+│  [world_model.py] WorldModel                                            │
+│  Directed causal edges: causes|suppresses|predicts|depends_on           │
+│  Confidence decay; max 2000 edges                                       │
+│  Writes: data/world_model.json                                          │
+│                                                                         │
+│  [novelty.py] NoveltyTracker                                            │
+│  score = 1/log(times_seen + e)                                          │
+│  Anti-loop: Jaccard overlap check → escape_concepts                     │
+│  Writes: data/novelty.json                                              │
+│                                                                         │
+│  [tension.py] TensionTracker                                            │
+│  Cross-cutting signal (conflict load, ambiguity pressure)               │
+│  Read by: MetaState, Stability, Goals, Contradiction, Detector          │
+└────────────┬────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 5 — STABILITY / MODE                                             │
+│                                                                         │
+│  [stability.py] StabilityMonitor                                        │
+│  Shannon entropy over MetaState activation pool                         │
+│  5 cognitive modes:                                                     │
+│   focused      — low entropy, stable                                    │
+│   exploitative — medium entropy, repeating                              │
+│   exploratory  — high entropy, searching                                │
+│   associative  — mid entropy, bridging                                  │
+│   reflective   — low entropy, self-checking                             │
+│  Mode weights → modulate goal drives                                    │
+└────────────┬────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 6 — GOAL / DRIVE                                                 │
+│                                                                         │
+│  [goals.py] GoalEngine                                                  │
+│  5 competing drives (configurable weights):                             │
+│   reduce_uncertainty    0.30  ← tension + contradiction load            │
+│   increase_novelty      0.25  ← novelty tracker                        │
+│   resolve_contradiction 0.20  ← contradiction registry                 │
+│   maintain_stability    0.15  ← stability entropy                      │
+│   expand_regions        0.10  ← region coverage                        │
+│  argmax → current_goal                                                  │
+│                                                                         │
+│  [energy.py] EnergyBudget                                               │
+│  Pool: 1.0, replenish 0.08/tick                                         │
+│  Costs: simulation 0.04 · exploration 0.06 · abstraction 0.10          │
+│  Writes: data/energy.json                                               │
+└────────────┬────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 7 — SELF-MODEL / IDENTITY                                        │
+│                                                                         │
+│  [self_model.py] SelfModel                                              │
+│  Recursive self-prediction (entropy mean-reversion)                     │
+│  Prediction vs actual at horizon 5 ticks → accuracy                    │
+│  Writes: data/self_model.json                                           │
+│                                                                         │
+│  [identity.py] IdentityTracker                                          │
+│  5 slowly-drifting personality traits (drift 0.02/observe):            │
+│   exploration_style · novelty_bias · stability_bias                     │
+│   abstraction_depth · contradiction_tolerance                           │
+│  Writes: data/identity.json                                             │
+│                                                                         │
+│  [worldview.py] Worldview  (3h refresh)                                 │
+│  5 longitudinal dimensions:                                             │
+│   concepts · contradictions · goals · home_regions · abstractions       │
+│  Writes: data/worldview.json                                            │
+└────────────┬────────────────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 8 — META / ADAPTATION                                            │
+│                                                                         │
+│  [reflection.py] ReflectionMonitor                                      │
+│  Reads all subsystems (non-invasive)                                    │
+│  Detects: over_fixating · drifting · looping · stuck                   │
+│  Writes: data/reflection.json                                           │
+│                                                                         │
+│  [meta_learning.py] MetaLearner                                         │
+│  5 strategy scores via prediction accuracy windows                      │
+│  Writes: data/meta_learning.json                                        │
+│                                                                         │
+│  [evolver.py] Evolver                                                   │
+│  Hill-climbing on novelty_strength + bias_strength                      │
+│  Signals: entropy + repetition + ambiguity load                         │
+│  Writes: data/evolved_params.json                                       │
+│                                                                         │
+│  [ecology.py] CognitiveEcology                                          │
+│  Orchestration heartbeat — sequences all 13 subsystems per tick         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LLM LAYER — Runner page (manual / interactive)                         │
+│                                                                         │
+│  [modulator.py] Modulation Layer                                        │
+│  Reads ambiguity score → selects prompt regime:                         │
+│   low    → clean direct prompt                                          │
+│   medium → injects top-5 graph neighbours as context                   │
+│   high   → tension framing + 8 neighbours + meta-state pressure        │
+│                                                                         │
+│  Ollama (localhost:11434)                                               │
+│  Models: qwen2.5:3b-instruct · qwen2.5:7b-instruct · llama3.2:3b      │
+│  Default: qwen2.5:3b-instruct  (config.yaml)                           │
+│                                                                         │
+│  Step ⑤ — response fed back into engine:                               │
+│   extract concepts from LLM answer → graph update → memory →           │
+│   episodes → contradiction → world_model → ecology                     │
+│   (engine learns from its own answers)                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Node Tree — Call Graph
+
+```
+AutoLearner.start()
+│
+├─── every 10s cycle ──────────────────────────────────────────────────────
+│    │
+│    ├── sources.*  (search + fetch)
+│    │
+│    ├── extractor.extract(sentence)
+│    │       └── spaCy.load('en_core_web_sm')
+│    │       └── SentenceTransformer.encode()     ← 384-dim MiniLM
+│    │
+│    ├── detector.detect_and_log(sentence, concepts, graph)
+│    │       ├── TensionTracker.push()
+│    │       └── NoveltyTracker.observe()
+│    │
+│    ├── SemanticGraph.update(concepts)
+│    │       └── SQLite write (graph.db)
+│    │
+│    ├── MetaState.reinforce(concepts)
+│    │       └── TensionTracker  (read)
+│    │
+│    ├── TemporalMemory.reinforce(concepts)
+│    │
+│    ├── ContradictionRegistry.observe(concepts)
+│    │       ├── TensionTracker.push()
+│    │       └── EpisodeStore.record()
+│    │
+│    ├── WorldModel.infer_from_context(concepts)
+│    │       └── EpisodeStore  (read transitions)
+│    │
+│    ├── CognitiveEcology.tick(concepts)
+│    │       ├── EnergyBudget.spend()
+│    │       ├── MetaLearner.tick()
+│    │       │       └── Evolver  (read)
+│    │       ├── Evolver.tick()
+│    │       │       └── ReflectionMonitor  (read)
+│    │       ├── SelfModel.tick()
+│    │       │       └── StabilityMonitor  (read)
+│    │       ├── IdentityTracker.observe()
+│    │       │       ├── NoveltyTracker  (read)
+│    │       │       ├── MetaState  (read)
+│    │       │       ├── StabilityMonitor  (read)
+│    │       │       ├── Abstractor  (read)
+│    │       │       └── ContradictionRegistry  (read)
+│    │       ├── GoalEngine.tick()
+│    │       │       ├── TensionTracker  (read)
+│    │       │       ├── NoveltyTracker  (read)
+│    │       │       ├── TemporalMemory  (read)
+│    │       │       ├── ContradictionRegistry  (read)
+│    │       │       ├── StabilityMonitor  (read)
+│    │       │       └── MetaState  (read)
+│    │       └── ReflectionMonitor.report()
+│    │               ├── StabilityMonitor  (read)
+│    │               ├── MetaState  (read)
+│    │               ├── NoveltyTracker  (read)
+│    │               ├── TemporalMemory  (read)
+│    │               ├── TensionTracker  (read)
+│    │               ├── ContradictionRegistry  (read)
+│    │               └── GoalEngine  (read)
+│    │
+│    ├── EpisodeStore.record(concepts)
+│    ├── Predictor.pre_activate(concepts, memory)
+│    ├── StabilityMonitor.tick(MetaState)
+│    ├── GoalEngine.tick()
+│    ├── ReflectionMonitor.report()
+│    ├── TemporalMemory.decay_to()
+│    ├── EnergyBudget.replenish()
+│    ├── SelfModel.tick()
+│    ├── IdentityTracker.observe()
+│    ├── MetaLearner.tick()
+│    ├── Evolver.tick()
+│    ├── NoveltyTracker.snapshot_top5(MetaState)
+│    └── MetaState.decay_to()
+│
+└─── every 3 hours ────────────────────────────────────────────────────────
+         ├── Abstractor.run()
+         │       ├── EpisodeStore.cooccurrence_matrix()
+         │       └── TemporalMemory  (read)
+         │
+         └── Worldview.update()
+                 ├── TemporalMemory · ContradictionRegistry · Abstractor
+                 ├── GoalEngine · StabilityMonitor · RegionIndex
+                 └── EpisodeStore
+
+Runner page (manual trigger)
+│
+├── extractor.extract(user_input)
+├── detector.detect_and_log()
+├── modulator.build_prompt()          ← graph neighbours + MetaState pressure
+├── call_llm() → Ollama → Qwen/Llama
+└── ⑤ extract(response) → full pipeline feedback loop
+        └── graph · memory · episodes · contradiction · world_model · ecology
+```
+
+---
+
+## Module Reference
+
+| Module | Class | Purpose | Data File |
+|---|---|---|---|
+| learner.py | AutoLearner | Main loop — search, fetch, orchestrate | live_feed.jsonl, learner_stats.json, fetch_status.json, growth_log.jsonl |
+| sources.py | — | Multi-source search + fetch | — (external APIs) |
+| extractor.py | Concept | spaCy NLP + MiniLM embeddings | — (in-memory cache) |
+| detector.py | AmbiguityResult | 3-metric ambiguity scoring | logs/ambiguity_scores.jsonl |
+| modulator.py | ModulationResult | Graph-aware prompt builder + LLM call | logs/ab_log.jsonl |
+| graph.py | SemanticGraph | NetworkX + SQLite knowledge store | graph.db, snapshots/*.json |
+| episodes.py | EpisodeStore | Episode log + transition graph | episodes.jsonl, transitions.json |
+| predictor.py | Predictor | Anticipatory pre-activation | — |
+| abstractor.py | Abstractor | Co-occurrence → abstract concepts L0/L1/L2 | abstractions.json |
+| meta_state.py | MetaState | 500-concept working attention pool | meta_state.json |
+| memory.py | TemporalMemory | Three-layer temporal store | memory.json |
+| contradiction.py | ContradictionRegistry | Bidirectional conflict detection | contradictions.json |
+| world_model.py | WorldModel | Directed causal edge registry | world_model.json |
+| novelty.py | NoveltyTracker | Exposure count + anti-loop detection | novelty.json |
+| tension.py | TensionTracker | Cross-cutting conflict/ambiguity pressure | — (in-memory) |
+| stability.py | StabilityMonitor | Shannon entropy → 5 cognitive modes | — |
+| goals.py | GoalEngine | 5 competing intrinsic drives | — |
+| energy.py | EnergyBudget | Finite energy pool per activity | energy.json |
+| self_model.py | SelfModel | Recursive self-prediction accuracy | self_model.json |
+| identity.py | IdentityTracker | 5 slowly-drifting personality traits | identity.json |
+| worldview.py | Worldview | Longitudinal identity (5 dimensions) | worldview.json |
+| reflection.py | ReflectionMonitor | Unified self-report + pathology detection | reflection.json |
+| meta_learning.py | MetaLearner | Strategy scoring via prediction accuracy | meta_learning.json |
+| evolver.py | Evolver | Hill-climbing parameter adaptation | evolved_params.json |
+| ecology.py | CognitiveEcology | Orchestration heartbeat (13 subsystems) | — |
+
+---
+
+## Data Files
+
+```
+data/
+├── graph.db               ← SemanticGraph  (SQLite — nodes + edges)
+├── episodes.jsonl         ← EpisodeStore   (concept co-occurrence log)
+├── transitions.json       ← EpisodeStore   (directed transition weights)
+├── live_feed.jsonl        ← AutoLearner    (last 200 activity entries)
+├── learner_stats.json     ← AutoLearner    (total_sentences, total_concepts)
+├── fetch_status.json      ← AutoLearner    (fetching bool + started_at)
+├── growth_log.jsonl       ← AutoLearner    (node/edge count per cycle)
+├── paused.txt             ← AutoLearner    ("1" paused / "0" running)
+├── engine_config.json     ← Config         (all params + ego presets)
+├── meta_state.json        ← MetaState      (activation pool snapshot)
+├── memory.json            ← TemporalMemory (3-layer memory snapshot)
+├── contradictions.json    ← ContradictionRegistry
+├── world_model.json       ← WorldModel     (causal edge registry)
+├── novelty.json           ← NoveltyTracker (exposure counts)
+├── energy.json            ← EnergyBudget   (current pool level)
+├── self_model.json        ← SelfModel      (prediction accuracy history)
+├── identity.json          ← IdentityTracker (5 personality traits)
+├── worldview.json         ← Worldview      (longitudinal identity)
+├── reflection.json        ← ReflectionMonitor (last self-report)
+├── meta_learning.json     ← MetaLearner    (strategy scores)
+├── evolved_params.json    ← Evolver        (adapted parameters)
+└── abstractions.json      ← Abstractor     (abstract concept hierarchy)
+
+snapshots/
+└── *.json                 ← SemanticGraph  (daily node+edge snapshots)
+
+logs/
+├── ambiguity_scores.jsonl ← detector.py   (per-sentence ambiguity log)
+└── ab_log.jsonl           ← modulator.py  (A/B LLM response log)
+```
+
+---
+
+## LLM Integration (Ollama)
+
+```
+config.yaml
+  model:
+    name:     qwen2.5:3b-instruct
+    endpoint: http://localhost:11434/api/generate
+    stream:   false
+
+Available models (installed):
+  qwen2.5:3b-instruct    ← default, fast
+  qwen2.5:7b-instruct    ← smarter, slower
+  llama3.2:3b            ← alternative
+
+Modulation regimes:
+  low    ambiguity → bare system prompt
+  medium ambiguity → + top-5 graph neighbours injected
+  high   ambiguity → + tension framing + 8 neighbours + meta-state pressure
+```
+
+---
+
+## Ego System (Settings page)
+
+```
+Max 3 named personality presets stored in engine_config.json under "egos"
+Each ego captures: identity · evolver · meta_state · goals · attention
+
+engine_config.json structure:
+{
+  "active_ego": "Curious",
+  "egos": {
+    "Curious":  { "identity": {...}, "evolver": {...}, "meta_state": {...}, ... },
+    "Stable":   { ... },
+    "Wild":     { ... }
+  },
+  "learning": { ... },
+  ...
+}
+
+UI: dropdown → Load / Delete · text input → Save Ego
+Reset to defaults preserves egos.
+```
+
+---
+
+## Graph Visualisation
+
+```
+Layout: UMAP (umap-learn)
+  Input:  384-dim MiniLM embeddings per node
+  Output: 2D coordinates — semantic proximity = spatial proximity
+  Params: n_neighbors=15, min_dist=0.1, metric=cosine
+  Cache:  st.cache_data keyed on node ID tuple
+
+Colour coding:
+  Blue   (#4a9eff) — Left-brain  (logic, math, science, structure)
+  Red    (#ff6b6b) — Right-brain (emotion, art, music, metaphor)
+  Orange (#f5a623) — Bridge      (both hemispheres)
+  Grey   (#555566) — Uncategorised
+```
+
+---
+
+## Scaling Projections
+
+```
+Safe zone     <50k nodes    — <1 GB RAM, everything fast
+Manageable    50–120k nodes — 1–3 GB RAM, startup slows
+Danger zone   >150k nodes   — RAM pressure, prune aggressively
+Hard limit    ~300k nodes   — process OOM risk
+
+Bottlenecks:
+  1. NetworkX full graph in RAM         → use SQLite-only queries where possible
+  2. episodes.jsonl unbounded           → add rolling 30-day window
+  3. Embedding cache unbounded dict     → cap at 50k entries with LRU
+  4. SQLite cold load at 100k+ nodes    → 3–5s startup penalty
+```
+
+---
+
+## Cognitive Modes
+
+| Mode | Entropy | Behaviour |
+|---|---|---|
+| focused | low, stable | Deep exploitation of current concepts |
+| exploitative | medium, repeating | Reinforcing known high-value paths |
+| exploratory | high, searching | Broad search across new topics |
+| associative | mid, bridging | Connecting distant concept clusters |
+| reflective | low, self-checking | Internal audit — runs ReflectionMonitor |
+
+## Goal Drives
+
+| Drive | Default Weight | Signal Source |
+|---|---|---|
+| reduce_uncertainty | 0.30 | TensionTracker + ContradictionRegistry |
+| increase_novelty | 0.25 | NoveltyTracker |
+| resolve_contradiction | 0.20 | ContradictionRegistry |
+| maintain_stability | 0.15 | StabilityMonitor entropy |
+| expand_regions | 0.10 | RegionIndex coverage |
+
+## Memory Layers
+
+| Layer | Decay Rate | Promotion |
+|---|---|---|
+| working | 0.97 | → episodic on repeated reinforcement |
+| episodic | 0.9997 | → semantic on sustained activation |
+| semantic | 0.99997 | permanent long-term store |
+
+## Dashboard Metrics
+
+| Metric | Source | Meaning |
+|---|---|---|
+| Nodes | SQLite COUNT(*) | Total concepts in graph |
+| Edges | SQLite COUNT(*) | Total co-occurrence links |
+| Sentences | learner_stats.json | Total sentences processed |
+
+---
+
+*Updated 2026-05-24*

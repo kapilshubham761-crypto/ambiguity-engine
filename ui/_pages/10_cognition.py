@@ -206,7 +206,7 @@ with tab_live:
             [(k.replace('_', ' '), round(v, 4)) for k, v in scores.items()],
             columns=["Drive", "Score"]
         ).sort_values("Score", ascending=False)
-        st.dataframe(df_scores, use_container_width=True, hide_index=True)
+        st.dataframe(df_scores, width='stretch', hide_index=True)
 
     # Pathology flags
     st.subheader("State flags", divider=False)
@@ -262,7 +262,7 @@ with tab_mem:
         if top_w:
             df_w = pd.DataFrame(top_w, columns=['concept', 'value'])
             df_w['value'] = df_w['value'].round(4)
-            st.dataframe(df_w, use_container_width=True, hide_index=True)
+            st.dataframe(df_w, width='stretch', hide_index=True)
         else:
             st.caption("No working memory yet.")
 
@@ -272,7 +272,7 @@ with tab_mem:
         if top_s:
             df_s = pd.DataFrame(top_s, columns=['concept', 'value'])
             df_s['value'] = df_s['value'].round(4)
-            st.dataframe(df_s, use_container_width=True, hide_index=True)
+            st.dataframe(df_s, width='stretch', hide_index=True)
         else:
             st.caption("Semantic memory empty — concepts consolidate after 3+ episodic hits.")
 
@@ -339,7 +339,7 @@ with tab_pred:
         if preds:
             df_p = pd.DataFrame(preds, columns=['concept', 'probability'])
             df_p['probability'] = df_p['probability'].round(4)
-            st.dataframe(df_p, use_container_width=True, hide_index=True)
+            st.dataframe(df_p, width='stretch', hide_index=True)
             st.caption("These concepts are pre-activated before the next lesson arrives.")
         else:
             st.info("No transitions from current context yet. Accept more lessons.")
@@ -355,7 +355,7 @@ with tab_pred:
         if manual_preds:
             df_mp = pd.DataFrame(manual_preds, columns=['predicted concept', 'probability'])
             df_mp['probability'] = df_mp['probability'].round(4)
-            st.dataframe(df_mp, use_container_width=True, hide_index=True)
+            st.dataframe(df_mp, width='stretch', hide_index=True)
         else:
             st.info("No transitions found for those concepts yet.")
 
@@ -410,7 +410,7 @@ with tab_contra:
                 'tension_a': c.get('tension_a', 0),
                 'tension_b': c.get('tension_b', 0),
             } for c in all_c])
-            st.dataframe(df_c, use_container_width=True, hide_index=True)
+            st.dataframe(df_c, width='stretch', hide_index=True)
         else:
             st.caption("None yet.")
 
@@ -554,7 +554,7 @@ with tab_wv:
 
     col_upd, col_btn = st.columns([3, 1])
     col_upd.caption(f"Last updated: {snap.get('last_updated', 'never')}  ·  Update #{snap.get('update_count', 0)}")
-    if col_btn.button("Refresh worldview", use_container_width=True):
+    if col_btn.button("Refresh worldview", width='stretch'):
         wv.update()
         st.rerun()
 
@@ -566,7 +566,7 @@ with tab_wv:
     pc = snap.get('persistent_concepts', [])
     if pc:
         df_pc = pd.DataFrame(pc).rename(columns={'concept': 'Concept', 'semantic_value': 'Semantic Value'})
-        st.dataframe(df_pc.head(30), use_container_width=True, hide_index=True)
+        st.dataframe(df_pc.head(30), width='stretch', hide_index=True)
     else:
         st.info("No persistent concepts yet — semantic memory needs more time.")
 
@@ -645,7 +645,7 @@ with tab_wv:
             'reuse_frequency': 'Reuse', 'member_count': 'Members',
             'emergence_score': 'Emergence',
         })
-        st.dataframe(df_fa, use_container_width=True, hide_index=True)
+        st.dataframe(df_fa, width='stretch', hide_index=True)
     else:
         st.info("No foundational abstractions yet — abstractions need more reuse cycles.")
 
@@ -658,4 +658,4 @@ with tab_wv:
         df_sb = pd.DataFrame([
             {'Region': k, 'Semantic weight': v} for k, v in sb.items()
         ])
-        st.dataframe(df_sb, use_container_width=True, hide_index=True)
+        st.dataframe(df_sb, width='stretch', hide_index=True)
