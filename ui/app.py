@@ -15,6 +15,7 @@ import json
 import time
 import streamlit as st
 from datetime import datetime, timezone
+from PIL import Image
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'components'))
 
@@ -36,7 +37,7 @@ except Exception:
 
 st.set_page_config(
     page_title="Ambiguity Engine",
-    page_icon="◈",
+    page_icon=Image.open(os.path.join(os.path.dirname(__file__), 'assets', 'logo.png')),
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -225,33 +226,42 @@ button[aria-label="Open sidebar"],
 # Live feed bar — pinned to top, shows latest AutoLearner entry            #
 # ======================================================================== #
 
-_live_entry = {}
+_lv_title = _lv_source = _lv_concepts = ''
+_lv_live = False
+
+# Currently-reading.json: written at start of each article fetch — most live signal
 try:
-    _lf_path = os.path.join(_ROOT, 'data', 'live_feed.jsonl')
-    with open(_lf_path, encoding='utf-8') as _lf:
-        for _ln in _lf:
-            _ln = _ln.strip()
-            if _ln:
-                _live_entry = json.loads(_ln)
+    _cr = json.loads(open(os.path.join(_ROOT, 'data', 'currently_reading.json'), encoding='utf-8').read())
+    _lv_title  = _cr.get('title', '')
+    _lv_source = _cr.get('source', '')
+    _lv_live   = True
 except Exception:
     pass
 
-_lv_topic    = _live_entry.get('topic', '')
-_lv_title    = _live_entry.get('title', '')
-_lv_source   = _live_entry.get('source', '')
-_lv_concepts = _live_entry.get('concepts', '')
-_lv_status   = _live_entry.get('status', 'ok')
-_lv_dot_col  = '#44ff88' if _lv_status == 'ok' else '#ff4444'
+# Fall back to last completed entry if currently_reading is absent
+if not _lv_title:
+    try:
+        _lf_path = os.path.join(_ROOT, 'data', 'live_feed.jsonl')
+        with open(_lf_path, encoding='utf-8') as _lf:
+            for _ln in _lf:
+                _ln = _ln.strip()
+                if _ln:
+                    _le = json.loads(_ln)
+                    _lv_title    = _le.get('title', '')
+                    _lv_source   = _le.get('source', '')
+                    _lv_concepts = _le.get('concepts', '')
+    except Exception:
+        pass
 
 if _lv_title:
+    _lv_conc_part = (f'<span style="color:#333355;margin-left:12px">{_lv_concepts} concepts</span>'
+                     if _lv_concepts else '')
     _lv_display = (
-        f'<span style="color:#505078;margin-right:6px;text-transform:uppercase;'
+        f'<span style="color:#505078;margin-right:8px;text-transform:uppercase;'
         f'font-size:10px;letter-spacing:0.12em">reading</span>'
-        f'<span style="color:#6868a0;margin-right:8px">{_lv_topic}</span>'
-        f'<span style="color:#4a4a70;margin-right:8px">→</span>'
-        f'<span style="color:#9898c8;margin-right:8px">{_lv_title[:80]}{"…" if len(_lv_title) > 80 else ""}</span>'
+        f'<span style="color:#b0b0d8;margin-right:8px">{_lv_title[:160]}{"…" if len(_lv_title) > 160 else ""}</span>'
         f'<span style="color:#404060">({_lv_source})</span>'
-        f'<span style="color:#333355;margin-left:12px">{_lv_concepts} concepts</span>'
+        f'{_lv_conc_part}'
     )
 else:
     _lv_display = '<span style="color:#303050">no feed yet — start the learner</span>'
@@ -276,7 +286,7 @@ st.markdown(f"""
 }}
 #ae-livebar-dot {{
     width: 6px; height: 6px; border-radius: 50%;
-    background: {_lv_dot_col};
+    background: {'#44ff88' if _lv_title else '#303050'};
     margin-right: 10px;
     flex-shrink: 0;
     animation: ae-pulse 1.6s ease-in-out infinite;

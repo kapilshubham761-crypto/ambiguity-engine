@@ -1,5 +1,5 @@
 # Ambiguity Engine — Cognitive Architecture
-*Last updated: 2026-05-24*
+*Last updated: 2026-05-24 · V7*
 
 ---
 
@@ -62,8 +62,8 @@ INTERNET SOURCES
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                        AMBIGUITY ENGINE v5                               ║
-║                    Cognitive Architecture — 9 Layers                     ║
+║                        AMBIGUITY ENGINE V7                               ║
+║                    Cognitive Architecture — 10 Layers                    ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -185,6 +185,31 @@ INTERNET SOURCES
 └─────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────┐
+│  LAYER 9 — META-REGULATION (NEW in V7)                                   │
+│  [regulator.py] MetaRegulator                                            │
+│  · Background thread, 60s interval                                       │
+│  · Reads 7 live system metrics:                                          │
+│    entropy · contradiction_rate · novelty_saturation · loop_score        │
+│    energy · activation_spread · ambiguity_pressure                       │
+│  · Computes targets for 12 Layer 2 variables using weighted signals      │
+│  · Smooth exponential blend (α=0.12): new = old×0.88 + target×0.12      │
+│  · Hard bounds enforced per variable (see _BOUNDS dict)                  │
+│  · Writes to engine_config.json · sets _regulated=True flag              │
+│  · Never touches Layer 1 physics constants                               │
+│                                                                          │
+│  Variable Taxonomy:                                                      │
+│  Layer 1 — Physics (manual sliders in YTP): energy costs, evolver delta  │
+│  Layer 2 — Adaptive (MetaRegulator, fully automated):                    │
+│    attention: novelty_strength · bias_strength                           │
+│    meta_state: decay_rate · reinforce_gain · fatigue_k · cooling_alpha   │
+│    identity: drift_rate                                                  │
+│    goals: reduce_uncertainty · increase_novelty · resolve_contradiction  │
+│            maintain_stability · expand_regions                           │
+│  Layer 3 — Personality (slow drift, IdentityTracker/Evolver):            │
+│    5 identity traits over hours/days                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
 │  LLM LAYER — Runner page (manual / interactive)                          │
 │  [modulator.py] → Ollama (localhost:11434)                               │
 │  low    ambiguity → bare system prompt                                   │
@@ -201,12 +226,12 @@ INTERNET SOURCES
 
 | Module | Class | Purpose | Data File |
 |---|---|---|---|
-| learner.py | AutoLearner | Main loop — search, fetch, orchestrate | live_feed.jsonl, learner_stats.json, fetch_status.json, cog_status.json |
+| learner.py | AutoLearner | Main loop — search, fetch, orchestrate. Background subsystem thread (30s), regulator thread (60s). Writes currently_reading.json at start of each fetch for live UI signal. | live_feed.jsonl, learner_stats.json, fetch_status.json, cog_status.json, currently_reading.json, perf_profile.json |
 | sources.py | — | Multi-source search + fetch per source type | — |
 | extractor.py | Concept | spaCy NLP + MiniLM 384-dim embeddings | — (session cache) |
-| detector.py | AmbiguityResult | 3-metric ambiguity scoring | logs/ambiguity_scores.jsonl |
+| detector.py | AmbiguityResult | 3-metric ambiguity scoring. Variance: vectorized via matrix multiply (normed @ normed.T). Bridge: uses graph._emb_matrix pre-built cache (one BLAS call, no rebuild). KMeans n_init=3. | logs/ambiguity_scores.jsonl |
 | modulator.py | ModulationResult | Graph-aware prompt builder + Ollama call | — |
-| graph.py | SemanticGraph | NetworkX + SQLite knowledge store | graph.db |
+| graph.py | SemanticGraph | NetworkX + SQLite knowledge store. _emb_pending batch queue → _flush_pending() does single vstack per update() call. Pre-built _emb_matrix + _emb_node_ids for fast bridge metric. | graph.db |
 | episodes.py | EpisodeStore | Episode log + directed transition graph | episodes.jsonl, transitions.json |
 | predictor.py | Predictor | Anticipatory pre-activation from transitions | — |
 | abstractor.py | Abstractor | Co-occurrence clusters → abstract concepts | abstractions.json |
@@ -227,6 +252,7 @@ INTERNET SOURCES
 | evolver.py | Evolver | Hill-climbing parameter adaptation | evolved_params.json |
 | ecology.py | CognitiveEcology | Orchestration heartbeat (13 subsystems) | — |
 | config.py | Config | Live config reader with mtime cache | engine_config.json |
+| regulator.py | MetaRegulator | Layer 2 autonomous parameter regulation — reads 7 system metrics, computes targets for 12 variables, smooth blend α=0.12, 60s interval | engine_config.json |
 
 ---
 
@@ -241,11 +267,14 @@ All pages use underscore prefix (`ui/_pages/`) — never `ui/pages/` (Streamlit 
 | 0_meta_state.py | Meta-State | Live concept activation pool — bars, mood, decay health. Auto-refresh 30s. |
 | 10_cognition.py | Cognition | 8-tab deep dive: Live · Memory · Episodes · Predictions · Contradictions · Abstractions · Simulate · Worldview |
 | 11_config.py | Settings | Live-editable engine params, ego presets (max 3), Cloudflare tunnel toggle. |
+| 12_ytp.py | YTP | Your Tuning Panel. Layer 1 sliders (6 physics constants). Layer 2 read-only live display (12 variables with AUTO badges, shown only after _regulated=True). Local-only access gate (blocks Cloudflare proxy). |
 
 ### app.py (entry point)
 - `st.set_page_config(layout="wide", initial_sidebar_state="expanded")`
+- `page_icon=PIL.Image.open("ui/assets/logo.png")` — project logo as favicon
 - Boot splash: 4s animated overlay, `sessionStorage` key prevents replay
 - Status detection: reads `cog_status.json`, `fetch_status.json`, `paused.txt`
+- Live bar: reads `currently_reading.json` first (written at START of fetch = real-time); falls back to live_feed.jsonl (written at END of fetch)
 - Sidebar: Stop/Resume button (writes paused.txt), animated status dot, thinking line, goal/mode chip
 - Global CSS injected from **main page context** (not sidebar.markdown) so it applies even when sidebar is collapsed
 - Pre-loads `torch` at startup to prevent circular import in Runner page
@@ -312,7 +341,9 @@ data/
 ├── evolved_params.json    Evolver         — adapted hill-climbed parameters
 ├── episodes.jsonl         EpisodeStore    — concept co-occurrence episode log
 ├── transitions.json       EpisodeStore    — directed transition weights
-└── abstractions.json      Abstractor      — abstract concept hierarchy L0/L1/L2
+├── abstractions.json      Abstractor      — abstract concept hierarchy L0/L1/L2
+├── currently_reading.json AutoLearner     — {title, source, url, concepts_found} written at START of each fetch (live "what is it reading now" signal for UI)
+└── perf_profile.json      AutoLearner     — pipeline timing profile: graph_update, subsystems, detect, total (ms) — feeds Cognition tab efficiency graph
 
 snapshots/  — SemanticGraph daily node+edge snapshots (*.json)
 logs/
@@ -325,7 +356,7 @@ logs/
 ## AutoLearner Detail
 
 ```python
-# learner.py key constants (overridable via engine_config.json)
+# learner.py key constants (code constants — not editable via YTP)
 CYCLE_TIME       = 10      # seconds between cycles
 N_WORKERS        = 8       # ThreadPoolExecutor size
 TOPICS_PER_CYCLE = 12      # topics sampled per cycle
@@ -341,9 +372,44 @@ src = random.choices(all_sources, weights=_src_weights, k=1)[0]
 # Thread safety
 self._feed_lock = threading.Lock()  # prevents 8 workers corrupting live_feed.jsonl
 
+# Background threads (started alongside main worker pool):
+_subsys_worker()     — drains _subsys_buf every 30s (subsystems run off critical path)
+_regulator_worker()  — calls MetaRegulator.tick() every 60s
+
+# Per-article pipeline:
+1. Write currently_reading.json at START of fetch (live UI signal)
+2. detect() called ONCE per article on sample of ≤30 concepts (not per-sentence)
+3. Subsystem updates queued to _subsys_buf (non-blocking)
+4. Timing profile recorded → perf_profile.json
+
 # After each cycle, writes:
 data/cog_status.json  → {mode, goal}  (read by sidebar chip + overlay)
 ```
+
+---
+
+## Pipeline Optimizations (V7)
+
+Three bottlenecks identified and resolved:
+
+| Bottleneck | Before | Fix |
+|---|---|---|
+| Subsystems (13 modules) | 78s synchronous per article | Background 30s thread draining a buffer — zero cost on hot path |
+| Graph embedding vstack | 62s — np.vstack per new node in tight loop | _emb_pending list + _flush_pending() — single vstack per update() call |
+| Bridge metric | Part of 31s detect — rebuilt 4473-node array every sentence | Uses graph._emb_matrix pre-built cache + one BLAS matrix-vector multiply |
+| Variance metric | O(n²) loop | Vectorized: normed @ normed.T, np.triu_indices for upper triangle |
+| detect() call frequency | Once per sentence | Once per article on ≤30-concept sample |
+
+---
+
+## Standalone Visualizer (visualizer.py / visualizer.bat)
+
+Separate Streamlit app on port 8502 — knowledge graph explorer independent of main UI.
+
+- `visualizer.bat` — one-click launch: kills old, starts on port 8502, polls health, opens browser
+- Graphs: 2D scatter (UMAP/PCA), 3D force layout, neighbourhood explorer, timeline
+- All charts full-height: `height = calc(100vh - 160px)` CSS + `_FULL_H = 820` constant
+- Refresh is manual only (no auto-refresh meta tag — would reset Streamlit session state)
 
 ---
 
@@ -442,6 +508,10 @@ Bottlenecks:
 - **torch circular import**: Fixed by (1) `import torch` at top of `extractor.py`, (2) pre-loading torch in `app.py` main thread before `pg.run()`, (3) deferring all ML imports in `runner.py` to after `st.stop()` guard. Root cause was `cupy-cuda12x` installed without `pytest` — uninstalled.
 - **fileWatcherType = none**: Set in `ui/.streamlit/config.toml` (must be in `ui/` dir, not root). Prevents WinError 206 from torch DLL paths exceeding Windows 260-char MAX_PATH limit. Code changes require manual Streamlit restart.
 - **Sidebar CSS**: Must be injected from `st.markdown()` (main page), NOT `st.sidebar.markdown()`. When sidebar is collapsed, sidebar DOM is not rendered, so CSS in sidebar.markdown never reaches the page.
-- **Page icons**: `st.Page()` icon arg requires a real emoji or None. `st.set_page_config(page_icon=)` accepts arbitrary strings. Current nav uses no icons (clean text only).
+- **Page icons**: `st.Page()` icon arg requires a real emoji or None. `st.set_page_config(page_icon=)` accepts a PIL Image. Current nav uses no icons (clean text only).
 - **No coding features**: Never add git panels, terminals, or code editors to the Streamlit app. User codes in VS Code.
 - **launch.bat**: Does NOT open `ambiguity-engine-tracker.html` — that line was removed.
+- **np.stack dtype**: `np.stack()` does NOT accept a `dtype` parameter (only `axis`, `out`). Use `np.array(list, dtype=...)` instead. Silent crash otherwise.
+- **YTP local-only gate**: Cloudflare rewrites Host header to `localhost:8501` so host check alone is insufficient. Gate checks CF-Ray, CF-Connecting-IP, X-Forwarded-For, X-Forwarded-Host headers — any of these present = block.
+- **perf_profile.json**: Written by AutoLearner after each article. If engine has not run since code update, file will be absent and UI shows "warming up" — restart engine with restart.bat.
+- **currently_reading.json**: Written at START of fetch (not end). If engine is paused or just started, file may be absent — UI falls back to live_feed.jsonl gracefully.

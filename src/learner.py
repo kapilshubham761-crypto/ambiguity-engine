@@ -135,6 +135,8 @@ class AutoLearner:
         self._feed_lock    = threading.Lock()
         self._perf_lock    = threading.Lock()
         self._perf_samples: list[dict] = []   # per-article timings (last 50)
+        self._subsys_buf:  list[str]   = []   # texts queued for background subsystems
+        self._subsys_lock  = threading.Lock()
 
     def _ensure_graph(self) -> None:
         if self._graph is None:
@@ -187,6 +189,50 @@ class AutoLearner:
 
     # ── process one search result ─────────────────────────────────────────────
 
+    def _subsys_queue(self, texts: list[str]) -> None:
+        """Add texts to the background subsystem buffer."""
+        with self._subsys_lock:
+            self._subsys_buf.extend(texts)
+            if len(self._subsys_buf) > 2000:
+                self._subsys_buf = self._subsys_buf[-2000:]
+
+    def _regulator_worker(self) -> None:
+        """Background thread: runs MetaRegulator every 60s — autonomous parameter control."""
+        time.sleep(60)   # let system stabilise before first regulation
+        while True:
+            try:
+                from regulator import MetaRegulator
+                MetaRegulator.get().tick()
+            except Exception as e:
+                log.debug('regulator error: %s', e)
+            time.sleep(60)
+
+    def _subsys_worker(self) -> None:
+        """Background thread: drains subsystem buffer every 30s — never blocks the hot path."""
+        while True:
+            time.sleep(30)
+            with self._subsys_lock:
+                if not self._subsys_buf:
+                    continue
+                texts = list(self._subsys_buf)
+                self._subsys_buf.clear()
+            def _s(fn):
+                try: fn()
+                except Exception: pass
+            _s(lambda: __import__('meta_state').MetaState.get().reinforce(texts))
+            _s(lambda: __import__('memory').TemporalMemory.get().reinforce(texts))
+            _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(texts))
+            _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(texts))
+            _s(lambda: __import__('ecology').CognitiveEcology.get().tick(texts))
+            try:
+                from episodes  import EpisodeStore
+                from predictor import Predictor
+                from memory    import TemporalMemory
+                EpisodeStore.get().record(texts, ambiguity=0.0, region=None)
+                Predictor.get().pre_activate(texts, TemporalMemory.get())
+            except Exception:
+                pass
+
     def _process(self, item: dict) -> dict:
         from extractor import extract
         from detector  import detect_and_log
@@ -203,6 +249,17 @@ class AutoLearner:
             'status':  'ok',
         }
 
+        # Signal immediately — bar shows this before fetch even completes
+        try:
+            _cr = _DATA / 'currently_reading.json'
+            _cr.write_text(json.dumps({
+                'title':  item.get('title', '')[:160],
+                'source': item.get('source', ''),
+                'ts':     datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+            }), encoding='utf-8')
+        except Exception:
+            pass
+
         t0 = _T()
         try:
             sentences = fetch_content(item)
@@ -214,48 +271,40 @@ class AutoLearner:
             entry['status'] = 'skip:short'
             return entry
 
-        all_texts  = []
-        n_concepts = 0
-        t_extract = t_detect = t_graph = 0.0
+        # Extract all concepts first, graph-update per sentence (preserves co-occurrence)
+        all_concepts = []
+        all_texts    = []
+        t_extract = t_graph = 0.0
 
         for sent in sentences:
             t1 = _T(); concepts = extract(sent); t_extract += _T() - t1
             if not concepts:
                 continue
-            t1 = _T(); detect_and_log(sent, concepts, graph=self._graph); t_detect += _T() - t1
             if self._graph:
                 t1 = _T(); self._graph.update(concepts); t_graph += _T() - t1
-            n_concepts += len(concepts)
+            all_concepts.extend(concepts)
             all_texts.extend(c.text for c in concepts)
 
         if not all_texts:
             entry['status'] = 'skip:no-concepts'
             return entry
 
+        n_concepts = len(all_concepts)
+
+        # Detect ONCE per article on a sample — not per sentence
+        t1 = _T()
+        sample = all_concepts[:30] if len(all_concepts) > 30 else all_concepts
+        detect_and_log(item.get('title', ''), sample, graph=self._graph)
+        t_detect = _T() - t1
+
         t1 = _T()
         if self._graph:
             self._graph.save()
         t_save = _T() - t1
 
-        def _s(fn):
-            try: fn()
-            except Exception: pass
-
-        t1 = _T()
-        _s(lambda: __import__('meta_state').MetaState.get().reinforce(all_texts))
-        _s(lambda: __import__('memory').TemporalMemory.get().reinforce(all_texts))
-        _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(all_texts))
-        _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(all_texts))
-        _s(lambda: __import__('ecology').CognitiveEcology.get().tick(all_texts))
-        try:
-            from episodes  import EpisodeStore
-            from predictor import Predictor
-            from memory    import TemporalMemory
-            EpisodeStore.get().record(all_texts, ambiguity=0.0, region=None)
-            Predictor.get().pre_activate(all_texts, TemporalMemory.get())
-        except Exception:
-            pass
-        t_subsys = _T() - t1
+        # Queue subsystems for background processing — does not block
+        self._subsys_queue(all_texts)
+        t_subsys = 0.0
 
         t_total = _T() - t0
 
@@ -266,8 +315,7 @@ class AutoLearner:
         entry['concepts']  = n_concepts
         entry['sentences'] = len(sentences)
 
-        # Record timing sample (thread-safe)
-        sample = {
+        sample_dict = {
             'fetch':    round(t_fetch,   3),
             'extract':  round(t_extract, 3),
             'detect':   round(t_detect,  3),
@@ -280,7 +328,7 @@ class AutoLearner:
             'source':    item.get('source', ''),
         }
         with self._perf_lock:
-            self._perf_samples.append(sample)
+            self._perf_samples.append(sample_dict)
             if len(self._perf_samples) > 50:
                 self._perf_samples = self._perf_samples[-50:]
 
@@ -289,27 +337,26 @@ class AutoLearner:
     # ── one full cycle ────────────────────────────────────────────────────────
 
     def _write_perf_profile(self, cycle: dict) -> None:
+        with self._perf_lock:
+            samples = list(self._perf_samples)
+        if not samples:
+            return
+        keys = ('fetch', 'extract', 'detect', 'graph', 'save', 'subsys', 'total')
+        avg  = {k: round(sum(s.get(k, 0) for s in samples) / len(samples), 3) for k in keys}
+        tot  = avg['total'] or 1
+        pct  = {k: round(avg[k] / tot * 100, 1) for k in keys if k != 'total'}
+        profile = {
+            'updated':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+            'n_samples':     len(samples),
+            'process_avg_s': avg,
+            'process_pct':   pct,
+            'cycle':         cycle,
+        }
         try:
-            with self._perf_lock:
-                samples = list(self._perf_samples)
-            if not samples:
-                return
-            keys = ('fetch', 'extract', 'detect', 'graph', 'save', 'subsys', 'total')
-            avg  = {k: round(sum(s[k] for s in samples) / len(samples), 3) for k in keys}
-            tot  = avg['total'] or 1
-            pct  = {k: round(avg[k] / tot * 100, 1) for k in keys if k != 'total'}
-            profile = {
-                'updated':      datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
-                'n_samples':    len(samples),
-                'process_avg_s': avg,
-                'process_pct':   pct,
-                'cycle':         cycle,
-            }
-            tmp = self._PERF_PATH.with_suffix('.tmp')
-            tmp.write_text(json.dumps(profile, indent=2), encoding='utf-8')
-            tmp.replace(self._PERF_PATH)
-        except Exception:
-            pass
+            with open(self._PERF_PATH, 'w', encoding='utf-8') as f:
+                json.dump(profile, f, indent=2)
+        except Exception as e:
+            log.debug('perf write failed: %s', e)
 
     def _cycle(self) -> None:
         self._ensure_graph()
@@ -469,3 +516,5 @@ class AutoLearner:
 
         self._thread = threading.Thread(target=_worker, daemon=True, name='learner')
         self._thread.start()
+        threading.Thread(target=self._subsys_worker,   daemon=True, name='subsys').start()
+        threading.Thread(target=self._regulator_worker, daemon=True, name='regulator').start()

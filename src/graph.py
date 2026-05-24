@@ -103,6 +103,7 @@ class SemanticGraph:
         self._text_index:   dict[str, str] = {}        # text → node_id  (O(1))
         self._emb_node_ids: list[str]      = []        # row i → node_id
         self._emb_matrix:   np.ndarray | None = None  # (N,384) normalised rows
+        self._emb_pending:  list[tuple[str, list]] = []  # new rows, flushed per update()
 
         # Dirty tracking — only write changed rows on save()
         self._dirty_nodes: set[str]         = set()
@@ -138,17 +139,24 @@ class SemanticGraph:
             self._emb_node_ids = []
 
     def _append_to_matrix(self, node_id: str, embedding: list) -> None:
-        """Incrementally add one normalised row — avoids full rebuild."""
-        v = np.array(embedding, dtype=np.float32)
-        n = np.linalg.norm(v)
-        if n > 0:
-            v = v / n
-        row = v.reshape(1, -1)
-        if self._emb_matrix is None:
-            self._emb_matrix = row
-        else:
-            self._emb_matrix = np.vstack([self._emb_matrix, row])
-        self._emb_node_ids.append(node_id)
+        """Queue a new row — flushed to matrix in one vstack at end of update()."""
+        self._emb_pending.append((node_id, embedding))
+
+    def _flush_pending(self) -> None:
+        """Batch-vstack all pending rows into the matrix — one allocation per update()."""
+        if not self._emb_pending:
+            return
+        rows = []
+        for nid, emb in self._emb_pending:
+            v = np.array(emb, dtype=np.float32)
+            n = np.linalg.norm(v)
+            if n > 0:
+                v = v / n
+            rows.append(v)
+            self._emb_node_ids.append(nid)
+        block = np.array(rows, dtype=np.float32)
+        self._emb_matrix = block if self._emb_matrix is None else np.vstack([self._emb_matrix, block])
+        self._emb_pending.clear()
 
     def _batch_cosine(self, embedding: list) -> tuple[str | None, float]:
         """Return (best_node_id, best_cosine) using one matrix multiply."""
@@ -217,6 +225,9 @@ class SemanticGraph:
 
         # 3.3 — edges between all pairs of concepts in this input
         self._update_edges(resolved_ids, now)
+
+        # Flush pending embeddings into matrix in one vstack
+        self._flush_pending()
 
         return resolved_ids
 

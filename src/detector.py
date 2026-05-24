@@ -73,19 +73,16 @@ def _cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def _variance_metric(embeddings: np.ndarray) -> float:
-    """
-    4.1a — Mean pairwise cosine distance across all concept pairs.
-    Returns 0 for a single concept (no pairs to measure).
-    Normalised: mean cosine distance is already in [0, 2]; we cap at 1.
-    """
+    """Mean pairwise cosine distance — vectorized with one matrix multiply."""
     n = len(embeddings)
     if n < 2:
         return 0.0
-    distances = []
-    for i in range(n):
-        for j in range(i + 1, n):
-            distances.append(_cosine_distance(embeddings[i], embeddings[j]))
-    mean_dist = float(np.mean(distances))
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    normed = embeddings / norms
+    sim_mat = normed @ normed.T       # (n, n) all pairwise cosines
+    i, j = np.triu_indices(n, k=1)
+    mean_dist = float(np.mean(1.0 - sim_mat[i, j]))
     return min(mean_dist, 1.0)
 
 
@@ -99,7 +96,7 @@ def _cluster_metric(embeddings: np.ndarray) -> float:
     if n < 2:
         return 0.0
     k = min(2, n)
-    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    km = KMeans(n_clusters=k, n_init=3, random_state=42)
     km.fit(embeddings)
     if k == 1:
         return 0.0
@@ -109,54 +106,52 @@ def _cluster_metric(embeddings: np.ndarray) -> float:
 
 def _bridge_metric(embeddings: np.ndarray, graph) -> float:
     """
-    4.1c — For each input concept, find its graph neighbourhood centroid.
-    Bridge score = mean pairwise cosine distance between those neighbourhood
-    centroids. High score → input concepts live in disconnected graph regions.
-    Falls back to 0 if the graph is empty or concepts have no neighbours.
+    Bridge score — uses graph's pre-built normalised embedding matrix
+    to avoid rebuilding a (N, 384) array on every call.
     """
     if graph is None or graph.node_count == 0:
+        return 0.0
+    mat = getattr(graph, '_emb_matrix', None)
+    ids = getattr(graph, '_emb_node_ids', None)
+    if mat is None or ids is None or len(ids) == 0:
         return 0.0
 
     n = len(embeddings)
     if n < 2:
         return 0.0
 
-    # Build a quick lookup: node_id -> embedding array
-    node_embs: dict[str, np.ndarray] = {
-        nid: np.array(data['embedding'], dtype=np.float32)
-        for nid, data in graph._g.nodes(data=True)
-    }
-    if not node_embs:
-        return 0.0
-
-    all_embs  = np.stack(list(node_embs.values()))
-    all_ids   = list(node_embs.keys())
-
     centroids: list[np.ndarray] = []
     for emb in embeddings:
-        # Find this concept's closest node in the graph
-        sims = all_embs @ emb / (
-            np.linalg.norm(all_embs, axis=1) * np.linalg.norm(emb) + 1e-8
-        )
-        closest_idx = int(np.argmax(sims))
-        closest_id  = all_ids[closest_idx]
+        v = np.array(emb, dtype=np.float32)
+        norm = np.linalg.norm(v)
+        if norm == 0:
+            continue
+        v = v / norm
+        sims = mat @ v                          # (N,) — one BLAS call, matrix pre-normalised
+        closest_id = ids[int(np.argmax(sims))]
 
-        # Neighbourhood centroid = mean of neighbor embeddings
-        # Skip concepts whose closest node has no neighbors — no graph signal yet
-        neighbours = [nb for nb in graph._g.neighbors(closest_id) if nb in node_embs]
+        neighbours = list(graph._g.neighbors(closest_id))
         if not neighbours:
             continue
-        nb_embs = np.stack([node_embs[nb] for nb in neighbours])
+        nb_embs = np.array(
+            [graph._g.nodes[nb]['embedding'] for nb in neighbours
+             if graph._g.nodes[nb].get('embedding')],
+            dtype=np.float32,
+        )
+        if len(nb_embs) == 0:
+            continue
         centroids.append(nb_embs.mean(axis=0))
 
     if len(centroids) < 2:
         return 0.0
 
-    distances = []
-    for i in range(len(centroids)):
-        for j in range(i + 1, len(centroids)):
-            distances.append(_cosine_distance(centroids[i], centroids[j]))
-    return min(float(np.mean(distances)), 1.0)
+    C = np.array(centroids, dtype=np.float32)
+    norms = np.linalg.norm(C, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    C = C / norms
+    sim_mat = C @ C.T
+    i, j = np.triu_indices(len(centroids), k=1)
+    return min(float(np.mean(1.0 - sim_mat[i, j])), 1.0)
 
 
 def _level(score: float) -> str:

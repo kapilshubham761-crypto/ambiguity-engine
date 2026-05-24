@@ -43,6 +43,10 @@ label { color: #5050a0 !important; font-size: 11px !important; letter-spacing: 0
 h1,h2,h3 { color: #6060a0 !important; font-size: 11px !important; letter-spacing: 0.2em !important;
            text-transform: uppercase !important; font-weight: 400 !important;
            border-bottom: 1px solid #141428 !important; padding-bottom: 4px !important; }
+/* Full-height charts */
+[data-testid="stPlotlyChart"] { height: calc(100vh - 160px) !important; }
+[data-testid="stPlotlyChart"] > div { height: 100% !important; }
+[data-testid="stPlotlyChart"] iframe { height: 100% !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -150,12 +154,15 @@ def _novelty_score(concept: str, novelty: dict) -> float:
 
 # ── Dark plotly base ──────────────────────────────────────────────────────────
 
+_FULL_H = 820
+
 def _dark_layout(**kwargs):
     base = dict(
         paper_bgcolor="#050508",
         plot_bgcolor="#07070e",
         font=dict(family="Consolas", color="#6868a0", size=11),
         margin=dict(l=20, r=20, t=36, b=20),
+        height=_FULL_H,
         legend=dict(bgcolor="#09090f", bordercolor="#1a1a28", borderwidth=1, font=dict(size=10)),
         xaxis=dict(showgrid=True, gridcolor="#0f0f1e", zeroline=False, color="#404060"),
         yaxis=dict(showgrid=True, gridcolor="#0f0f1e", zeroline=False, color="#404060"),
@@ -182,10 +189,9 @@ with st.sidebar:
     edge_weight_min = st.slider("Min edge weight", 0.0, 2.0, 0.1, 0.05)
 
     st.markdown("---")
-    _qp = st.query_params
-    _default_refresh = _qp.get("refresh", "1") == "1"
-    auto_refresh = st.toggle("Auto-refresh (12s)", value=_default_refresh)
-    st.query_params["refresh"] = "1" if auto_refresh else "0"
+    if st.button("Refresh", width="stretch"):
+        st.cache_data.clear()
+        st.rerun()
 
     if st.button("Reset view", width="stretch"):
         st.cache_data.clear()
@@ -194,9 +200,6 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(f'<div style="font-size:10px;color:#252540">{time.strftime("%H:%M:%S")}</div>',
                 unsafe_allow_html=True)
-
-if auto_refresh:
-    st.markdown('<meta http-equiv="refresh" content="12">', unsafe_allow_html=True)
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 
@@ -343,6 +346,7 @@ elif category == "Point Cloud 3D":
         paper_bgcolor="#050508", plot_bgcolor="#07070e",
         font=dict(family="Consolas", color="#6868a0", size=11),
         margin=dict(l=0, r=0, t=36, b=0),
+        height=_FULL_H,
         title=dict(text="Embedding Space — PCA 3D", font=dict(color="#6868a0", size=12)),
         scene=dict(
             bgcolor="#070710",
@@ -791,6 +795,6 @@ st.markdown(f"""
   <span>causal edges <b style="color:#3a3a60">{len(wm.get('edges',[]))}</b></span>
   <span>transitions <b style="color:#3a3a60">{len(trans):,}</b></span>
   <span>memory items <b style="color:#3a3a60">{sum(len(memory.get(l,{})) for l in ['working','episodic','semantic']):,}</b></span>
-  <span style="margin-left:auto">refreshes every 12s · {time.strftime('%H:%M:%S')}</span>
+  <span style="margin-left:auto">last loaded · {time.strftime('%H:%M:%S')}</span>
 </div>
 """, unsafe_allow_html=True)

@@ -50,7 +50,8 @@ ambiguity-engine/
 │   ├── meta_learning.py   MetaLearner — strategy scoring
 │   ├── evolver.py         Evolver — hill-climbing parameter adaptation
 │   ├── ecology.py         CognitiveEcology — orchestration heartbeat (13 subsystems)
-│   └── config.py          Config — live config reader with mtime cache
+│   ├── config.py          Config — live config reader with mtime cache
+│   └── regulator.py       MetaRegulator — autonomous Layer 2 parameter regulation (60s background thread)
 ├── ui/
 │   ├── app.py             Streamlit entry point — boot splash, sidebar, nav, global CSS
 │   ├── .streamlit/
@@ -62,12 +63,15 @@ ambiguity-engine/
 │       ├── 3_runner.py    Runner — manual pipeline + LLM
 │       ├── 0_meta_state.py Meta-State — concept activation pool
 │       ├── 10_cognition.py Cognition — 8-tab deep cognitive view
-│       └── 11_config.py   Settings — live params, egos, Cloudflare tunnel
+│       ├── 11_config.py   Settings — live params, egos, Cloudflare tunnel
+│       └── 12_ytp.py      YTP — Your Tuning Panel (Layer 1 sliders + Layer 2 live read-only, local-only)
 ├── data/                  Runtime files (gitignored) — see Data Files below
 ├── overlay.py             Always-on-top tkinter stats (CPU/RAM/GPU/graph/mode/goal)
+├── visualizer.py          Standalone graph visualizer — Streamlit on port 8502
 ├── launch.bat             Kill old → clear caches → start overlay + Streamlit → open browser
 ├── restart.bat            Quick restart (no overlay, no browser)
 ├── overlay.bat            Launch overlay only (pythonw, no console)
+├── visualizer.bat         One-click launch of standalone visualizer on port 8502
 ├── config.yaml            LLM config (model name, Ollama endpoint)
 ├── CLAUDE.md              This file
 └── ARCHITECTURE.md        Full architecture with layer diagrams, module ref, data files
@@ -87,6 +91,10 @@ ambiguity-engine/
 - **No coding features in the Streamlit app** — no git panels, terminals, code editors. User codes in VS Code
 - **launch.bat does NOT open** any HTML tracker files
 - **cupy-cuda12x is uninstalled** — it was breaking imports (needed pytest which wasn't installed). Do not reinstall.
+- **np.stack() has no dtype param** — use `np.array(list, dtype=np.float32)` instead, otherwise silent crash
+- **YTP is local-only** — checks CF-Ray/CF-Connecting-IP/X-Forwarded-For headers in addition to host; Cloudflare rewrites host to localhost so host check alone is insufficient
+- **currently_reading.json written at START of fetch** — gives live "what is it reading" signal; live_feed.jsonl is written at END and used as fallback
+- **MetaRegulator runs in background thread every 60s** — reads 7 system metrics, autonomously adjusts 12 Layer 2 variables, writes to engine_config.json. Never call it synchronously from the fetch pipeline.
 
 ---
 
@@ -116,6 +124,8 @@ ambiguity-engine/
 | episodes.jsonl | EpisodeStore | Concept co-occurrence episode log |
 | transitions.json | EpisodeStore | Directed transition weights |
 | abstractions.json | Abstractor | Abstract concept hierarchy L0/L1/L2 |
+| currently_reading.json | AutoLearner | {title, source, url, concepts_found} — written at START of each fetch for live UI display |
+| perf_profile.json | AutoLearner | Pipeline timing profile: graph_update, subsystems, detect, total (ms) — feeds Cognition efficiency graph |
 
 ---
 
@@ -177,14 +187,21 @@ double-click restart.bat
 
 ---
 
-## Current State (as of 2026-05-24)
+## Current State (as of 2026-05-24 · V7)
 
 **What works:**
 - Fully autonomous learning — AutoLearner runs 24/7, no human review
 - 4,473+ nodes, 18,410+ edges in graph.db
-- All 9 cognitive layers active (learner → ecology heartbeat)
+- All 10 cognitive layers active (learner → MetaRegulator)
+- MetaRegulator (Layer 9) — autonomous self-tuning of all 12 Layer 2 variables, 60s background thread
+- Three-layer variable taxonomy: Layer 1 physics (manual), Layer 2 adaptive (MetaRegulator), Layer 3 personality (IdentityTracker/Evolver)
+- Pipeline optimized: subsystems off critical path (30s background thread), vectorized variance, bridge metric uses pre-built matrix, batch vstack
+- YTP (12_ytp.py) — Layer 1 sliders + Layer 2 live read-only displays with AUTO badges, local-only gated
 - Cognitive Core Panel (1_state.py) — real-time machine state monitor
-- 5-page navigation: Core / Runner / Meta-State / Cognition / Settings
+- 6-page navigation: Core / Runner / Meta-State / Cognition / Settings / YTP
+- Standalone visualizer on port 8502 (visualizer.py + visualizer.bat) — full-height charts, manual refresh
+- Project logo as browser favicon
+- Live bar shows what the engine is reading NOW (currently_reading.json, start-of-fetch)
 - Ego system (up to 3 personality presets)
 - Cloudflare tunnel in Settings (optional public URL)
 - GPU monitoring in overlay via pynvml
@@ -193,6 +210,7 @@ double-click restart.bat
 - Sidebar expand/collapse button styling: CSS must be in main page `st.markdown()` not sidebar context
 - torch circular import: fully resolved via import ordering + cupy uninstall
 - fileWatcherType=none: must restart Streamlit manually after code changes
+- perf_profile.json absent on first launch — appears after first article cycle
 
 ---
 
