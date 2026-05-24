@@ -51,7 +51,6 @@ summary[data-testid="stExpanderToggle"] span { color: #6868a0 !important; font-s
 """, unsafe_allow_html=True)
 
 REFRESH_SEC = 10
-st.markdown(f'<meta http-equiv="refresh" content="{REFRESH_SEC}">', unsafe_allow_html=True)
 
 st.markdown("""
 <div style="padding:16px 0 4px;border-bottom:1px solid #222238;margin-bottom:20px">
@@ -161,3 +160,7 @@ if stats:
     s4.metric("Mean Stability",  f"{stats.get('mean_stability', 0):.4f}")
 
 st.caption(f"auto-refresh {REFRESH_SEC}s · tick {reg_snap.get('tick_count', 0)}")
+
+import time as _time
+_time.sleep(REFRESH_SEC)
+st.rerun()

@@ -964,8 +964,7 @@ with st.expander("learnings / concept browser", expanded=False):
                 st.caption("No ambiguity log yet.")
 
 
-# ── Auto-refresh every 4 seconds ─────────────────────────────────────────────
-st.markdown(
-    '<script>setTimeout(()=>window.location.reload(),4000)</script>',
-    unsafe_allow_html=True
-)
+# ── Auto-refresh every 4 seconds (in-session rerun — keeps WebSocket alive) ──
+import time as _time
+_time.sleep(4)
+st.rerun()
