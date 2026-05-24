@@ -40,7 +40,7 @@ import json
 import os
 import tempfile
 import uuid
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -80,12 +80,16 @@ class EpisodeStore:
 
     def __init__(self) -> None:
         cfg = _cfg()
-        self._max_episodes    = int(cfg.get('max_episodes', 1000))
-        self._min_concepts    = int(cfg.get('min_concepts', 2))
+        self._max_episodes     = int(cfg.get('max_episodes', 1000))
+        self._min_concepts     = int(cfg.get('min_concepts', 2))
         self._transition_decay = float(cfg.get('transition_decay', 0.95))
         # edges: "A__SEP__B" → {weight, count}
         self._edges: dict[str, dict] = {}
+        # In-memory episode buffer — eliminates file reads on every recent() call
+        self._buf: deque[dict] = deque(maxlen=self._max_episodes)
+        self._record_count = 0   # triggers periodic file trim
         self._load_transitions()
+        self._load_episodes()
 
     # ------------------------------------------------------------------ #
     # Public API                                                           #
@@ -129,26 +133,9 @@ class EpisodeStore:
         return dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
 
     def recent(self, n: int = 20) -> list[dict]:
-        """Load last n episodes from the JSONL file."""
-        try:
-            with open(_EP_PATH, encoding='utf-8') as f:
-                lines = f.readlines()
-            eps = []
-            for line in reversed(lines):
-                line = line.strip()
-                if line:
-                    try:
-                        eps.append(json.loads(line))
-                    except Exception:
-                        pass
-                if len(eps) >= n:
-                    break
-            return list(reversed(eps))
-        except FileNotFoundError:
-            return []
-        except Exception as e:
-            log.warning('episodes.recent error: %s', e)
-            return []
+        """Return last n episodes from the in-memory buffer."""
+        buf = list(self._buf)
+        return buf[-n:] if n < len(buf) else buf
 
     def strongest_paths(self, n: int = 20) -> list[tuple[str, str, float]]:
         """Top-n transition edges by weight."""
@@ -221,13 +208,17 @@ class EpisodeStore:
         self._save_transitions()
 
     def _append_episode(self, ep: dict) -> None:
+        self._buf.append(ep)
+        self._record_count += 1
         os.makedirs(os.path.dirname(_EP_PATH), exist_ok=True)
         with open(_EP_PATH, 'a', encoding='utf-8') as f:
             f.write(json.dumps(ep, ensure_ascii=False) + '\n')
-        self._trim_episodes()
+        # Trim file to max_episodes every 100 records (amortized, not every write)
+        if self._record_count % 100 == 0:
+            self._trim_episodes()
 
     def _trim_episodes(self) -> None:
-        """Keep only the last max_episodes lines."""
+        """Keep only the last max_episodes lines in the JSONL file."""
         try:
             with open(_EP_PATH, encoding='utf-8') as f:
                 lines = f.readlines()
@@ -236,6 +227,24 @@ class EpisodeStore:
                     f.writelines(lines[-self._max_episodes:])
         except Exception:
             pass
+
+    def _load_episodes(self) -> None:
+        """Populate the in-memory buffer from the JSONL file at startup."""
+        try:
+            with open(_EP_PATH, encoding='utf-8') as f:
+                lines = f.readlines()
+            for line in lines[-self._max_episodes:]:
+                line = line.strip()
+                if line:
+                    try:
+                        self._buf.append(json.loads(line))
+                    except Exception:
+                        pass
+            log.debug('episodes loaded: %d into buffer', len(self._buf))
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            log.warning('episodes load error: %s', e)
 
     def _save_transitions(self) -> None:
         dir_ = os.path.dirname(_TR_PATH)

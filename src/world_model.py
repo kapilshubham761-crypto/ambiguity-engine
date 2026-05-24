@@ -80,8 +80,9 @@ class WorldModel:
         self._max_edges        = int(cfg.get('max_edges',          2000))
         self._relations        = list(cfg.get('relations', list(VALID_RELATIONS)))
 
-        # edges[(source, target, relation)] = confidence
-        self._edges: dict[tuple, float] = {}
+        # edges[(source, target, relation)] = {'conf': float, 'epoch': int}
+        # Decay is lazy — applied on read via _get_conf(), not on every observe().
+        self._edges: dict[tuple, dict] = {}
         self._obs_count: int = 0
         self._load()
 
@@ -89,21 +90,45 @@ class WorldModel:
     # Persistence                                                          #
     # ------------------------------------------------------------------ #
 
+    def _get_conf(self, key: tuple) -> float:
+        """Lazy-decay: compute current confidence without touching other edges."""
+        edge = self._edges.get(key)
+        if edge is None:
+            return 0.0
+        age = self._obs_count - edge['epoch']
+        if age <= 0:
+            return edge['conf']
+        return edge['conf'] * (self._confidence_decay ** age)
+
+    def _prune(self) -> None:
+        """Drop edges below min_confidence, then trim to max_edges if still over."""
+        to_del = [k for k in self._edges if self._get_conf(k) < self._min_confidence]
+        for k in to_del:
+            del self._edges[k]
+        if len(self._edges) > self._max_edges:
+            scored = sorted(self._edges.keys(), key=self._get_conf)
+            for k in scored[:len(self._edges) - self._max_edges]:
+                del self._edges[k]
+
     def _load(self) -> None:
         try:
             with open(_DATA_PATH, encoding='utf-8') as f:
                 raw = json.load(f)
+            self._obs_count = int(raw.get('obs_count', 0))
             for item in raw.get('edges', []):
                 key = (item['source'], item['target'], item['relation'])
-                self._edges[key] = float(item['confidence'])
-            self._obs_count = int(raw.get('obs_count', 0))
+                # Load as already-materialized at current epoch
+                self._edges[key] = {'conf': float(item['confidence']),
+                                    'epoch': self._obs_count}
         except Exception:
             pass
 
     def _save(self) -> None:
+        # Materialize all lazy values before saving (keeps file format identical)
         edges_list = [
-            {'source': s, 'target': t, 'relation': r, 'confidence': round(c, 6)}
-            for (s, t, r), c in self._edges.items()
+            {'source': s, 'target': t, 'relation': r,
+             'confidence': round(self._get_conf((s, t, r)), 6)}
+            for (s, t, r) in self._edges
         ]
         _atomic_write(_DATA_PATH, {
             'edges': edges_list,
@@ -128,22 +153,15 @@ class WorldModel:
 
         self._obs_count += 1
 
-        # Decay all edges slightly
-        for k in list(self._edges):
-            self._edges[k] *= self._confidence_decay
-            if self._edges[k] < self._min_confidence:
-                del self._edges[k]
-
-        # Reinforce observed edge
+        # Reinforce observed edge using lazy-decayed current value
         key = (source, target, relation)
-        current = self._edges.get(key, 0.0)
-        self._edges[key] = min(1.0, current + (1.0 - current) * 0.30 * strength)
+        current = self._get_conf(key)
+        new_conf = min(1.0, current + (1.0 - current) * 0.30 * strength)
+        self._edges[key] = {'conf': new_conf, 'epoch': self._obs_count}
 
-        # Prune to max_edges (drop weakest)
+        # Prune only when over cap (amortized — not on every call)
         if len(self._edges) > self._max_edges:
-            sorted_keys = sorted(self._edges, key=lambda k: self._edges[k])
-            for k in sorted_keys[:len(self._edges) - self._max_edges]:
-                del self._edges[k]
+            self._prune()
 
         if self._obs_count % 50 == 0:
             self._save()
@@ -156,9 +174,11 @@ class WorldModel:
         Sorted by confidence descending.
         """
         results = []
-        for (s, t, r), c in self._edges.items():
-            if s == concept and c >= min_confidence:
-                results.append({'target': t, 'relation': r, 'confidence': round(c, 4)})
+        for (s, t, r) in self._edges:
+            if s == concept:
+                c = self._get_conf((s, t, r))
+                if c >= min_confidence:
+                    results.append({'target': t, 'relation': r, 'confidence': round(c, 4)})
         results.sort(key=lambda x: x['confidence'], reverse=True)
         return results
 
@@ -166,9 +186,11 @@ class WorldModel:
                        min_confidence: float = 0.10) -> list[dict]:
         """Return all incoming causal edges pointing TO concept."""
         results = []
-        for (s, t, r), c in self._edges.items():
-            if t == concept and c >= min_confidence:
-                results.append({'source': s, 'relation': r, 'confidence': round(c, 4)})
+        for (s, t, r) in self._edges:
+            if t == concept:
+                c = self._get_conf((s, t, r))
+                if c >= min_confidence:
+                    results.append({'source': s, 'relation': r, 'confidence': round(c, 4)})
         results.sort(key=lambda x: x['confidence'], reverse=True)
         return results
 
@@ -195,10 +217,11 @@ class WorldModel:
 
     def top_edges(self, n: int = 20) -> list[dict]:
         """Return n highest-confidence edges."""
-        sorted_edges = sorted(self._edges.items(), key=lambda x: x[1], reverse=True)
+        scored = sorted(self._edges.keys(), key=self._get_conf, reverse=True)
         return [
-            {'source': s, 'target': t, 'relation': r, 'confidence': round(c, 4)}
-            for (s, t, r), c in sorted_edges[:n]
+            {'source': s, 'target': t, 'relation': r,
+             'confidence': round(self._get_conf((s, t, r)), 4)}
+            for (s, t, r) in scored[:n]
         ]
 
     def snapshot(self) -> dict:
