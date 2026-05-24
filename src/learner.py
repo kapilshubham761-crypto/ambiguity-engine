@@ -254,8 +254,7 @@ class AutoLearner:
                 pass
 
     def _process(self, item: dict) -> dict:
-        from extractor import extract
-        from detector  import detect_and_log
+        from detector import detect_and_log
         _T = time.perf_counter
 
         entry = {
@@ -291,13 +290,17 @@ class AutoLearner:
             entry['status'] = 'skip:short'
             return entry
 
-        # Extract all concepts first, graph-update per sentence (preserves co-occurrence)
+        # Batch-embed all sentences in one encoder call, then update graph per sentence
+        from extractor import extract_batch
         all_concepts = []
         all_texts    = []
         t_extract = t_graph = 0.0
 
-        for sent in sentences:
-            t1 = _T(); concepts = extract(sent); t_extract += _T() - t1
+        t1 = _T()
+        batch = extract_batch(sentences)
+        t_extract = _T() - t1
+
+        for concepts in batch:
             if not concepts:
                 continue
             if self._graph:

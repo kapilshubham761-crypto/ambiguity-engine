@@ -29,7 +29,6 @@ import time
 import xml.etree.ElementTree as ET
 
 import requests
-import spacy
 import trafilatura
 
 HEADERS = {'User-Agent': 'AmbiguityEngine/0.1 (research toy; contact: local)'}
@@ -52,16 +51,14 @@ def _get(url: str, params: dict | None = None, retries: int = 2, timeout: int = 
 # Text utilities — sentence splitter + readability score                    #
 # ======================================================================== #
 
-_nlp = None
-
 def _sentences(text: str, min_len: int = 40, max_len: int = 400) -> list[str]:
-    global _nlp
-    if _nlp is None:
-        _nlp = spacy.load('en_core_web_sm')
-    doc = _nlp(text[:60_000])
+    """Split text into clean sentences using regex — no NLP model needed."""
+    text = re.sub(r'\s+', ' ', text[:60_000]).strip()
+    # Split on sentence-ending punctuation followed by whitespace + capital or digit
+    parts = re.split(r'(?<=[.!?])\s+(?=[A-Z0-9"])', text)
     out = []
-    for sent in doc.sents:
-        s = re.sub(r'\s+', ' ', sent.text.strip())
+    for s in parts:
+        s = s.strip()
         if min_len <= len(s) <= max_len and s.count(' ') >= 4:
             out.append(s)
     return out
