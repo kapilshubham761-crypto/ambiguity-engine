@@ -18,28 +18,28 @@
     "cost_abstraction": 0.14
   },
   "identity": {
-    "drift_rate": 0.044
+    "drift_rate": 0.0128
   },
   "evolver": {
     "adapt_every": 30,
     "max_delta": 0.05
   },
   "attention": {
-    "bias_strength": 0.15,
-    "novelty_strength": 0.35
+    "bias_strength": 0.2733,
+    "novelty_strength": 0.3766
   },
   "meta_state": {
-    "decay_rate": 0.97,
-    "reinforce_gain": 0.25,
-    "fatigue_k": 0.2,
-    "cooling_alpha": 0.5
+    "decay_rate": 0.9772,
+    "reinforce_gain": 0.285,
+    "fatigue_k": 0.465,
+    "cooling_alpha": 0.4549
   },
   "goals": {
-    "reduce_uncertainty": 0.1,
-    "increase_novelty": 0.75,
-    "resolve_contradiction": 0.25,
-    "maintain_stability": 0.35,
-    "expand_regions": 0.45
+    "reduce_uncertainty": 0.1934,
+    "increase_novelty": 0.2971,
+    "resolve_contradiction": 0.1258,
+    "maintain_stability": 0.2192,
+    "expand_regions": 0.1645
   },
   "egos": {
     "soma": {
@@ -69,5 +69,6 @@
       }
     }
   },
-  "active_ego": "soma"
+  "active_ego": "soma",
+  "_regulated": true
 }

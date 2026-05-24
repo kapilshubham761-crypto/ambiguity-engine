@@ -17,10 +17,19 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 import json
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
+_DATA = Path(ROOT) / 'data'
+
+
+def _load_json(name: str) -> dict:
+    try:
+        return json.loads((_DATA / name).read_text(encoding='utf-8'))
+    except Exception:
+        return {}
 
 # ── Design system + component CSS ────────────────────────────────────────────
 st.markdown("""
@@ -108,15 +117,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── load singletons (lazy, non-crashing) ─────────────────────────────────────
-@st.cache_resource(show_spinner=False)
-def _reflection():
-    from reflection import ReflectionMonitor
-    return ReflectionMonitor.get()
 
 @st.cache_resource(show_spinner=False)
-def _memory():
-    from memory import TemporalMemory
-    return TemporalMemory.get()
+def _field():
+    from jam_field import JamField
+    return JamField.get()
 
 @st.cache_resource(show_spinner=False)
 def _episodes():
@@ -138,16 +143,6 @@ def _abstractor():
     from abstractor import Abstractor
     return Abstractor.get()
 
-@st.cache_resource(show_spinner=False)
-def _goals():
-    from goals import GoalEngine
-    return GoalEngine.get()
-
-@st.cache_resource(show_spinner=False)
-def _stability():
-    from stability import StabilityMonitor
-    return StabilityMonitor.get()
-
 
 # ── tab layout ────────────────────────────────────────────────────────────────
 tab_live, tab_mem, tab_ep, tab_pred, tab_contra, tab_abs, tab_sim, tab_wv = st.tabs([
@@ -160,29 +155,22 @@ tab_live, tab_mem, tab_ep, tab_pred, tab_contra, tab_abs, tab_sim, tab_wv = st.t
 # TAB 1 — Live
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_live:
-    rf = _reflection()
-    ge = _goals()
-    sm = _stability()
+    reg  = _load_json('regulation.json')
+    cog  = _load_json('cog_status.json')
+    jf   = _load_json('jam_field.json')
 
-    try:
-        report = rf.report()
-    except Exception as e:
-        st.warning(f"Reflection not yet warmed up: {e}")
-        report = {}
+    mode    = cog.get('mode', reg.get('mode', 'associative'))
+    goal    = cog.get('goal', reg.get('goal', 'explore'))
+    entropy = reg.get('entropy', 0.0)
+    pressure = reg.get('pressure', 0.0)
 
-    mode    = report.get('current_mode', 'reflective')
-    entropy = report.get('entropy', 0.0)
-    goal    = report.get('goal', 'maintain_stability')
-    flags   = report.get('flags', [])
-    desc    = rf.describe() if report else "No data yet."
-
-    # Mode + flags row
     _MODE_COLOUR = {
         'focused':      '#f59e0b',
         'exploratory':  '#3b82f6',
-        'associative':  '#8b5cf6',
-        'exploitative': '#ef4444',
-        'reflective':   '#10b981',
+        'conflicted':   '#ef4444',
+        'saturated':    '#8b5cf6',
+        'drifting':     '#10b981',
+        'associative':  '#4a9eff',
         'unknown':      '#6b7280',
     }
     mc = _MODE_COLOUR.get(mode, '#888')
@@ -201,45 +189,42 @@ with tab_live:
         <div class="cog-card">
           <div style="font-size:0.75rem;color:#888;margin-bottom:6px">CURRENT DRIVE</div>
           <div class="cog-mode" style="color:#a78bfa">{goal.replace('_', ' ').upper()}</div>
-          <div style="font-size:0.8rem;color:#999;margin-top:6px">argmax intrinsic drives</div>
+          <div style="font-size:0.8rem;color:#999;margin-top:6px">field-driven regulation</div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Entropy gauge
-    st.subheader("Entropy", divider=False)
-    st.progress(float(entropy), text=f"Shannon entropy: {entropy:.3f}  (healthy 0.20–0.80)")
-    ec1, ec2, ec3 = st.columns(3)
-    ec1.metric("Active concepts",  report.get('active_concept_count', 0))
-    ec2.metric("Ambiguity load",   f"{report.get('ambiguity_load', 0.0):.2f}")
-    ec3.metric("Novelty balance",  f"{report.get('novelty_balance', 0.0):.2f}")
+    st.subheader("Field pressure", divider=False)
+    st.progress(float(min(pressure, 1.0)), text=f"Pressure: {pressure:.3f}  ·  Entropy: {entropy:.3f}")
 
-    # Drive scores
-    st.subheader("Drive scores", divider=False)
-    scores = ge.drive_scores()
-    if scores:
-        df_scores = pd.DataFrame(
-            [(k.replace('_', ' '), round(v, 4)) for k, v in scores.items()],
-            columns=["Drive", "Score"]
-        ).sort_values("Score", ascending=False)
-        st.dataframe(df_scores, width='stretch', hide_index=True)
+    stats = jf.get('field_stats', {})
+    ec1, ec2, ec3, ec4 = st.columns(4)
+    ec1.metric("Active concepts",   jf.get('active_count', 0))
+    ec2.metric("Mean tension",      f"{stats.get('mean_tension', 0):.3f}")
+    ec3.metric("Mean novelty",      f"{stats.get('mean_novelty', 0):.3f}")
+    ec4.metric("Mean stability",    f"{stats.get('mean_stability', 0):.3f}")
 
-    # Pathology flags
-    st.subheader("State flags", divider=False)
-    if flags:
-        flag_html = ' '.join(f'<span class="cog-pill cog-flag">{f}</span>' for f in flags)
-        st.markdown(flag_html, unsafe_allow_html=True)
-    else:
-        st.markdown('<span class="cog-pill cog-ok">healthy</span>', unsafe_allow_html=True)
+    st.subheader("Regulation scalars", divider=False)
+    rc1, rc2, rc3 = st.columns(3)
+    rc1.metric("Gain rate",       f"{reg.get('gain_rate', 0):.4f}")
+    rc2.metric("Decay rate",      f"{reg.get('decay_rate', 0):.5f}")
+    rc3.metric("Diffusion",       f"{reg.get('diffusion_strength', 0):.4f}")
 
-    # Describe line
-    st.markdown(f"<div style='color:#888;font-size:0.85rem;margin-top:12px'>{desc}</div>",
-                unsafe_allow_html=True)
-
-    # Region info
-    region = report.get('dominant_region')
-    r_count = report.get('region_count', 0)
-    if region or r_count:
-        st.caption(f"Active region: {region or 'none'} · {r_count} total regions")
+    st.subheader("Top active concepts", divider=False)
+    top = jf.get('top', [])
+    if top:
+        max_v = top[0][1] if top else 1.0
+        for text, val in top:
+            frac = val / max(float(max_v), 0.001)
+            bar_col = '#ef4444' if frac > 0.75 else '#f59e0b' if frac > 0.40 else '#4a9eff'
+            st.markdown(f"""
+            <div style="display:flex;align-items:center;gap:10px;padding:3px 0;font-size:13px">
+              <div style="min-width:200px;color:#9898c8">{text}</div>
+              <div style="flex:1;height:6px;background:#0a0a12;border-radius:2px;overflow:hidden">
+                <div style="height:100%;width:{int(frac*100)}%;background:{bar_col};border-radius:2px"></div>
+              </div>
+              <div style="min-width:60px;text-align:right;color:#6868a0">{val:.5f}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     if st.button("Refresh", key="live_refresh"):
         st.cache_resource.clear()
@@ -250,48 +235,47 @@ with tab_live:
 # TAB 2 — Memory
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_mem:
-    mem = _memory()
-    snap = mem.snapshot()
+    jf_field = _field()
 
-    w_count = snap.get('working_count', 0)
-    e_count = snap.get('episodic_count', 0)
-    s_count = snap.get('semantic_count', 0)
+    top_active  = jf_field.top(20, by='activation')   # "working" — recently firing
+    top_persist = jf_field.top(20, by='persistence')   # "semantic" — durably learned
+    top_momentum = jf_field.top(20, by='momentum')     # "episodic" — directional carry
 
-    st.subheader("Layer counts", divider=False)
+    w_count = len([t for t, v in top_active  if v.get('activation',  0) > 0.05])
+    e_count = len([t for t, v in top_momentum if v.get('momentum',   0) > 0.01])
+    s_count = len([t for t, v in top_persist  if v.get('persistence',0) > 0.10])
+
+    st.subheader("Field memory layers", divider=False)
     c1, c2, c3 = st.columns(3)
-    c1.metric("Working", w_count,  help="Fast decay ~5min half-life")
-    c2.metric("Episodic", e_count, help="Medium decay ~4h half-life")
-    c3.metric("Semantic", s_count, help="Slow decay ~7-day half-life")
-
-    # Layer fill bars
-    max_count = max(w_count, e_count, s_count, 1)
-    st.markdown("**Layer fill**")
-    st.progress(w_count / max_count, text=f"Working  {w_count}")
-    st.progress(e_count / max_count, text=f"Episodic {e_count}")
-    st.progress(s_count / max_count, text=f"Semantic {s_count}")
+    c1.metric("Active (working)",   w_count, help="activation > 0.05")
+    c2.metric("Momentum (episodic)", e_count, help="momentum > 0.01")
+    c3.metric("Persistent (semantic)", s_count, help="persistence > 0.10")
 
     col_w, col_s = st.columns(2)
     with col_w:
-        st.subheader("Top working (recent)", divider=False)
-        top_w = snap.get('top_working', [])
-        if top_w:
-            df_w = pd.DataFrame(top_w, columns=['concept', 'value'])
-            df_w['value'] = df_w['value'].round(4)
+        st.subheader("Top active (recent firing)", divider=False)
+        if top_active:
+            df_w = pd.DataFrame(
+                [(t, round(v.get('activation', 0), 5)) for t, v in top_active],
+                columns=['concept', 'activation']
+            )
             st.dataframe(df_w, width='stretch', hide_index=True)
         else:
-            st.caption("No working memory yet.")
+            st.caption("No active concepts yet.")
 
     with col_s:
-        st.subheader("Top semantic (deep knowledge)", divider=False)
-        top_s = snap.get('top_semantic', [])
-        if top_s:
-            df_s = pd.DataFrame(top_s, columns=['concept', 'value'])
-            df_s['value'] = df_s['value'].round(4)
+        st.subheader("Top persistent (deep knowledge)", divider=False)
+        if top_persist:
+            df_s = pd.DataFrame(
+                [(t, round(v.get('persistence', 0), 4), int(v.get('times_seen', 0)))
+                 for t, v in top_persist],
+                columns=['concept', 'persistence', 'seen']
+            )
             st.dataframe(df_s, width='stretch', hide_index=True)
         else:
-            st.caption("Semantic memory empty — concepts consolidate after 3+ episodic hits.")
+            st.caption("Concepts persist after repeated exposure.")
 
-    st.caption("Decay: working 0.97/min · episodic 0.9997/min · semantic 0.99997/min")
+    st.caption("activation = current firing · momentum = directional carry · persistence = durable learning")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -343,10 +327,10 @@ with tab_ep:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_pred:
     pred = _predictor()
-    mem4 = _memory()
+    jf4  = _field()
 
-    st.subheader("Predict from active working memory", divider=False)
-    top_working = [c for c, _ in mem4.top_working(10)]
+    st.subheader("Predict from active field concepts", divider=False)
+    top_working = [t for t, _ in jf4.top(10, by='activation')]
 
     if top_working:
         st.caption(f"Context: {', '.join(top_working[:5])}")
@@ -488,8 +472,8 @@ with tab_sim:
     st.subheader("Sandbox cognition", divider=False)
     st.caption("Runs hypothetical activation propagation — no real state is changed.")
 
-    mem7 = _memory()
-    default_seeds = ', '.join(c for c, _ in mem7.top_working(5))
+    jf7 = _field()
+    default_seeds = ', '.join(t for t, _ in jf7.top(5, by='activation'))
 
     seeds_input = st.text_input(
         "Seed concepts (comma-separated)",

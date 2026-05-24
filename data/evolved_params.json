@@ -1,8 +1,8 @@
 {
   "params": {
-    "novelty_strength": 0.3,
-    "bias_strength": 0.7500000000000001
+    "novelty_strength": 0.44999999999999996,
+    "bias_strength": 1.0
   },
-  "tick_count": 150,
-  "ts": 1779565971.7474911
+  "tick_count": 120,
+  "ts": 1779649915.4782102
 }

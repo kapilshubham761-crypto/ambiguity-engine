@@ -146,7 +146,6 @@ from graph     import SemanticGraph
 from extractor import extract
 from detector  import detect_and_log
 from modulator import build_prompt, call_llm
-from meta_state import MetaState
 
 @st.cache_resource(show_spinner="Loading graph…")
 def _load_graph():
@@ -163,7 +162,7 @@ with st.spinner("Detecting ambiguity…"):
     result = detect_and_log(user_input, concepts, graph=g)
 
 with st.spinner("Building modulation prompt…"):
-    mod = build_prompt(concepts, result, graph=g, meta=MetaState.get())
+    mod = build_prompt(concepts, result, graph=g)
 
 g.update(concepts)
 g.save()
@@ -258,15 +257,11 @@ if response and response.strip():
             try: fn()
             except Exception: pass
 
-        _s(lambda: MetaState.get().reinforce(resp_texts))
-        _s(lambda: __import__('memory').TemporalMemory.get().reinforce(resp_texts))
         _s(lambda: __import__('episodes').EpisodeStore.get().record(
             resp_texts, ambiguity=result.score, region='runner'))
-        _s(lambda: __import__('predictor').Predictor.get().pre_activate(
-            resp_texts, __import__('memory').TemporalMemory.get()))
+        _s(lambda: __import__('predictor').Predictor.get().pre_activate(resp_texts, None))
         _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(resp_texts))
         _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(resp_texts))
-        _s(lambda: __import__('ecology').CognitiveEcology.get().tick(resp_texts))
 
         tags = ''.join(
             f'<span style="display:inline-block;background:#0d0d18;border:1px solid #222238;'

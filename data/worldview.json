@@ -65,209 +65,254 @@
       "goal": "maintain_stability",
       "mode": "reflective",
       "ts": 1779603783.4848964
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779614465.9605904
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779636497.9593065
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779638466.0975685
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779640419.2337549
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779642354.71701
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779644282.2591116
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779646108.693078
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779647965.5186293
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779649829.2615962
     }
   ],
-  "update_count": 13,
+  "update_count": 22,
   "persistent_concepts": [
     {
-      "concept": "information theory",
-      "semantic_value": 0.829
+      "concept": "art",
+      "semantic_value": 0.9764
     },
     {
-      "concept": "pathway",
-      "semantic_value": 0.6951
+      "concept": "knot",
+      "semantic_value": 0.9098
     },
     {
-      "concept": "information",
-      "semantic_value": 0.6758
+      "concept": "space",
+      "semantic_value": 0.9065
     },
     {
-      "concept": "enzyme",
-      "semantic_value": 0.547
+      "concept": "player",
+      "semantic_value": 0.8777
     },
     {
-      "concept": "amino acid",
-      "semantic_value": 0.5037
+      "concept": "game",
+      "semantic_value": 0.844
     },
     {
-      "concept": "isbn",
-      "semantic_value": 0.4725
+      "concept": "game theory",
+      "semantic_value": 0.801
     },
     {
-      "concept": "cell",
-      "semantic_value": 0.4725
+      "concept": "architecture",
+      "semantic_value": 0.7941
     },
     {
-      "concept": "atp",
-      "semantic_value": 0.4725
+      "concept": "problem",
+      "semantic_value": 0.6199
     },
     {
-      "concept": "pmid",
-      "semantic_value": 0.4562
-    },
-    {
-      "concept": "entropy",
-      "semantic_value": 0.4561
-    },
-    {
-      "concept": "gogo",
-      "semantic_value": 0.456
-    },
-    {
-      "concept": "system",
-      "semantic_value": 0.4489
-    },
-    {
-      "concept": "child",
-      "semantic_value": 0.4384
-    },
-    {
-      "concept": "product",
-      "semantic_value": 0.422
-    },
-    {
-      "concept": "metabolic pathway",
-      "semantic_value": 0.422
-    },
-    {
-      "concept": "nadh",
-      "semantic_value": 0.422
-    },
-    {
-      "concept": "state",
-      "semantic_value": 0.4166
-    },
-    {
-      "concept": "bit",
-      "semantic_value": 0.4152
-    },
-    {
-      "concept": "reaction",
-      "semantic_value": 0.4042
-    },
-    {
-      "concept": "glycolysis",
-      "semantic_value": 0.4042
-    },
-    {
-      "concept": "body",
-      "semantic_value": 0.3618
-    },
-    {
-      "concept": "symbol",
-      "semantic_value": 0.3466
-    },
-    {
-      "concept": "brain",
-      "semantic_value": 0.3416
-    },
-    {
-      "concept": "dream",
-      "semantic_value": 0.3062
-    },
-    {
-      "concept": "shannon",
-      "semantic_value": 0.3061
-    },
-    {
-      "concept": "woman",
-      "semantic_value": 0.306
-    },
-    {
-      "concept": "rate",
-      "semantic_value": 0.3041
-    },
-    {
-      "concept": "original",
-      "semantic_value": 0.3013
-    },
-    {
-      "concept": "gogogogo",
-      "semantic_value": 0.2847
-    },
-    {
-      "concept": "ai",
-      "semantic_value": 0.2847
-    },
-    {
-      "concept": "building block",
-      "semantic_value": 0.2847
-    },
-    {
-      "concept": "measure",
-      "semantic_value": 0.2846
-    },
-    {
-      "concept": "method",
-      "semantic_value": 0.284
-    },
-    {
-      "concept": "journal",
-      "semantic_value": 0.2816
-    },
-    {
-      "concept": "principle",
-      "semantic_value": 0.2802
-    },
-    {
-      "concept": "water",
-      "semantic_value": 0.2752
-    },
-    {
-      "concept": "change",
-      "semantic_value": 0.2733
-    },
-    {
-      "concept": "environment",
-      "semantic_value": 0.2626
-    },
-    {
-      "concept": "concentration",
-      "semantic_value": 0.2626
-    },
-    {
-      "concept": "rem",
-      "semantic_value": 0.2625
-    },
-    {
-      "concept": "pdf",
-      "semantic_value": 0.2625
-    },
-    {
-      "concept": "ieee transactions",
-      "semantic_value": 0.2625
-    },
-    {
-      "concept": "grandmother",
-      "semantic_value": 0.2624
-    },
-    {
-      "concept": "oxygen",
-      "semantic_value": 0.2621
+      "concept": "theory",
+      "semantic_value": 0.6083
     },
     {
       "concept": "work",
-      "semantic_value": 0.2572
+      "semantic_value": 0.6067
+    },
+    {
+      "concept": "experience",
+      "semantic_value": 0.5856
+    },
+    {
+      "concept": "line",
+      "semantic_value": 0.5738
+    },
+    {
+      "concept": "element",
+      "semantic_value": 0.5737
+    },
+    {
+      "concept": "plane",
+      "semantic_value": 0.5585
+    },
+    {
+      "concept": "volume",
+      "semantic_value": 0.5448
+    },
+    {
+      "concept": "mind",
+      "semantic_value": 0.544
+    },
+    {
+      "concept": "idea",
+      "semantic_value": 0.5433
+    },
+    {
+      "concept": "model",
+      "semantic_value": 0.4863
+    },
+    {
+      "concept": "century",
+      "semantic_value": 0.4852
+    },
+    {
+      "concept": "crossing",
+      "semantic_value": 0.4562
+    },
+    {
+      "concept": "building",
+      "semantic_value": 0.4554
+    },
+    {
+      "concept": "study",
+      "semantic_value": 0.4545
+    },
+    {
+      "concept": "link",
+      "semantic_value": 0.4394
+    },
+    {
+      "concept": "artist",
+      "semantic_value": 0.4386
+    },
+    {
+      "concept": "shape",
+      "semantic_value": 0.4376
+    },
+    {
+      "concept": "concept",
+      "semantic_value": 0.4367
+    },
+    {
+      "concept": "consciousness",
+      "semantic_value": 0.4215
+    },
+    {
+      "concept": "meaning",
+      "semantic_value": 0.4204
+    },
+    {
+      "concept": "stage",
+      "semantic_value": 0.4042
+    },
+    {
+      "concept": "order",
+      "semantic_value": 0.4028
+    },
+    {
+      "concept": "object",
+      "semantic_value": 0.4014
+    },
+    {
+      "concept": "nash",
+      "semantic_value": 0.3857
+    },
+    {
+      "concept": "brain",
+      "semantic_value": 0.3856
+    },
+    {
+      "concept": "strategy",
+      "semantic_value": 0.3856
+    },
+    {
+      "concept": "knot theory",
+      "semantic_value": 0.3667
+    },
+    {
+      "concept": "field",
+      "semantic_value": 0.3666
+    },
+    {
+      "concept": "language",
+      "semantic_value": 0.3657
+    },
+    {
+      "concept": "payoff",
+      "semantic_value": 0.3472
     },
     {
       "concept": "year",
-      "semantic_value": 0.2569
+      "semantic_value": 0.3464
     },
     {
-      "concept": "community",
-      "semantic_value": 0.2564
+      "concept": "behavior",
+      "semantic_value": 0.346
     },
     {
-      "concept": "track",
-      "semantic_value": 0.2398
+      "concept": "relationship",
+      "semantic_value": 0.3458
     },
     {
-      "concept": "gene",
-      "semantic_value": 0.2398
+      "concept": "book",
+      "semantic_value": 0.3452
     },
     {
-      "concept": "g3p",
-      "semantic_value": 0.2398
+      "concept": "nash equilibrium",
+      "semantic_value": 0.327
+    },
+    {
+      "concept": "addition",
+      "semantic_value": 0.3263
+    },
+    {
+      "concept": "system",
+      "semantic_value": 0.326
+    },
+    {
+      "concept": "surface",
+      "semantic_value": 0.3258
+    },
+    {
+      "concept": "word",
+      "semantic_value": 0.3255
+    },
+    {
+      "concept": "body",
+      "semantic_value": 0.3254
+    },
+    {
+      "concept": "history",
+      "semantic_value": 0.3251
+    },
+    {
+      "concept": "alexander",
+      "semantic_value": 0.3062
     }
   ],
   "chronic_contradictions": [],
@@ -277,6 +322,6 @@
   "semantic_biases": {
     "unknown": 1.0
   },
-  "identity_summary": "Anchored in: information theory, pathway, information",
-  "last_updated": "2026-05-24T06:23:03+00:00"
+  "identity_summary": "Anchored in: art, knot, space",
+  "last_updated": "2026-05-24T19:10:29+00:00"
 }

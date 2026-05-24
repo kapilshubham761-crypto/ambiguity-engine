@@ -426,14 +426,11 @@ st.sidebar.markdown(
 # ── V3 cognitive chip (goal + mode) ──────────────────────────────────────────
 _goal_html = ''
 try:
-    import sys as _sys
-    _sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-    from goals import GoalEngine
-    from stability import StabilityMonitor
-    _ge   = GoalEngine.get()
-    _sm   = StabilityMonitor.get()
-    _goal = _ge.current_goal().replace('_', ' ')
-    _mode = _sm._current_mode
+    _cog_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'cog_status.json')
+    with open(_cog_path, encoding='utf-8') as _cf:
+        _cog = json.load(_cf)
+    _goal = _cog.get('goal', 'explore').replace('_', ' ')
+    _mode = _cog.get('mode', 'associative')
     _MODE_CHIP_COLOUR = {
         'focused':      '#f59e0b',
         'exploratory':  '#3b82f6',

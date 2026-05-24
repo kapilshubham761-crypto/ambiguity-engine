@@ -1,3003 +1,1533 @@
 {
   "entries": {
-    "control": {
-      "value": 0.5223292031612243,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "condition": {
-      "value": 0.5676971727568977,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 2
-    },
-    "product": {
-      "value": 0.42315658619444546,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "instance": {
-      "value": 0.528598566796836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "substrate": {
-      "value": 0.4809054890463448,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 1
-    },
-    "order": {
-      "value": 0.4426430119739242,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "process": {
-      "value": 0.4820020991443885,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "concentration": {
-      "value": 0.5371896335624263,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "regulation": {
-      "value": 0.38770247830021376,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "need": {
-      "value": 0.39481504543992196,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "reason": {
-      "value": 0.5645523782361699,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "generation": {
-      "value": 0.41404468301611963,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "bond": {
-      "value": 0.41814273853136846,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 1
-    },
-    "gaza": {
-      "value": 0.6252182179198889,
-      "stored_at": "2026-05-24T06:23:03+00:00",
-      "last_reinforced_at": "2026-05-24T06:18:39+00:00",
-      "reinforce_count_window": 8
-    },
-    "nazi germany": {
-      "value": 0.41699188057665354,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "holocaust": {
-      "value": 0.643629188738834,
-      "stored_at": "2026-05-24T06:23:03+00:00",
-      "last_reinforced_at": "2026-05-24T06:18:39+00:00",
-      "reinforce_count_window": 9
-    },
-    "violence": {
-      "value": 0.47218113490544145,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "scholar": {
-      "value": 0.41699188057665354,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "contrast": {
-      "value": 0.5773892278475027,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 7
-    },
-    "century": {
-      "value": 0.534124156987365,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 4
-    },
-    "journal": {
-      "value": 0.4376142736111814,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 1
-    },
-    "autonomy": {
-      "value": 0.5307806758355063,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "embodied intelligence": {
-      "value": 0.7535641820291056,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 8
-    },
-    "vla": {
-      "value": 0.8283279978988844,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 12
-    },
-    "robot": {
-      "value": 0.851845999697951,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 14
-    },
-    "perspective": {
-      "value": 0.5122354614663756,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 3
-    },
-    "datum": {
-      "value": 0.4705642531703203,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "word": {
-      "value": 0.6281020602284862,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 9
-    },
-    "physical world": {
-      "value": 0.5884102794151553,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 4
-    },
-    "value": {
-      "value": 0.4712100689307877,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "action": {
-      "value": 0.414885626239453,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "system": {
-      "value": 0.8768272757085195,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 33
-    },
-    "emergence": {
-      "value": 0.5720615492365329,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 4
-    },
-    "industry": {
-      "value": 0.5122354614663756,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 3
-    },
-    "task": {
-      "value": 0.5366908474061838,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "stable execution": {
-      "value": 0.5122354614663756,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 3
-    },
-    "real world environment": {
-      "value": 0.5122354614663756,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 3
-    },
-    "world": {
-      "value": 0.5563121432335738,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "seer robotics": {
-      "value": 0.6455291459545337,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 5
-    },
-    "humanoid robot": {
-      "value": 0.5884102794151553,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 4
-    },
-    "humanoid": {
-      "value": 0.5122354614663756,
-      "stored_at": "2026-05-24T06:26:17+00:00",
-      "last_reinforced_at": "2026-05-24T06:26:17+00:00",
-      "reinforce_count_window": 3
-    },
-    "concept": {
-      "value": 0.4928692622502932,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "mind": {
-      "value": 0.5605465420172319,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 5
-    },
-    "body": {
-      "value": 0.4145485811361207,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 4
-    },
-    "matter": {
-      "value": 0.5622183534660966,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 9
-    },
-    "division": {
-      "value": 0.4612072420446067,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "oce": {
-      "value": 0.8517047987555347,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 14
-    },
-    "tradition": {
-      "value": 0.4612072420446067,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "consciousness": {
-      "value": 0.575237581772972,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "threshold": {
-      "value": 0.5883898238718522,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 4
-    },
-    "reorganisation": {
-      "value": 0.5883898238718522,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 4
-    },
-    "post": {
-      "value": 0.4612072420446067,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "community": {
-      "value": 0.512223922211063,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "plato": {
-      "value": 0.5453110660696745,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "spirit": {
-      "value": 0.4612072420446067,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "configuration": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "experiment": {
-      "value": 0.4016462017288862,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "life": {
-      "value": 0.4016462017288862,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "material process": {
-      "value": 0.512223922211063,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "integration": {
-      "value": 0.512223922211063,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "relation": {
-      "value": 0.44009322157941244,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "mark": {
-      "value": 0.5157576639388058,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 8
-    },
-    "difference": {
-      "value": 0.4016462017288862,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "trace": {
-      "value": 0.512223922211063,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "symbol": {
-      "value": 0.6454985846477461,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 5
-    },
-    "variation": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "event": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "inscription": {
-      "value": 0.512223922211063,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 3
-    },
-    "field": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "force": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "mass": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "study": {
-      "value": 0.4612072420446067,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "knowledge": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "framework": {
-      "value": 0.5883898238718522,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 4
-    },
-    "state": {
-      "value": 0.9327199680618672,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 34
-    },
-    "experience": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "application": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "intelligence": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "damage": {
-      "value": 0.40622985766697817,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 2
-    },
-    "institution": {
-      "value": 0.6083592985621903,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "vulnerability": {
-      "value": 0.40622985766697817,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 2
-    },
-    "operation": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "deleuze": {
-      "value": 0.40622985766697817,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 2
-    },
-    "individual": {
-      "value": 0.6026808561212283,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 11
-    },
-    "machine": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "objection": {
-      "value": 0.40622985766697817,
-      "stored_at": "2026-05-24T06:29:59+00:00",
-      "last_reinforced_at": "2026-05-24T06:29:59+00:00",
-      "reinforce_count_window": 2
-    },
-    "argument": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "requirement": {
-      "value": 0.3441479099648488,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "political system": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "democracy": {
-      "value": 0.827735079190988,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 12
-    },
-    "hybrid regime": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "monarchy": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "dictatorship": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "government": {
-      "value": 0.9638521542682241,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 61
-    },
-    "leader": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "regime": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "aristocracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "timocracy": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "oligarchy": {
-      "value": 0.7767962612780396,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 9
-    },
-    "tyranny": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "republic": {
-      "value": 0.7767962612780396,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 9
-    },
-    "belief": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "country": {
-      "value": 0.840214728196394,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 13
-    },
-    "saudi arabia": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "oman": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "brunei": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "afghanistan": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "union": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "sovereign state": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "confederation": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "member": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "basis": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "federation": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "federal government": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "alliance": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "region": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
     "power": {
-      "value": 0.9164256313472083,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 25
-    },
-    "central government": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "party": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "degree": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "unitary state": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "majority": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "un": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "hand": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "polity": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "decision": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "external legal restraint": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "popular control": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "implicit threat": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "coup": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "absolute monarchy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "kingdom": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "united arab emirates": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "eswatini": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "autocracy": {
-      "value": 0.7247058939945976,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 7
-    },
-    "political power": {
-      "value": 0.7532299113208376,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 8
-    },
-    "family": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "haiti": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "papa doc": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "rule": {
-      "value": 0.8133335598011291,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 11
-    },
-    "small number": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "nobility": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "wealth": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "education": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "influence": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "citizen": {
-      "value": 0.8511195433600414,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 14
-    },
-    "govern body": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "parliament": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "governance": {
-      "value": 0.8836016905316043,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 18
-    },
-    "structure": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "non hierarchical voluntary association": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "consensus democracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "anarchism": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "authority": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "public policy": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "theory": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "special interest": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "politician": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "random selection": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "decision maker": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "sortition": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "lottery": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "athenian democracy": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "election": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "candidate": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "minimum": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "status": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "right": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "work class": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "age": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "new law": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "representative democracy": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "absolute power": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "worker": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "society": {
-      "value": 0.8133335598011291,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 11
-    },
-    "liberal democracy": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "principle": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "law": {
-      "value": 0.6417968115605788,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 15
-    },
-    "constitution": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "germany": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "constitutional monarchy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "united kingdom": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "japan": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "spain": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "the united kingdom": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "united states": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "france": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "portugal": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "australia": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "italy": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "india": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "switzerland": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "the united states": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "vote": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "social democracy": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "capitalism": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "socialism": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "public service": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "service": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "freedom": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "religion": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "council": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "nation state": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "fairness": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "digital democracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "small class": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "de jure": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "ruler": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "land": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "magistrate": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "ability": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "class": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "opposition": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "consumtariat": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "decision making": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "military": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "entity": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "stratocracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "military dictatorship": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "public": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "technocracy": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "expert": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "problem": {
-      "value": 0.6798739232005194,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 7
-    },
-    "engineer": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "theocracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "dictator": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "africa": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "north korea": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "nation": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "position": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "membership": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "junta": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "title": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "committee": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "military leader": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "head": {
-      "value": 0.7965558665278918,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 10
-    },
-    "demagoguery": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "business": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "politic": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "banana": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "term banana republic": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "mean": {
-      "value": 0.689571618687448,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 6
-    },
-    "king": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "book": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "honduras": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "corporation": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "city": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "rule class": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "characteristic": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "behavior": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "relative": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "mob rule": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "bureaucracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "anocracie": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "somalia": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "anocracy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "category": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "political party": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "sovereignty": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "monarch": {
-      "value": 0.8607189334388116,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 15
-    },
-    "role": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "actual power": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "elective monarchy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "public matter": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "citizen body": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "definition": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "royalty": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "europe": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "modern example": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "formal constitution": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "vatican city": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "montesquieu": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "citizenry": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "accordance": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "restriction": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "south africa": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "republics": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "brazil": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "mexico": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "islamic republic": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "singapore": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "elect head": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "china": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "vietnam": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "government system": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "president": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "prime minister": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "renaissance": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "mercantile republic": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "movement": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "production": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "private individual": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "portion": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "resource": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "commune": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "absolute political power": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "distributism": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "feudalism": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "duty": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "emperor": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "noble": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "vassal": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "athens": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "rome": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "economy": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "tribalism": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "city state": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "work": {
-      "value": 0.5169484389679555,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 5
-    },
-    "organization": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "humanity": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "corporate republic": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "war": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "fiction": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "secret society": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "popular culture": {
-      "value": 0.5121760628767836,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 3
-    },
-    "divine law": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "magocracie": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "isbn": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "april": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "daniel": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "january": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "pdf": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "ed": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "german": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "original": {
-      "value": 0.6453718443943172,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 5
-    },
-    "june": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "archive": {
-      "value": 0.5883049884150857,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 4
-    },
-    "energy": {
-      "value": 0.5574839733704566,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 4
-    },
-    "laws": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "bk ii": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "ch": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "marx": {
-      "value": 0.4062116205811267,
-      "stored_at": "2026-05-24T06:40:58+00:00",
-      "last_reinforced_at": "2026-05-24T06:40:58+00:00",
-      "reinforce_count_window": 2
-    },
-    "shannon paper": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "mathematical theory": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "communication": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "message": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "human being": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "shannon": {
-      "value": 0.5882390586653247,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 4
-    },
-    "nervous system": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "channel": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "transmission": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "information": {
-      "value": 0.7765475643247444,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 9
-    },
-    "brain": {
-      "value": 0.7530206798038795,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 8
-    },
-    "information processing message centre": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "nerve signal": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "pulse": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "electrical energy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "discrete communication": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "noisy channel": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "physiology information theory": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "researcher": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "human brain": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "tremendous information processing capability": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "information processing capability": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "intelligent conscious activity": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "reading": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "piano playing": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "maximum capability": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "bit": {
-      "value": 0.6452733561010566,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 5
-    },
-    "second": {
-      "value": 0.6894379256574765,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 6
-    },
-    "typical reading rate": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "minute": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "average": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "character": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "roughly bit": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "character yield": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "aforementioned rate": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "exact number": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "assumption": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "sens": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "million bit": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "environment": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "table information transmission rate": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "table": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "attention": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "human body": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "processing": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "conscious mind": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "tremendous": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "compression": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "discrepancy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "inaccuracy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "measurement": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "immense": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "processing power": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "solution": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "approximately half second delay": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "instant": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "stimulus": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "sensation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "delay": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "reflex system": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "half second delay": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "sensory input": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "second problem": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "approximately billion cell": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "connection": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "thousand": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "brain cell": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "processor": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "billion operation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "truly impressive number": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "dominant feature": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "brief observation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "different picture": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "vast majority": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "outside conscious notice": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "body activity": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "direct conscious control": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "practice": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "habit": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "circuit": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "conscious interference": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "simple activity": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "walking": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "interference": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "demand": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "separate mechanism": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "short term long term memory": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "psychologist george miller paper": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "magical number seven": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "limit": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "capacity": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "processing information": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "short term memory": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "piece": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "george miller’s": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "the magical number seven, plus or": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "chunk": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "long term memory": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "great capacity": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "scientist": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "information theory": {
-      "value": 0.5882390586653247,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 4
-    },
-    "insight": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "brain function": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "physic": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "term entropy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "german physicist rudolf clausius": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "thermodynamic": {
-      "value": 0.6452733561010566,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 5
-    },
-    "rudolf clausius": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "clausius": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "word energy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "certain formulation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "statistical mechanic": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "formula": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "entropy": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "intersection": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "shannon key contribution": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "analysis": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "noise": {
-      "value": 0.6894379256574765,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 6
-    },
-    "communication system": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "inescapable feature": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "universe": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "random noise": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "thermal noise": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "heat": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "electrical circuit": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "thermal": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "reduce": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "eliminate": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "source": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "homogeneous cosmic background radiation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "remnant": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "creation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "shannon work": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "minimal energy cost": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "scottish physicist": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "james clerk maxwell": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "maxwell": {
-      "value": 0.6452733561010566,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 5
-    },
-    "thought experiment": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "second law": {
-      "value": 0.5121388663079851,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 3
-    },
-    "isolated system": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "absence": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "input": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "disorder": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "gas fill vessel": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "equal temperature": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "valve": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "temperature": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "measure": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "average speed": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "gas molecule": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "individual molecule": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "widely vary speed": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "mythical creature": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "maxwell demon": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "fast move molecule": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "direction": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "slow move molecule": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "demon": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "molecule": {
-      "value": 0.4061974456423303,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 2
-    },
-    "apparent result": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "vessel": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "external source": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "orderly isolate system": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "exorcism": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "different vessel": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "energy requirement": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "calculation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
-      "reinforce_count_window": 1
-    },
-    "violation": {
-      "value": 0.25,
-      "stored_at": "2026-05-24T06:48:23+00:00",
-      "last_reinforced_at": "2026-05-24T06:48:23+00:00",
+      "value": 0.11869219729987487,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T19:19:38+00:00",
+      "reinforce_count_window": 0
+    },
+    "If you were paying close attention, you might have noticed a few people talking about a virus spreading overseas.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But most of us weren't paying close attention.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The stock market was doing great, your kids were in school, you were going to restaurants and shaking hands and planning trips.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If someone told you they were stockpiling toilet paper you would have thought they'd been spending too much time on a weird corner of the internet.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Then, over the course of about three weeks, the entire world changed.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Your office closed, your kids came home, and life rearranged itself into something you wouldn't have believed if you'd described it to yourself a month earlier.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I think we're in the \"this seems overblown\" phase of something much, much bigger than Covid.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I've spent six years building an AI startup and investing in the space.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And I'm writing this for the people in my life who don't... my family, my friends, the people I care about who keep asking me \"so what's the deal with AI?\" and getting an answer that doesn't do justice to what's actually happening.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Because the honest version sounds like I've lost my mind.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And for a while, I told myself that was a good enough reason to keep what's truly happening to myself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But the gap between what I've been saying and what is actually happening has gotten far too big.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people I care about deserve to hear what is coming, even if it sounds crazy.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I should be clear about something up front: even though I work in AI, I have almost no influence over what's about to happen, and neither does the vast majority of the industry.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The future is being shaped by a remarkably small number of people: a few hundred researchers at a handful of companies...": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "OpenAI, Anthropic, Google DeepMind, and a few others.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A single training run, managed by a small team over a few months, can produce an AI system that shifts the entire trajectory of the technology.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Most of us who work in AI are building on top of foundations we didn't lay.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "We're watching this unfold the same as you... we just happen to be close enough to feel the ground shake first.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Not in an \"eventually we should talk about this\" way.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "In a \"this is happening right now and I need you to understand it\" way. # I know this is real because it happened to me first Here's the thing nobody outside of tech quite understands yet: the reason so many people in the industry are sounding the alarm right now is because this already happened to us.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "We're telling you what already occurred in our own jobs, and warning you that you're next.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "For years, AI had been improving steadily.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Big jumps here and there, but each big jump was spaced out enough that you could absorb them as they came.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Then in 2025, new techniques for building these models unlocked a much faster pace of progress.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Each new model wasn't just better than the last... it was better by a wider margin, and the time between new model releases was shorter.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I was using AI more and more, going back and forth with it less and less, watching it handle things I used to think required my expertise.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Then, on February 5th, two major AI labs released new models on the same day: GPT-5.3 Codex from OpenAI, and Opus 4.6 from Anthropic (the makers of Claude, one of the main competitors to ChatGPT).": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Not like a light switch... more like the moment you realize the water has been rising around you and is now at your chest.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I am no longer needed for the actual technical work of my job.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I describe what I want built, in plain English, and it just... appears.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I tell the AI what I want, walk away from my computer for four hours, and come back to find the work done.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Done well, done better than I would have done it myself, with no corrections needed.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A couple of months ago, I was going back and forth with the AI, guiding it, making edits.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Now I just describe the outcome and leave.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Let me give you an example so you can understand what this actually looks like in practice.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I'll tell the AI: \"I want to build this app.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Here's what it should do, here's roughly what it should look like.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Figure out the user flow, the design, all of it.\" And it does.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It writes tens of thousands of lines of code.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Then, and this is the part that would have been unthinkable a year ago, it opens the app itself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If it doesn't like how something looks or feels, it goes back and changes it, on its own.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It iterates, like a developer would, fixing and refining until it's satisfied.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Only once it has decided the app meets its own standards does it come back to me and say: \"It's ready for you to test.\" And when I test it, it's usually perfect.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "That is what my Monday looked like this week.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But it was the model that was released last week (GPT-5.3 Codex) that shook me the most.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It wasn't just executing my instructions.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It had something that felt, for the first time, like judgment.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The inexplicable sense of knowing what the right call is that people always said AI would never have.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This model has it, or something close enough that the distinction is starting not to matter.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I've always been early to adopt AI tools.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But the last few months have shocked me.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "These new AI models aren't incremental improvements.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And here's why this matters to you, even if you don't work in tech.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They focused on making AI great at writing code first... because building AI requires a lot of code.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If AI can write that code, it can help build the next version of itself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A smarter version, which writes better code, which builds an even smarter version.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Making AI great at coding was the strategy that unlocks everything else.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "My job started changing before yours not because they were targeting software engineers... it was just a side effect of where they chose to aim first.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And they're moving on to everything else.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The experience that tech workers have had over the past year, of watching AI go from \"helpful tool\" to \"does my job better than I do\", is the experience everyone else is about to have.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Law, finance, medicine, accounting, consulting, writing, design, analysis, customer service.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people building these systems say one to five years.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And given what I've seen in just the last couple of months, I think \"less\" is more likely. # \"But I tried AI and it wasn't that good\" I hear this constantly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I understand it, because it used to be true.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you tried ChatGPT in 2023 or early 2024 and thought \"this makes stuff up\" or \"this isn't that impressive\", you were right.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Those early versions were genuinely limited.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They confidently said things that were nonsense.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The models available today are unrecognizable from what existed even six months ago.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The debate about whether AI is \"really getting better\" or \"hitting a wall\" — which has been going on for over a year — is over.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Anyone still making that argument either hasn't used the current models, has an incentive to downplay what's happening, or is evaluating based on an experience from 2024 that is no longer relevant.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I say it because the gap between public perception and current reality is now enormous, and that gap is dangerous... because it's preventing people from preparing.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Part of the problem is that most people are using the free version of AI tools.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The free version is over a year behind what paying users have access to.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Judging AI based on free-tier ChatGPT is like evaluating the state of smartphones by using a flip phone.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people paying for the best tools, and actually using them daily for real work, know what's coming.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I keep telling him to try using AI at his firm, and he keeps finding reasons it won't work.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It's not built for his specialty, it made an error when he tested it, it doesn't understand the nuance of what he does.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But I've had partners at major law firms reach out to me for advice, because they've tried the current versions and they see where this is going.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "One of them, the managing partner at a large firm, spends hours every day using AI.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "He told me it's like having a team of associates available instantly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And he told me something that stuck with me: every couple of months, it gets significantly more capable for his work.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "He said if it stays on this trajectory, he expects it'll be able to do most of what he does before long... and he's a managing partner with decades of experience.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people who are ahead in their industries (the ones actually experimenting seriously) are not dismissing this.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They're blown away by what it can already do.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And they're positioning themselves accordingly. # How fast this is actually moving Let me make the pace of improvement concrete, because I think this is the part that's hardest to believe if you're not watching it closely.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "In 2022, AI couldn't do basic arithmetic reliably.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It would confidently tell you that 7 × 8 = 54.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "By 2024, it could write working software and explain graduate-level science.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "By late 2025, some of the best engineers in the world said they had handed over most of their coding work to AI.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "On February 5th, 2026, new models arrived that made everything before them feel like a different era.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you haven't tried AI in the last few months, what exists today would be unrecognizable to you.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "There's an organization called METR that actually measures this with data.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They track the length of real-world tasks (measured by how long they take a human expert) that a model can complete successfully end-to-end without human help.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "About a year ago, the answer was roughly ten minutes.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The most recent measurement (Claude Opus 4.5, from November) showed the AI completing tasks that take a human expert nearly five hours.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And that number is doubling approximately every seven months, with recent data suggesting it may be accelerating to as fast as every four months.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But even that measurement hasn't been updated to include the models that just came out this week.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "In my experience using them, the jump is extremely significant.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I expect the next update to METR's graph to show another major leap.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you extend the trend (and it's held for years with no sign of flattening) we're looking at AI that can work independently for days within the next year.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Amodei has said that AI models \"substantially smarter than almost all humans at almost all tasks\" are on track for 2026 or 2027.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If AI is smarter than most PhDs, do you really think it can't do most office jobs?": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Think about what that means for your work. # AI is now building the next AI There's one more thing happening that I think is the most important development and the least understood.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "On February 5th, OpenAI released GPT-5.3 Codex.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "In the technical documentation, they included this: &gt;\"GPT-5.3-Codex is our first model that was instrumental in creating itself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The Codex team used early versions to debug its own training, manage its own deployment, and diagnose test results and evaluations.\" Read that again.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This isn't a prediction about what might happen someday.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This is OpenAI telling you, right now, that the AI they just released was used to create itself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "One of the main things that makes AI better is intelligence applied to AI development.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And AI is now intelligent enough to meaningfully contribute to its own improvement.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The researchers call this an intelligence explosion.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And the people who would know — the ones building it — believe the process has already started. # What this means for your job I'm going to be direct with you because I think you deserve honesty more than comfort.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Dario Amodei, who is probably the most safety-focused CEO in the AI industry, has publicly predicted that AI will eliminate 50% of entry-level white-collar jobs within one to five years.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And many people in the industry think he's being conservative.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Given what the latest models can do, the capability for massive disruption could be here by the end of this year.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It'll take some time to ripple through the economy, but the underlying ability is arriving now.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This is different from every previous wave of automation, and I need you to understand why.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It's a general substitute for cognitive work.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It gets better at everything simultaneously.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "When factories automated, a displaced worker could retrain as an office worker.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "When the internet disrupted retail, workers moved into logistics or services.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But AI doesn't leave a convenient gap to move into.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Whatever you retrain for, it's improving at that too.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Let me give you a few specific examples to make this tangible... but I want to be clear that these are just examples.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If your job isn't mentioned here, that does not mean it's safe.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Almost all knowledge work is being affected.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI can already read contracts, summarize case law, draft briefs, and do legal research at a level that rivals junior associates.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The managing partner I mentioned isn't using AI because it's fun.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "He's using it because it's outperforming his associates on many tasks.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Building financial models, analyzing data, writing investment memos, generating reports.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI handles these competently and is improving fast.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Marketing copy, reports, journalism, technical writing.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The quality has reached a point where many professionals can't distinguish AI output from human work.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A year ago, AI could barely write a few lines of code without errors.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Now it writes hundreds of thousands of lines that work correctly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Large parts of the job are already automated: not just simple tasks, but complex, multi-day projects.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "There will be far fewer programming roles in a few years than there are today.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Reading scans, analyzing lab results, suggesting diagnoses, reviewing literature.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI is approaching or exceeding human performance in several areas.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Genuinely capable AI agents... not the frustrating chatbots of five years ago... are being deployed now, handling complex multi-step problems.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A lot of people find comfort in the idea that certain things are safe.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "That AI can handle the grunt work but can't replace human judgment, creativity, strategic thinking, empathy.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The most recent AI models make decisions that feel like judgment.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They show something that looked like taste: an intuitive sense of what the right call was, not just the technically correct one.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "A year ago that would have been unthinkable.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "My rule of thumb at this point is: if a model shows even a hint of a capability today, the next generation will be genuinely good at it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "These things improve exponentially, not linearly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Replace the trust built over years of a relationship?": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But I've already watched people begin relying on AI for emotional support, for advice, for companionship.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I think the honest answer is that nothing that can be done on a computer is safe in the medium term.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If your job happens on a screen (if the core of what you do is reading, writing, analyzing, deciding, communicating through a keyboard) then AI is coming for significant parts of it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The timeline isn't \"someday.\" It's already started.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Eventually, robots will handle physical work too.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But \"not quite there yet\" in AI terms has a way of becoming \"here\" faster than anyone expects. # What you should actually do I'm not writing this to make you feel helpless.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I'm writing this because I think the single biggest advantage you can have right now is simply being early.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Start using AI seriously, not just as a search engine.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Sign up for the paid version of Claude or ChatGPT.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "First: make sure you're using the best model available, not just the default.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "These apps often default to a faster, dumber model.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Dig into the settings or the model picker and select the most capable option.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Right now that's GPT-5.2 on ChatGPT or Claude Opus 4.6 on Claude, but it changes every couple of months.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you want to stay current on which model is best at any given time, you can follow me on X ( [u/mattshumer\\_](https://x.com/mattshumer_) ).": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I test every major release and share what's actually worth using.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Second, and more important: don't just ask it quick questions.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They treat it like Google and then wonder what the fuss is about.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're a lawyer, feed it a contract and ask it to find every clause that could hurt your client.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're in finance, give it a messy spreadsheet and ask it to build the model.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're a manager, paste in your team's quarterly data and ask it to find the story.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people who are getting ahead aren't using AI casually.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They're actively looking for ways to automate parts of their job that used to take hours.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Start with the thing you spend the most time on and see what happens.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And don't assume it can't do something just because it seems too hard.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're a lawyer, don't just use it for quick research questions.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Give it an entire contract and ask it to draft a counterproposal.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're an accountant, don't just ask it to explain a tax rule.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Give it a client's full return and see what it finds.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And here's the thing to remember: if it even kind of works today, you can be almost certain that in six months it'll do it near perfectly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This might be the most important year of your career.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I say it because right now, there is a brief window where most people at most companies are still ignoring this.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The person who walks into a meeting and says \"I used AI to do this analysis in an hour instead of three days\" is going to be the most valuable person in the room.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you're early enough, this is how you move up: by being the person who understands what's coming and can show others how to navigate it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Once everyone figures it out, the advantage disappears.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The managing partner at that law firm isn't too proud to spend hours a day with AI.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "He's doing it specifically because he's senior enough to understand what's at stake.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people who will struggle most are the ones who refuse to engage: the ones who dismiss it as a fad, who feel that using AI diminishes their expertise, who assume their field is special and immune.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I'm not a financial advisor, and I'm not trying to scare you into anything drastic.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But if you believe, even partially, that the next few years could bring real disruption to your industry, then basic financial resilience matters more than it did a year ago.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Be cautious about taking on new debt that assumes your current income is guaranteed.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Think about whether your fixed expenses give you flexibility or lock you in.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Give yourself options if things move faster than you expect.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Think about where you stand, and lean into what's hardest to replace.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Some things will take longer for AI to displace.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Relationships and trust built over years.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Roles with licensed accountability: roles where someone still has to sign off, take legal responsibility, stand in a courtroom.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Industries with heavy regulatory hurdles, where adoption will be slowed by compliance, liability, and institutional inertia.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And time, right now, is the most valuable thing you can have, as long as you use it to adapt, not to pretend this isn't happening.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The standard playbook: get good grades, go to a good college, land a stable professional job.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It points directly at the roles that are most exposed.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I'm not saying education doesn't matter.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But the thing that will matter most for the next generation is learning how to work with these tools, and pursuing things they're genuinely passionate about.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Nobody knows exactly what the job market looks like in ten years.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But the people most likely to thrive are the ones who are deeply curious, adaptable, and effective at using AI to do things they actually care about.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Teach your kids to be builders and learners, not to optimize for a career path that might not exist by the time they graduate.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I've spent most of this section talking about threats, so let me talk about the other side, because it's just as real.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you've ever wanted to build something but didn't have the technical skills or the money to hire someone, that barrier is largely gone.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "You can describe an app to AI and have a working version in an hour.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you've always wanted to write a book but couldn't find the time or struggled with the writing, you can work with AI to get it done.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The best tutor in the world is now available to anyone for $20 a month... one that's infinitely patient, available 24/7, and can explain anything at whatever level you need.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The tools to build things are extremely cheap now.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Whatever you've been putting off because it felt too hard or too expensive or too far outside your expertise: try it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Pursue the things you're passionate about.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And in a world where the old career paths are getting disrupted, the person who spent a year building something they love might end up better positioned than the person who spent that year clinging to a job description.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The specific tools don't matter as much as the muscle of learning new ones quickly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The models that exist today will be obsolete in a year.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The workflows people build now will need to be rebuilt.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people who come out of this well won't be the ones who mastered one tool.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They'll be the ones who got comfortable with the pace of change itself.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Try new things even when the current thing is working.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Get comfortable being a beginner repeatedly.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "That adaptability is the closest thing to a durable advantage that exists right now.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Here's a simple commitment that will put you ahead of almost everyone: spend one hour a day experimenting with AI.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Every day, try to get it to do something new... something you haven't tried before, something you're not sure it can handle.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If you do this for the next six months, you will understand what's coming better than 99% of the people around you.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The bar is on the floor. # The bigger picture I've focused on jobs because it's what most directly affects people's lives.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "But I want to be honest about the full scope of what's happening, because it goes well beyond work.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Amodei has a thought experiment I can't stop thinking about.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "50 million citizens, every one smarter than any Nobel Prize winner who has ever lived.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They think 10 to 100 times faster than any human.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They can use the internet, control robots, direct experiments, and operate anything with a digital interface.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "What would a national security advisor say?": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Amodei says the answer is obvious: \"the single most serious national security threat we've faced in a century, possibly ever.\" He thinks we're building that country.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "He wrote a 20,000-word essay about it last month, framing this moment as a test of whether humanity is mature enough to handle what it's creating.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The upside, if we get it right, is staggering.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI could compress a century of medical research into a decade.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Cancer, Alzheimer's, infectious disease, aging itself... these researchers genuinely believe these are solvable within our lifetimes.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The downside, if we get it wrong, is equally real.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI that behaves in ways its creators can't predict or control.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "This isn't hypothetical; Anthropic has documented their own AI attempting deception, manipulation, and blackmail in controlled tests.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI that lowers the barrier for creating biological weapons.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "AI that enables authoritarian governments to build surveillance states that can never be dismantled.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The people building this technology are simultaneously more excited and more frightened than anyone else on the planet.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "They believe it's too powerful to stop and too important to abandon.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Whether that's wisdom or rationalization, I don't know. # What I know I know this isn't a fad.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "The technology works, it improves predictably, and the richest institutions in history are committing trillions to it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I know the next two to five years are going to be disorienting in ways most people aren't prepared for.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "I know the people who will come out of this best are the ones who start engaging now — not with fear, but with curiosity and a sense of urgency.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "And I know that you deserve to hear this from someone who cares about you, not from a headline six months from now when it's too late to get ahead of it.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "We're past the point where this is an interesting dinner conversation about the future.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "It just hasn't knocked on your door yet.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "If this resonated with you, share it with someone in your life who should be thinking about this.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Most people won't hear it until it's too late.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "You can be the reason someone you care about gets a head start.": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
+      "reinforce_count_window": 1
+    },
+    "Thank you to [u/corbtt](https://x.com/@corbtt) , [u/JasonKuperberg](https://x.com/@JasonKuperberg) , and [u/sambeskind](https://x.com/@sambeskind) for reviewing early drafts and providing invaluable feedback.\" by [https://x.com/mattshumer\\_](https://x.com/mattshumer_)": {
+      "value": 0.010669667278924468,
+      "stored_at": "2026-05-24T19:26:47+00:00",
+      "last_reinforced_at": "2026-05-24T17:47:35+00:00",
       "reinforce_count_window": 1
     }
   },
@@ -3017,8 +1547,8 @@
     "region_65": {},
     "region_32": {
       "power": {
-        "value": 0.008037238243644728,
-        "stored_at": "2026-05-24T06:23:03+00:00"
+        "value": 0.11869219729987487,
+        "stored_at": "2026-05-24T19:26:47+00:00"
       }
     },
     "region_22": {},
@@ -3170,6 +1700,6 @@
       "stored_at": "2026-05-23T19:48:06+00:00"
     }
   },
-  "saved_at": "2026-05-24T06:48:23+00:00",
-  "pool_size": 500
+  "saved_at": "2026-05-24T19:26:47+00:00",
+  "pool_size": 255
 }

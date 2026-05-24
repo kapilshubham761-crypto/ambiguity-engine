@@ -1,17 +1,16 @@
 """
-AutoLearner — replaces Teacher + LessonQueue.
+AutoLearner — JAM Field pipeline
+==================================
+fetch → embed → graph → JAM field ingest → field dynamics
 
-Direct pipeline: search -> fetch -> extract -> graph update.
-No queue file. No manual review. 4 parallel workers. 10-second cycle.
-
-Writes:
-  data/live_feed.jsonl      last 200 activity entries (UI live monitor)
-  data/learner_stats.json   cumulative totals
-  data/fetch_status.json    fetching bool (sidebar dot)
-  data/paused.txt           pause/resume sync
+Background threads:
+  learner   — main cycle every 10s
+  subsys    — contradiction + world_model + episodes every 30s
+  regulator — Regulation.tick() every 60s
 """
 
 from __future__ import annotations
+
 import json, os, random, re, sys, threading, time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -27,7 +26,7 @@ from logger  import get_logger
 
 log = get_logger('learner')
 
-# ── Config — defaults (overridden at runtime by engine_config.json) ───────────
+# ── Config defaults ────────────────────────────────────────────────────────────
 CYCLE_TIME       = 10
 N_WORKERS        = 8
 TOPICS_PER_CYCLE = 12
@@ -38,7 +37,6 @@ CHECKIN_EVERY    = 3 * 3600
 FEED_MAX         = 200
 
 def _lcfg(key: str, default):
-    """Read a learning param from live config, fall back to module default."""
     try:
         from config import Config
         v = Config.get_instance().get('learning', key)
@@ -46,13 +44,13 @@ def _lcfg(key: str, default):
     except Exception:
         return default
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
+# ── Paths ──────────────────────────────────────────────────────────────────────
 _STATS_PATH  = _DATA / 'learner_stats.json'
 _FEED_PATH   = _DATA / 'live_feed.jsonl'
 _PAUSED_PATH = _DATA / 'paused.txt'
 _FSTATUS     = _DATA / 'fetch_status.json'
 
-# ── Flat topic list — searched in random order each cycle ─────────────────────
+# ── Topics ─────────────────────────────────────────────────────────────────────
 TOPICS = [
     'consciousness perception cognition', 'quantum mechanics wave particle',
     'evolution natural selection adaptation', 'language syntax semantics meaning',
@@ -80,7 +78,7 @@ TOPICS = [
     'evolutionary biology animal behaviour', 'social psychology group identity',
 ]
 
-# Keywords that flag content as computer-code-related — skip these items entirely
+# ── Code-content filter ────────────────────────────────────────────────────────
 _CODE_KEYWORDS = {
     'programming', 'coding', 'source code', 'github', 'repository', 'javascript',
     'typescript', 'nodejs', 'reactjs', 'angularjs', 'vuejs', 'webpack', 'npm ',
@@ -94,14 +92,12 @@ _CODE_KEYWORDS = {
     'open source project', 'code review', 'pull request', 'version control',
 }
 
-
 def _is_code_content(item: dict) -> bool:
-    """Return True if this item is about programming/code and should be skipped."""
     text = (item.get('title', '') + ' ' + item.get('snippet', '')).lower()
     return any(kw in text for kw in _CODE_KEYWORDS)
 
 
-# Stopwords for keyword extraction (MetaState needs short repeatable terms)
+# ── Keyword extraction for subsystem feeds ─────────────────────────────────────
 _STOPWORDS = {
     'the','a','an','is','are','was','were','be','been','being','have','has','had',
     'do','does','did','will','would','could','should','may','might','can','shall',
@@ -112,12 +108,10 @@ _STOPWORDS = {
     'other','after','before','first','last','much','many','well','even','still','way',
     'while','here','there','their','they','them','he','she','we','you','i','me','my',
     'our','your','his','her','its','been','being','make','made','new','used','use',
-    'two','one','three','four','five','six','seven','eight','nine','ten','however',
-    'although','because','since','though','whereas','whether','within','without',
+    'two','one','three','four','five','however','although','because','since','though',
 }
 
 def _keywords_from_sentences(sentences: list[str]) -> list[str]:
-    """Extract short repeatable keyword terms from sentences for MetaState."""
     seen: set[str] = set()
     result: list[str] = []
     for sent in sentences:
@@ -140,7 +134,6 @@ def _fstatus_write(fetching: bool) -> None:
         data = {
             'fetching':   fetching,
             'started_at': datetime.now(tz=timezone.utc).isoformat() if fetching else None,
-            'needed':     0,
         }
         tmp = _FSTATUS.with_suffix('.tmp')
         tmp.write_text(json.dumps(data), encoding='utf-8')
@@ -162,23 +155,24 @@ class AutoLearner:
 
     def __init__(self):
         _DATA.mkdir(exist_ok=True)
-        self._stats        = self._load_stats()
-        self._last_checkin = self._load_last_checkin()
+        self._stats         = self._load_stats()
+        self._last_checkin  = 0.0
         self._thread: threading.Thread | None = None
-        self._graph        = None
+        self._graph         = None
+        self._field         = None
+        self._dynamics      = None
         self._known_urls: set = set()
-        self._feed_lock    = threading.Lock()
-        self._perf_lock    = threading.Lock()
-        self._perf_samples: list[dict] = []   # per-article timings (last 50)
-        self._subsys_buf:  list[str]   = []   # texts queued for background subsystems
+        self._feed_lock     = threading.Lock()
+        self._perf_lock     = threading.Lock()
+        self._perf_samples: list[dict] = []
+        self._subsys_buf:  list[str]   = []
         self._subsys_lock  = threading.Lock()
-        # Feed buffer — in-memory deque, flushed every 5 appends
+        self._feed_dirty   = 0
         try:
             existing = _FEED_PATH.read_text(encoding='utf-8').splitlines() if _FEED_PATH.exists() else []
             self._feed_buf: deque[str] = deque(existing[-FEED_MAX:], maxlen=FEED_MAX)
         except Exception:
             self._feed_buf = deque(maxlen=FEED_MAX)
-        self._feed_dirty = 0
 
     def _ensure_graph(self) -> None:
         if self._graph is None:
@@ -188,7 +182,21 @@ class AutoLearner:
             except Exception:
                 pass
 
-    # ── persistence ───────────────────────────────────────────────────────────
+    def _ensure_field(self) -> None:
+        if self._field is None:
+            try:
+                from jam_field import JamField
+                self._field = JamField.get()
+            except Exception:
+                pass
+        if self._dynamics is None:
+            try:
+                from field_dynamics import FieldDynamics
+                self._dynamics = FieldDynamics.get()
+            except Exception:
+                pass
+
+    # ── Persistence ───────────────────────────────────────────────────────────
 
     def _load_stats(self) -> dict:
         try:
@@ -213,7 +221,6 @@ class AutoLearner:
             pass
 
     def _feed_flush(self) -> None:
-        """Force write the feed buffer — call at end of each cycle."""
         try:
             with self._feed_lock:
                 if self._feed_dirty > 0:
@@ -222,10 +229,7 @@ class AutoLearner:
         except Exception:
             pass
 
-    def _load_last_checkin(self) -> float:
-        return 0.0
-
-    # ── pause / resume ────────────────────────────────────────────────────────
+    # ── Pause ─────────────────────────────────────────────────────────────────
 
     @property
     def is_paused(self) -> bool:
@@ -241,28 +245,33 @@ class AutoLearner:
     def stats(self) -> dict:
         return dict(self._stats)
 
-    # ── process one search result ─────────────────────────────────────────────
+    # ── Subsystem buffer ──────────────────────────────────────────────────────
 
     def _subsys_queue(self, texts: list[str]) -> None:
-        """Add texts to the background subsystem buffer."""
         with self._subsys_lock:
             self._subsys_buf.extend(texts)
             if len(self._subsys_buf) > 2000:
                 self._subsys_buf = self._subsys_buf[-2000:]
 
+    # ── Background workers ────────────────────────────────────────────────────
+
     def _regulator_worker(self) -> None:
-        """Background thread: runs MetaRegulator every 60s — autonomous parameter control."""
-        time.sleep(60)   # let system stabilise before first regulation
+        """Regulation tick every 60s — Layer 4."""
+        time.sleep(60)
         while True:
             try:
-                from regulator import MetaRegulator
-                MetaRegulator.get().tick()
+                if self._field is not None:
+                    from regulation import Regulation
+                    Regulation.get().tick(self._field)
             except Exception as e:
-                log.debug('regulator error: %s', e)
+                log.debug('regulation error: %s', e)
             time.sleep(60)
 
     def _subsys_worker(self) -> None:
-        """Background thread: drains subsystem buffer every 30s — never blocks the hot path."""
+        """
+        Background subsystems every 30s — Layer 5 only.
+        Contradiction, world model, episodes, prediction.
+        """
         while True:
             time.sleep(30)
             with self._subsys_lock:
@@ -270,43 +279,41 @@ class AutoLearner:
                     continue
                 texts = list(self._subsys_buf)
                 self._subsys_buf.clear()
+
             def _s(fn):
                 try: fn()
                 except Exception: pass
-            # MetaState needs short repeatable keyword terms, not full sentences
-            _kw = _keywords_from_sentences(texts)
-            _s(lambda: __import__('meta_state').MetaState.get().reinforce(_kw))
-            _s(lambda: __import__('memory').TemporalMemory.get().reinforce(texts))
+
             _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(texts))
             _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(texts))
-            _s(lambda: __import__('ecology').CognitiveEcology.get().tick(texts))
             try:
                 from episodes  import EpisodeStore
                 from predictor import Predictor
-                from memory    import TemporalMemory
                 EpisodeStore.get().record(texts, ambiguity=0.0, region=None)
-                Predictor.get().pre_activate(texts, TemporalMemory.get())
+                Predictor.get().pre_activate(texts, None)
             except Exception:
                 pass
+
+    # ── Process one article ───────────────────────────────────────────────────
 
     def _process(self, item: dict) -> dict:
         from detector import detect_and_log
         _T = time.perf_counter
 
         entry = {
-            'ts':      datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
-            'topic':   item.get('topic', ''),
-            'title':   item.get('title', '')[:80],
-            'source':  item.get('source', ''),
-            'url':     item.get('url', ''),
+            'ts':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+            'topic':    item.get('topic', ''),
+            'title':    item.get('title', '')[:80],
+            'source':   item.get('source', ''),
+            'url':      item.get('url', ''),
             'concepts': 0,
             'sentences': 0,
-            'status':  'ok',
+            'status':   'ok',
         }
 
-        # Signal immediately — bar shows this before fetch even completes
+        # Signal live bar — article starting
+        _cr = _DATA / 'currently_reading.json'
         try:
-            _cr = _DATA / 'currently_reading.json'
             _cr.write_text(json.dumps({
                 'title':  item.get('title', '')[:160],
                 'source': item.get('source', ''),
@@ -315,6 +322,7 @@ class AutoLearner:
         except Exception:
             pass
 
+        # ── Fetch ──────────────────────────────────────────────────────────────
         t0 = _T()
         try:
             sentences = fetch_content(item)
@@ -326,88 +334,97 @@ class AutoLearner:
             entry['status'] = 'skip:short'
             return entry
 
-        # Batch-embed all sentences in one encoder call, then update graph per sentence
+        # ── Batch embed ────────────────────────────────────────────────────────
         from extractor import extract_batch
-        all_concepts = []
-        all_texts    = []
-        t_extract = t_graph = 0.0
-
         t1 = _T()
         batch = extract_batch(sentences)
         t_extract = _T() - t1
 
-        _cr_path = _DATA / 'currently_reading.json'
-        n_total   = len(sentences)
+        # ── Graph update + JAM field ingest ───────────────────────────────────
+        all_concepts: list = []
+        all_node_ids: list[str] = []
+        t_graph = 0.0
+        n_total = len(sentences)
+
         for idx, concepts in enumerate(batch):
-            # Update live bar with current sentence text
+            # Update live bar per sentence
             try:
-                sent_text = sentences[idx][:120] if idx < len(sentences) else ''
-                _cr_path.write_text(json.dumps({
+                _cr.write_text(json.dumps({
                     'title':    item.get('title', '')[:160],
                     'source':   item.get('source', ''),
-                    'sentence': sent_text,
+                    'sentence': sentences[idx][:120] if idx < len(sentences) else '',
                     'progress': f'{idx + 1}/{n_total}',
                     'ts':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
                 }), encoding='utf-8')
             except Exception:
                 pass
+
             if not concepts:
                 continue
-            if self._graph:
-                t1 = _T(); self._graph.update(concepts); t_graph += _T() - t1
-            all_concepts.extend(concepts)
-            all_texts.extend(c.text for c in concepts)
 
-        if not all_texts:
+            if self._graph:
+                t1 = _T()
+                node_ids = self._graph.update(concepts)
+                t_graph += _T() - t1
+            else:
+                node_ids = [''] * len(concepts)
+
+            all_concepts.extend(concepts)
+            all_node_ids.extend(node_ids)
+
+        if not all_concepts:
             entry['status'] = 'skip:no-concepts'
             return entry
 
+        # ── JAM field ingest (Layer 2) ─────────────────────────────────────────
+        if self._field is not None:
+            self._field.ingest(all_concepts, all_node_ids)
+
+        all_texts = [c.text for c in all_concepts]
         n_concepts = len(all_concepts)
 
-        # Detect ONCE per article on a sample — not per sentence
+        # ── Detect ambiguity — once per article ────────────────────────────────
         t1 = _T()
         sample = all_concepts[:30] if len(all_concepts) > 30 else all_concepts
         detect_and_log(item.get('title', ''), sample, graph=self._graph)
         t_detect = _T() - t1
 
+        # ── Graph save ─────────────────────────────────────────────────────────
         t1 = _T()
         if self._graph:
             self._graph.save()
         t_save = _T() - t1
 
-        # Queue subsystems for background processing — does not block
+        # ── Queue sentences for Layer 5 subsystems ────────────────────────────
         self._subsys_queue(all_texts)
-        t_subsys = 0.0
-
         t_total = _T() - t0
 
+        # ── Stats ──────────────────────────────────────────────────────────────
         self._stats['total_sentences'] = self._stats.get('total_sentences', 0) + len(sentences)
         self._stats['total_concepts']  = self._stats.get('total_concepts', 0) + n_concepts
-        self._save_stats()
 
         entry['concepts']  = n_concepts
         entry['sentences'] = len(sentences)
 
-        sample_dict = {
-            'fetch':    round(t_fetch,   3),
-            'extract':  round(t_extract, 3),
-            'detect':   round(t_detect,  3),
-            'graph':    round(t_graph,   3),
-            'save':     round(t_save,    3),
-            'subsys':   round(t_subsys,  3),
-            'total':    round(t_total,   3),
-            'sentences': len(sentences),
-            'concepts':  n_concepts,
-            'source':    item.get('source', ''),
-        }
         with self._perf_lock:
-            self._perf_samples.append(sample_dict)
+            self._perf_samples.append({
+                'fetch':    round(t_fetch,   3),
+                'extract':  round(t_extract, 3),
+                'detect':   round(t_detect,  3),
+                'graph':    round(t_graph,   3),
+                'save':     round(t_save,    3),
+                'subsys':   0.0,
+                'total':    round(t_total,   3),
+                'sentences': len(sentences),
+                'concepts':  n_concepts,
+                'source':    item.get('source', ''),
+            })
             if len(self._perf_samples) > 50:
                 self._perf_samples = self._perf_samples[-50:]
 
         return entry
 
-    # ── one full cycle ────────────────────────────────────────────────────────
+    # ── One full cycle ────────────────────────────────────────────────────────
 
     def _write_perf_profile(self, cycle: dict) -> None:
         with self._perf_lock:
@@ -418,29 +435,29 @@ class AutoLearner:
         avg  = {k: round(sum(s.get(k, 0) for s in samples) / len(samples), 3) for k in keys}
         tot  = avg['total'] or 1
         pct  = {k: round(avg[k] / tot * 100, 1) for k in keys if k != 'total'}
-        profile = {
-            'updated':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
-            'n_samples':     len(samples),
-            'process_avg_s': avg,
-            'process_pct':   pct,
-            'cycle':         cycle,
-        }
         try:
             with open(self._PERF_PATH, 'w', encoding='utf-8') as f:
-                json.dump(profile, f, indent=2)
-        except Exception as e:
-            log.debug('perf write failed: %s', e)
+                json.dump({
+                    'updated':       datetime.now(tz=timezone.utc).isoformat(timespec='seconds'),
+                    'n_samples':     len(samples),
+                    'process_avg_s': avg,
+                    'process_pct':   pct,
+                    'cycle':         cycle,
+                }, f, indent=2)
+        except Exception:
+            pass
 
     def _cycle(self) -> None:
         self._ensure_graph()
+        self._ensure_field()
+
         n_workers        = _lcfg('n_workers',        N_WORKERS)
         topics_per_cycle = _lcfg('topics_per_cycle', TOPICS_PER_CYCLE)
-        fetch_timeout    = _lcfg('fetch_timeout',     FETCH_TIMEOUT)
-        search_timeout   = _lcfg('search_timeout',    SEARCH_TIMEOUT)
+        fetch_timeout    = _lcfg('fetch_timeout',    FETCH_TIMEOUT)
+        search_timeout   = _lcfg('search_timeout',   SEARCH_TIMEOUT)
 
-        all_sources = list(SOURCES.keys())
-        topics = random.sample(TOPICS, min(topics_per_cycle, len(TOPICS)))
-
+        all_sources  = list(SOURCES.keys())
+        topics       = random.sample(TOPICS, min(topics_per_cycle, len(TOPICS)))
         _src_weights = [3 if s == 'wikipedia' else 1 for s in all_sources]
 
         def _search(topic):
@@ -458,11 +475,14 @@ class AutoLearner:
         items_to_process = []
         _fstatus_write(True)
 
+        # ── Search phase ───────────────────────────────────────────────────────
         tc0 = time.perf_counter()
         _search_pool = ThreadPoolExecutor(max_workers=n_workers)
         try:
-            for fut in as_completed([_search_pool.submit(_search, t) for t in topics],
-                                    timeout=search_timeout * 2):
+            for fut in as_completed(
+                [_search_pool.submit(_search, t) for t in topics],
+                timeout=search_timeout * 2
+            ):
                 try:
                     for item in fut.result():
                         url = item.get('url', '')
@@ -480,8 +500,9 @@ class AutoLearner:
         if len(self._known_urls) > 5000:
             self._known_urls = set(list(self._known_urls)[-2000:])
 
+        # ── Process phase ──────────────────────────────────────────────────────
         n_ok = 0
-        tp0 = time.perf_counter()
+        tp0  = time.perf_counter()
         _process_pool = ThreadPoolExecutor(max_workers=n_workers)
         futs = {_process_pool.submit(self._process, item): item
                 for item in items_to_process}
@@ -490,12 +511,12 @@ class AutoLearner:
                 if self.is_paused:
                     break
                 try:
-                    entry = fut.result()
-                    if entry['status'] == 'ok':
+                    e = fut.result()
+                    if e['status'] == 'ok':
                         n_ok += 1
-                        self._feed_append(entry)
+                        self._feed_append(e)
                         log.info('learned: %s [%s] +%d concepts',
-                                 entry['title'], entry['source'], entry['concepts'])
+                                 e['title'], e['source'], e['concepts'])
                 except Exception:
                     pass
         except Exception:
@@ -506,21 +527,37 @@ class AutoLearner:
 
         _fstatus_write(False)
 
-        # Growth snapshot
+        # ── Field dynamics pass (Layer 3) ──────────────────────────────────────
+        if self._field and self._dynamics and self._graph:
+            try:
+                self._dynamics.propagate(self._field, self._graph)
+            except Exception as e:
+                log.debug('dynamics error: %s', e)
+
+        # ── Field decay ────────────────────────────────────────────────────────
+        if self._field:
+            try:
+                self._field.decay()
+            except Exception as e:
+                log.debug('field decay error: %s', e)
+
+        # ── Save stats (once per cycle, not per article) ───────────────────────
+        self._save_stats()
+
+        # ── Growth log ────────────────────────────────────────────────────────
         if self._graph:
             try:
-                p = _DATA / 'growth_log.jsonl'
                 line = json.dumps({
                     'ts':    datetime.now(tz=timezone.utc).isoformat(timespec='minutes'),
                     'nodes': self._graph.node_count,
                     'edges': self._graph.edge_count,
                 })
-                with open(p, 'a', encoding='utf-8') as f:
+                with open(_DATA / 'growth_log.jsonl', 'a', encoding='utf-8') as f:
                     f.write(line + '\n')
             except Exception:
                 pass
 
-        # Abstractor + Worldview periodic run (replaces old check-in)
+        # ── Periodic abstractor + worldview (every 3h) ────────────────────────
         checkin_every = _lcfg('checkin_every', CHECKIN_EVERY)
         if time.time() - self._last_checkin >= checkin_every and self._graph:
             try:
@@ -533,53 +570,21 @@ class AutoLearner:
             except Exception as e:
                 log.debug('refresh error: %s', e)
 
-        # Cognitive ticks
-        def _t(fn):
-            try: fn()
-            except Exception: pass
-
-        tt0 = time.perf_counter()
-        _t(lambda: __import__('stability').StabilityMonitor.get().tick(
-            __import__('meta_state').MetaState.get()))
-        _t(lambda: __import__('goals').GoalEngine.get().tick())
-        _t(lambda: __import__('reflection').ReflectionMonitor.get().report())
-        _t(lambda: __import__('memory').TemporalMemory.get().decay_to())
-        _t(lambda: __import__('energy').EnergyBudget.get().replenish())
-        _t(lambda: __import__('self_model').SelfModel.get().tick())
-        _t(lambda: __import__('identity').IdentityTracker.get().observe())
-        _t(lambda: __import__('meta_learning').MetaLearner.get().tick())
-        _t(lambda: __import__('evolver').Evolver.get().tick())
-        _t(lambda: __import__('novelty').NoveltyTracker.get().snapshot_top5(
-            __import__('meta_state').MetaState.get()))
-        _t(lambda: __import__('meta_state').MetaState.get().decay_to())
-        t_ticks = time.perf_counter() - tt0
-
-        # Flush feed buffer so UI sees all entries from this cycle
+        # ── Flush feed ─────────────────────────────────────────────────────────
         self._feed_flush()
 
-        # Write performance profile
+        # ── Perf profile ───────────────────────────────────────────────────────
         self._write_perf_profile({
             't_search_s':  round(t_search,  2),
             't_process_s': round(t_process, 2),
-            't_ticks_s':   round(t_ticks,   2),
-            't_total_s':   round(t_search + t_process + t_ticks, 2),
+            't_ticks_s':   0.0,
+            't_total_s':   round(t_search + t_process, 2),
             'items_found': len(items_to_process),
             'items_ok':    n_ok,
             'workers':     n_workers,
         })
 
-        # Write cog_status for overlay
-        try:
-            _mode = __import__('stability').StabilityMonitor.get()._current_mode
-            _goal = __import__('goals').GoalEngine.get().current_goal().replace('_', ' ')
-            _cs = _DATA / 'cog_status.json'
-            _tmp = _cs.with_suffix('.tmp')
-            _tmp.write_text(json.dumps({'mode': _mode, 'goal': _goal}), encoding='utf-8')
-            _tmp.replace(_cs)
-        except Exception:
-            pass
-
-    # ── background thread ─────────────────────────────────────────────────────
+    # ── Start ──────────────────────────────────────────────────────────────────
 
     def start(self, graph=None) -> None:
         if self._thread and self._thread.is_alive():
@@ -600,7 +605,19 @@ class AutoLearner:
                     _fstatus_write(False)
                 time.sleep(_lcfg('cycle_time', CYCLE_TIME))
 
+        def _watchdog():
+            """Restart learner thread if it dies unexpectedly."""
+            time.sleep(120)
+            while True:
+                if not self._thread.is_alive():
+                    log.warning('learner thread died — restarting')
+                    self._thread = threading.Thread(
+                        target=_worker, daemon=True, name='learner')
+                    self._thread.start()
+                time.sleep(60)
+
         self._thread = threading.Thread(target=_worker, daemon=True, name='learner')
         self._thread.start()
         threading.Thread(target=self._subsys_worker,   daemon=True, name='subsys').start()
         threading.Thread(target=self._regulator_worker, daemon=True, name='regulator').start()
+        threading.Thread(target=_watchdog,              daemon=True, name='watchdog').start()

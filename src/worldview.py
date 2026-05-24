@@ -199,24 +199,21 @@ class Worldview:
     # ------------------------------------------------------------------ #
 
     def _compute_persistent_concepts(self) -> list[dict]:
-        """Concepts durably encoded in semantic memory above threshold."""
+        """Concepts durably encoded in the JAM field (high persistence)."""
         results = []
         try:
-            from memory import TemporalMemory
-            mem = TemporalMemory.get()
-            # Iterate semantic layer directly
-            sem = mem._semantic if hasattr(mem, '_semantic') else {}
-            for concept, entry in sem.items():
-                val = entry.get('value', 0.0) if isinstance(entry, dict) else float(entry)
+            from jam_field import JamField
+            top = JamField.get().top(50, by='persistence')
+            for text, props in top:
+                val = props.get('persistence', 0.0)
                 if val >= _CONCEPT_PERSIST_THRESHOLD:
                     results.append({
-                        'concept':       concept,
+                        'concept':        text,
                         'semantic_value': round(val, 4),
                     })
         except Exception:
             pass
-        results.sort(key=lambda x: x['semantic_value'], reverse=True)
-        return results[:50]
+        return results
 
     def _compute_chronic_contradictions(self) -> list[dict]:
         """Contradictions that have been open longer than the chronic threshold."""
@@ -309,41 +306,32 @@ class Worldview:
 
     def _compute_semantic_biases(self) -> dict[str, float]:
         """
-        Fraction of semantic memory devoted to each home region's concepts.
-        Reveals which domains the engine has absorbed most deeply.
+        Fraction of JAM field persistence devoted to each region's concepts.
         """
         biases: dict[str, float] = {}
         try:
-            from memory import TemporalMemory
-            mem = TemporalMemory.get()
-            sem = mem._semantic if hasattr(mem, '_semantic') else {}
-            total_sem_value = sum(
-                (e.get('value', 0.0) if isinstance(e, dict) else float(e))
-                for e in sem.values()
-            )
-            if total_sem_value <= 0:
+            from jam_field import JamField
+            from episodes import EpisodeStore
+            top = JamField.get().top(500, by='persistence')
+            total_val = sum(props.get('persistence', 0.0) for _, props in top)
+            if total_val <= 0:
                 return biases
 
-            # Use episode region tags to associate concepts with regions
-            try:
-                from episodes import EpisodeStore
-                concept_regions: dict[str, str] = {}
-                for ep in EpisodeStore.get().recent(500):
-                    region = ep.get('region') or 'unknown'
-                    for c in ep.get('concepts', []):
-                        if c not in concept_regions:
-                            concept_regions[c] = region
+            concept_regions: dict[str, str] = {}
+            for ep in EpisodeStore.get().recent(500):
+                region = ep.get('region') or 'unknown'
+                for c in ep.get('concepts', []):
+                    if c not in concept_regions:
+                        concept_regions[c] = region
 
-                region_value: dict[str, float] = defaultdict(float)
-                for concept, entry in sem.items():
-                    val = entry.get('value', 0.0) if isinstance(entry, dict) else float(entry)
-                    r = concept_regions.get(concept, 'unknown')
-                    region_value[r] += val
+            region_value: dict[str, float] = defaultdict(float)
+            for text, props in top:
+                val = props.get('persistence', 0.0)
+                r = concept_regions.get(text, 'unknown')
+                region_value[r] += val
 
-                for region, val in region_value.items():
-                    biases[region] = round(val / total_sem_value, 4)
-            except Exception:
-                pass
+            for region, val in region_value.items():
+                biases[region] = round(val / total_val, 4)
         except Exception:
             pass
         return dict(sorted(biases.items(), key=lambda x: x[1], reverse=True))
@@ -392,13 +380,13 @@ class Worldview:
         Recompute all five identity dimensions from current system state.
         Accumulates history — does not reset on each call.
         """
-        # Record current goal + mode before computing
+        # Record current goal + mode from regulation output
         try:
-            from goals import GoalEngine
-            from stability import StabilityMonitor
-            goal = GoalEngine.get().current_goal()
-            mode = StabilityMonitor.get()._current_mode
-            self.record_goal(goal, mode)
+            import json, os as _os
+            _cog = os.path.join(_os.path.dirname(__file__), '..', 'data', 'cog_status.json')
+            with open(_cog, encoding='utf-8') as _f:
+                _d = json.load(_f)
+            self.record_goal(_d.get('goal', 'explore'), _d.get('mode', 'associative'))
         except Exception:
             pass
 
