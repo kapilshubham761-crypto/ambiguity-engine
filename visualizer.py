@@ -5,7 +5,10 @@ Reads data/ and graph.db directly. Not imported by or connected to engine code.
 """
 
 import json
+import os
+import re
 import sqlite3
+import subprocess
 import time
 from pathlib import Path
 
@@ -16,9 +19,70 @@ import streamlit as st
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
-_ROOT = Path(__file__).parent
-_DB   = _ROOT / "data" / "graph.db"
-_DATA = _ROOT / "data"
+_ROOT    = Path(__file__).parent
+_DB      = _ROOT / "data" / "graph.db"
+_DATA    = _ROOT / "data"
+_CF_BIN  = _ROOT / "cloudflared.exe"
+_VZ_LOG  = _DATA / "viz_tunnel.log"
+_VZ_PID  = _DATA / "viz_tunnel.pid"
+
+
+# ── Tunnel helpers ─────────────────────────────────────────────────────────────
+
+def _tunnel_running() -> bool:
+    try:
+        pid = int(_VZ_PID.read_text())
+    except Exception:
+        return False
+    try:
+        import psutil
+        if psutil.pid_exists(pid):
+            return True
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+                           capture_output=True, text=True, timeout=3)
+        return 'cloudflared' in r.stdout.lower()
+    except Exception:
+        return False
+
+
+def _tunnel_url() -> str:
+    try:
+        log = _VZ_LOG.read_text(encoding='utf-8', errors='ignore')
+        m   = re.search(r'https://[a-z0-9\-]+\.trycloudflare\.com', log)
+        return m.group(0) if m else ''
+    except Exception:
+        return ''
+
+
+def _start_tunnel():
+    _stop_tunnel()
+    _VZ_LOG.write_text('', encoding='utf-8')
+    flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS if os.name == 'nt' else 0
+    log_fh = open(_VZ_LOG, 'w', encoding='utf-8')
+    proc = subprocess.Popen(
+        [str(_CF_BIN), 'tunnel', '--url', 'http://localhost:8502'],
+        stdout=log_fh, stderr=subprocess.STDOUT,
+        creationflags=flags, close_fds=True,
+    )
+    log_fh.close()
+    _VZ_PID.write_text(str(proc.pid))
+
+
+def _stop_tunnel():
+    try:
+        pid = int(_VZ_PID.read_text())
+        r = subprocess.run(['tasklist', '/FI', f'PID eq {pid}', '/NH'],
+                           capture_output=True, text=True, timeout=3)
+        if 'cloudflared' in r.stdout.lower():
+            subprocess.run(['taskkill', '/PID', str(pid), '/F'],
+                           capture_output=True, timeout=5)
+    except Exception:
+        pass
+    try: _VZ_PID.unlink()
+    except Exception: pass
 
 # ── Page config ───────────────────────────────────────────────────────────────
 
@@ -196,6 +260,42 @@ with st.sidebar:
     if st.button("Reset view", width="stretch"):
         st.cache_data.clear()
         st.rerun()
+
+    st.markdown("---")
+
+    # ── Public access (Cloudflare tunnel for port 8502) ───────────────────────
+    st.markdown("""
+    <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+                color:#303050;margin-bottom:8px">Public Access</div>
+    """, unsafe_allow_html=True)
+
+    _running = _tunnel_running()
+    if _CF_BIN.exists():
+        if _running:
+            if st.button("Stop sharing", width="stretch"):
+                _stop_tunnel()
+                st.rerun()
+            _url = _tunnel_url()
+            if _url:
+                st.markdown(
+                    f'<a href="{_url}" target="_blank" style="font-size:11px;color:#4a9eff;'
+                    f'word-break:break-all;text-decoration:none">{_url}</a>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown('<div style="font-size:11px;color:#505078">URL loading…</div>',
+                            unsafe_allow_html=True)
+                time.sleep(2)
+                st.rerun()
+        else:
+            if st.button("Share publicly", width="stretch", type="primary"):
+                _start_tunnel()
+                st.info("Starting… URL appears in ~8s.")
+                time.sleep(8)
+                st.rerun()
+    else:
+        st.markdown('<div style="font-size:10px;color:#252540">cloudflared.exe not found</div>',
+                    unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown(f'<div style="font-size:10px;color:#252540">{time.strftime("%H:%M:%S")}</div>',
