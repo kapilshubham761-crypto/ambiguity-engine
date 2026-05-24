@@ -710,6 +710,15 @@ st.markdown(f"""
 # ══════════════════════════════════════════════════════════════════════════════
 
 perf = _j(DATA / 'perf_profile.json', {})
+
+# Cache valid data in session_state — survive restarts before first cycle completes
+_perf_stale = False
+if perf.get('process_avg_s'):
+    st.session_state['_perf_cache'] = perf
+elif '_perf_cache' in st.session_state:
+    perf = st.session_state['_perf_cache']
+    _perf_stale = True
+
 _pa  = perf.get('process_avg_s', {})
 _pp  = perf.get('process_pct',   {})
 _cyc = perf.get('cycle',         {})
@@ -754,11 +763,16 @@ if _pa:
     _t_total   = _cyc.get('t_total_s', 0)
     _efficiency = round(_cyc.get('items_ok', 0) / max(_cyc.get('items_found', 1), 1) * 100)
 
+    _stale_badge = (
+        '&nbsp;<span style="color:#f59e0b;font-size:10px;letter-spacing:0.08em">cached · refreshing</span>'
+        if _perf_stale else ''
+    )
+
     perf_html = f"""
 <div style="padding:16px 28px;background:#07070b;border-bottom:1px solid #181828">
   <div style="font-size:12px;letter-spacing:0.2em;color:#505078;text-transform:uppercase;
               border-bottom:1px solid #1a1a28;padding-bottom:6px;margin-bottom:14px">
-    pipeline efficiency  ·  <span style="color:#6868a0">{_ns} samples</span>
+    pipeline efficiency  ·  <span style="color:#6868a0">{_ns} samples</span>{_stale_badge}
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px">
@@ -808,7 +822,12 @@ if _pa:
 else:
     perf_html = (
         '<div style="padding:12px 28px;background:#07070b;border-bottom:1px solid #181828;'
-        'font-size:12px;color:#303050">pipeline profiler warming up — data after first cycle</div>'
+        'display:flex;align-items:center;gap:10px">'
+        '<span style="font-size:12px;color:#303050">pipeline profiler</span>'
+        '<span style="font-size:11px;color:#252540;letter-spacing:0.08em">'
+        'waiting for first cycle · auto-refreshing</span>'
+        '<span style="color:#252540;animation:ae-pulse 1.6s ease-in-out infinite">◈</span>'
+        '</div>'
     )
 
 st.markdown(perf_html, unsafe_allow_html=True)
