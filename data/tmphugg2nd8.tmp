@@ -1,0 +1,3061 @@
+{
+  "exposures": {
+    "runner": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:29:00+00:00",
+      "last_seen": "2026-05-23T03:29:00+00:00"
+    },
+    "slow": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:29:00+00:00",
+      "last_seen": "2026-05-23T03:29:00+00:00"
+    },
+    "bone": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:29:37+00:00",
+      "last_seen": "2026-05-23T03:29:37+00:00"
+    },
+    "adult human body": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:29:37+00:00",
+      "last_seen": "2026-05-23T03:29:37+00:00"
+    },
+    "boiling point": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T03:29:48+00:00",
+      "last_seen": "2026-05-23T03:29:54+00:00"
+    },
+    "water": {
+      "times_seen": 6,
+      "first_seen": "2026-05-23T03:29:48+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "sea level": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T03:29:48+00:00",
+      "last_seen": "2026-05-23T03:29:54+00:00"
+    },
+    "pomona": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "roman goddess": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "fruit tree": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "garden": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "orchard": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "wife": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "vertumnus god": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "season": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "change": {
+      "times_seen": 68,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "plant growth": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "vertumnus": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:34:59+00:00",
+      "last_seen": "2026-05-23T03:34:59+00:00"
+    },
+    "dmp": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:35:00+00:00",
+      "last_seen": "2026-05-23T03:35:00+00:00"
+    },
+    "polyhymnia": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T03:35:00+00:00",
+      "last_seen": "2026-05-23T03:35:00+00:00"
+    },
+    "thimk": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:09:21+00:00",
+      "last_seen": "2026-05-23T04:09:21+00:00"
+    },
+    "ne": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:09:56+00:00",
+      "last_seen": "2026-05-23T04:09:56+00:00"
+    },
+    "million dollor": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:09:56+00:00",
+      "last_seen": "2026-05-23T04:09:56+00:00"
+    },
+    "miss": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:10:41+00:00",
+      "last_seen": "2026-05-23T04:10:41+00:00"
+    },
+    "namme o": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:11:47+00:00",
+      "last_seen": "2026-05-23T04:11:47+00:00"
+    },
+    "namme": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:11:47+00:00",
+      "last_seen": "2026-05-23T04:11:47+00:00"
+    },
+    "earth": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "rain": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "snow": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "hail": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "land": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "river": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "lake": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "ocean": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "sun": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "main source": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "energy": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:21:04+00:00",
+      "last_seen": "2026-05-23T04:28:32+00:00"
+    },
+    "tsavorite": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "grossular variety": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "primary deposit": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "itrafo": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "village": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "andrembesoa area": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "central madagascar": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "andrembesoa": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:05+00:00"
+    },
+    "madagascar": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "sample": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "locality": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "classical gemological method": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "chemical analysis": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "uv vis nir": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "mid ir spectroscopy": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:03+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "garnet chemical composition": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "nearly pure grossular": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "mol": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "iron": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "vanadium": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "main chromophore": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:04+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "iron content": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "fe o": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "ratio": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "know deposit": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "itrafo deposit": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "new vein": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "future production": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "access difficulty": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "security concern": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:05+00:00",
+      "last_seen": "2026-05-23T04:23:06+00:00"
+    },
+    "past decade": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "impressive discovery": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "diamond": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "colored stone": {
+      "times_seen": 6,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "corundum": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "spinel": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "garnet": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "tourmaline": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "reduce gem production": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "high development cost": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "environmental consideration": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "downturn": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "global economy": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "case study": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "mahafale pastoralist": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "linta river": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "spiny forest ecoregion": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "southwestern madagascar": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "paper": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "human impact": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "forest cover": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "mahafale": {
+      "times_seen": 3,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:19+00:00"
+    },
+    "the linta river": {
+      "times_seen": 3,
+      "first_seen": "2026-05-23T04:23:09+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "legal ethical restriction": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "trade": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "gem": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "nation": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "premium market value": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "certain stone": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "particular source": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "origin": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "increase importance": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "ruby sapphire emerald copper bear tourmaline": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:11+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "article": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "geographic source": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "production": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "natural cultured pearl": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "year": {
+      "times_seen": 34,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "map": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "important gem produce region": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "world": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "accompany wall chart": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:12+00:00",
+      "last_seen": "2026-05-23T04:23:17+00:00"
+    },
+    "environmental history": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:19+00:00",
+      "last_seen": "2026-05-23T04:23:19+00:00"
+    },
+    "spiny forest": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:23:19+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "anthropogenic change": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:19+00:00",
+      "last_seen": "2026-05-23T04:23:19+00:00"
+    },
+    "forest": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:19+00:00",
+      "last_seen": "2026-05-23T04:23:19+00:00"
+    },
+    "mahafale landscape": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:19+00:00",
+      "last_seen": "2026-05-23T04:23:19+00:00"
+    },
+    "thorn": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "inconvenience": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "preference": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "pastoralist strategy": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "grass": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "factor": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "detail": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "external internal process": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "increase sedentarisation": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "transhumant pastoralist": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "prickly": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "cactus": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "landscape": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "cattle fodder": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "human food": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:20+00:00",
+      "last_seen": "2026-05-23T04:23:20+00:00"
+    },
+    "recent displacement": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "mobile pastoralist": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "immigrant farmer": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "clearing": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "large forest help": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "pastoralist": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "reserve": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "livestock": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "stress": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:21+00:00",
+      "last_seen": "2026-05-23T04:23:21+00:00"
+    },
+    "attempt": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "complex process": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "environmental change": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "study": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "flexibility": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "nature culture mosaic": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "ecological social pressure": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "mosaic": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:23:22+00:00",
+      "last_seen": "2026-05-23T04:23:22+00:00"
+    },
+    "student life": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "medium": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "television": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "internet": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "influence": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "learn strategy": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "school": {
+      "times_seen": 21,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "author": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "method": {
+      "times_seen": 6,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "task": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "student": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "regular classroom lesson": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:30+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "lesson": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "grade classroom": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "documentary method": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "bohnsack": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "medium prototype": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "prototype": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:23:31+00:00",
+      "last_seen": "2026-05-23T04:38:40+00:00"
+    },
+    "gogogogo appearance gogogogo": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "rural municipality": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "gogogogo": {
+      "times_seen": 107,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "appearance gogogogo": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "district": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "ampanihy": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "atsimo andrefana": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "atsimo-andrefana": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "population": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:23:41+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "municipality": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:41+00:00",
+      "last_seen": "2026-05-23T04:39:07+00:00"
+    },
+    "farmer": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:41+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "additional": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:41+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "livelihood": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:41+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "important crop": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "important product": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "peanut": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "maize": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "sweet potato": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "cowpea": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "service": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "employment": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "mineral resource": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "reference": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "the area.[3] references": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:42+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "dem datum": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "shuttle radar topography mission": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "dem": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "shuttle radar topography mission - ^": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "mining property": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "propertymine": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "archive": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "original": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:23:43+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "grandmother": {
+      "times_seen": 87,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "million child": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "south africa": {
+      "times_seen": 59,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "home": {
+      "times_seen": 25,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "road": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "senegalese proverb": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "south african family": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "community": {
+      "times_seen": 78,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "old woman": {
+      "times_seen": 17,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "gogo": {
+      "times_seen": 140,
+      "first_seen": "2026-05-23T04:23:52+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "vulnerable marginalised community": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:24+00:00"
+    },
+    "capacity": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "agent": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "health outcome": {
+      "times_seen": 20,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "turn": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "work": {
+      "times_seen": 17,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "partnership": {
+      "times_seen": 18,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "key area": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:53+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "early childhood development antenatal care": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "feed practice": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "play": {
+      "times_seen": 20,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "stimulation": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "pre adolescent year substance abuse": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "sexual reproductive health": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "mental health": {
+      "times_seen": 18,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "gender base violence": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:54+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "gogos wellness digital technology training": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "non communicable disease": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "income generation": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "organisation": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "ngos": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "corporate": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "private individual": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:55+00:00",
+      "last_seen": "2026-05-23T04:39:26+00:00"
+    },
+    "opportunity": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "community base project": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "initiative": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "health promotion specialist": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "specific community need": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "tailor engagement option": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:23:56+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "child life": {
+      "times_seen": 25,
+      "first_seen": "2026-05-23T04:24:03+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "early year": {
+      "times_seen": 22,
+      "first_seen": "2026-05-23T04:24:04+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "child": {
+      "times_seen": 121,
+      "first_seen": "2026-05-23T04:24:04+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "emotional social language cognitive foundation": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:04+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "future learning": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:04+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "wellbeing": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:04+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "timeslive": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:05+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "kabungane biyela": {
+      "times_seen": 13,
+      "first_seen": "2026-05-23T04:24:05+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "south african child": {
+      "times_seen": 13,
+      "first_seen": "2026-05-23T04:24:05+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "track": {
+      "times_seen": 13,
+      "first_seen": "2026-05-23T04:24:05+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "age": {
+      "times_seen": 13,
+      "first_seen": "2026-05-23T04:24:05+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "inequality": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:30+00:00"
+    },
+    "classroom": {
+      "times_seen": 22,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "grade": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "grade 1": {
+      "times_seen": 14,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "teacher": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "caregiver": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "nurturer": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:06+00:00",
+      "last_seen": "2026-05-23T04:39:31+00:00"
+    },
+    "grandchild": {
+      "times_seen": 38,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "love": {
+      "times_seen": 18,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:32+00:00"
+    },
+    "resilience": {
+      "times_seen": 27,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:37+00:00"
+    },
+    "wisdom": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "incredibly difficult circumstance": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:32+00:00"
+    },
+    "across south africa": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:32+00:00"
+    },
+    "support": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "encouragement": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "practical tool": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:08+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "programme": {
+      "times_seen": 22,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "simple powerful way": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "language": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "confidence": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "creativity": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "emotional security": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "readiness": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:09+00:00",
+      "last_seen": "2026-05-23T04:39:34+00:00"
+    },
+    "gogo sing": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "story": {
+      "times_seen": 79,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "game": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "laugh": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "meaningful time": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "foundation": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "child future": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:35+00:00"
+    },
+    "jane simmonds gogogogo non profit organizations johannesburg": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "gp follower gogogogo": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "south african non profit organisation": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "registered non profit company": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "focus": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "building capacity": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "skill": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "knowledge": {
+      "times_seen": 22,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "female generation caregiver": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "jane simmonds": {
+      "times_seen": 27,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "organizations johannesburg": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:10+00:00",
+      "last_seen": "2026-05-23T04:39:36+00:00"
+    },
+    "hand": {
+      "times_seen": 12,
+      "first_seen": "2026-05-23T04:24:11+00:00",
+      "last_seen": "2026-05-23T04:39:37+00:00"
+    },
+    "future": {
+      "times_seen": 26,
+      "first_seen": "2026-05-23T04:24:11+00:00",
+      "last_seen": "2026-05-23T04:39:37+00:00"
+    },
+    "innovation": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "research hub": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "life opportunity": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "presence": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "majesty": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "king": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "queen": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "belgium": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "kbf africa prize": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "ceremony": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "celebration": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "life": {
+      "times_seen": 30,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "safe space": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "bench": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "the kbf africa prize": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:12+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "friendship bench": {
+      "times_seen": 22,
+      "first_seen": "2026-05-23T04:24:13+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "small task force": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:13+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "dedicated grandmother": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:13+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "health initiative": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:13+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "low resource setting": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:13+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "hope": {
+      "times_seen": 39,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:42+00:00"
+    },
+    "carry": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "powerful": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "mentally healthy community": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "global movement": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:42+00:00"
+    },
+    "friendship bench model": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:42+00:00"
+    },
+    "country": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:42+00:00"
+    },
+    "zimbabwe": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "train mental health supporter": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "walking distance": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:14+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "award": {
+      "times_seen": 28,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "client": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "partner": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "supporter": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "community member": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "power": {
+      "times_seen": 42,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "human connection": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "accessible mental health care": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:15+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "mentalhealthforall": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "friendshipbenchzimbabwe": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "winner": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "wellbeing programs category": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "woman": {
+      "times_seen": 95,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "world awards": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "paris": {
+      "times_seen": 35,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "the women changing the world awards": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "moment": {
+      "times_seen": 19,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "personal achievement": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "recognition": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "big story": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "remarkable gogo": {
+      "times_seen": 11,
+      "first_seen": "2026-05-23T04:24:16+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "privilege": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "compassion": {
+      "times_seen": 17,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:37+00:00"
+    },
+    "quiet strength": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:37+00:00"
+    },
+    "family": {
+      "times_seen": 25,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "circumstance": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "dignity": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "connection": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "extraordinary role": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "healthy future": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "generation": {
+      "times_seen": 33,
+      "first_seen": "2026-05-23T04:24:17+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "courage": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:19+00:00",
+      "last_seen": "2026-05-23T04:39:38+00:00"
+    },
+    "steady": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:19+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "human": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:19+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "transformative": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:19+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "honour": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:39+00:00"
+    },
+    "ready2026 intersystems conference": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:40+00:00"
+    },
+    "learn": {
+      "times_seen": 10,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:41+00:00"
+    },
+    "shared": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:41+00:00"
+    },
+    "look": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:41+00:00"
+    },
+    "shopping tote": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "conference gift": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:43+00:00"
+    },
+    "attendee": {
+      "times_seen": 18,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "intersystems": {
+      "times_seen": 17,
+      "first_seen": "2026-05-23T04:24:22+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "small detail": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:23+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "intersystems ready2026": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:23+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "beautiful gogogogo bag": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:23+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "health education life opportunity": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:23+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "ready2026": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:23+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "brand story": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:24+00:00",
+      "last_seen": "2026-05-23T04:39:44+00:00"
+    },
+    "pleasure meeting": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:25+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "ready": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:25+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "big event": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:25+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "company": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:39:45+00:00"
+    },
+    "impact": {
+      "times_seen": 24,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "mission": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:54+00:00"
+    },
+    "incredible conversation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "skollworldforum": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "trevor noah": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "wawira njiru": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "founder": {
+      "times_seen": 24,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "education": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:26+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "growth": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "organization": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "ton": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "food": {
+      "times_seen": 9,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "team": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "county": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "kenya": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "insight": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "scale": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "masterclass level": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "identify champions": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "success": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "vision": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:27+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "locally led": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:28+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "sustainability": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:28+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "localize intervention": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:28+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "locally led & community": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:28+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "benefit": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "scaling": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "primary mission": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "economic impact": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "woman empowerment": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "strategic partnership": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "government": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "champion": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:29+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "global giants": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "wawira": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "india": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:39:06+00:00"
+    },
+    "national school feeding program": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "classroom hunger": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "solvable problem": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "infrastructure": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "political": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "charity": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:30+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "true example": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "precious life count": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "blueprint": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "time gift": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "give circle": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "individual donation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "local ingredient": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "meal": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:31+00:00",
+      "last_seen": "2026-05-23T04:38:58+00:00"
+    },
+    "nearly entire school year": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:32+00:00",
+      "last_seen": "2026-05-23T04:39:00+00:00"
+    },
+    "direct link": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:32+00:00",
+      "last_seen": "2026-05-23T04:39:02+00:00"
+    },
+    "skollforum": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:32+00:00",
+      "last_seen": "2026-05-23T04:39:02+00:00"
+    },
+    "crisis": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:33+00:00",
+      "last_seen": "2026-05-23T04:39:02+00:00"
+    },
+    "poor schooling": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:33+00:00",
+      "last_seen": "2026-05-23T04:39:02+00:00"
+    },
+    "strong foundation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:35+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "learning": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:35+00:00",
+      "last_seen": "2026-05-23T04:39:16+00:00"
+    },
+    "health": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:35+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "nutrition": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:35+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "basic skill": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "gap": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "meghalaya approach": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "early childhood care": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "learn system": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "silo": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "meghalaya": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "model": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "real life observation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:36+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "rigid testing": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:37+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "frontline worker": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "natural environment": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "trust": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "early identification": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "challenge": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "simple low cost support": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:39+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "system": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "solution": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "strong integration": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "consistent training": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "long term policy commitment": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "state": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "intent": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "early intervention": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "early transformation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "right start": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:40+00:00",
+      "last_seen": "2026-05-23T04:39:05+00:00"
+    },
+    "approach": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:41+00:00",
+      "last_seen": "2026-05-23T04:39:06+00:00"
+    },
+    "india human capital story": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:41+00:00",
+      "last_seen": "2026-05-23T04:39:06+00:00"
+    },
+    "prevention": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:41+00:00",
+      "last_seen": "2026-05-23T04:39:06+00:00"
+    },
+    "correction": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:41+00:00",
+      "last_seen": "2026-05-23T04:39:06+00:00"
+    },
+    "kya_lagta_hai": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "earlychildhood": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "educationreform": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "publichealth nutritionmatters": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "communityled": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "policyinnovation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "learningoutcomes": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "world book day": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "open mind": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:10+00:00"
+    },
+    "literacy crisis": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "grade learner": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "meaning": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "grade 4": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:43+00:00",
+      "last_seen": "2026-05-23T04:39:11+00:00"
+    },
+    "book": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:44+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "voice": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:44+00:00",
+      "last_seen": "2026-05-23T04:39:12+00:00"
+    },
+    "early age": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:44+00:00",
+      "last_seen": "2026-05-23T04:39:16+00:00"
+    },
+    "act": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:16+00:00"
+    },
+    "care": {
+      "times_seen": 24,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "page": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:17+00:00"
+    },
+    "change future": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:17+00:00"
+    },
+    "this world book day": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:17+00:00"
+    },
+    "literacy4life jane simmonds gojanego jane simmonds": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:18+00:00"
+    },
+    "executive director": {
+      "times_seen": 16,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "programmes category": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:18+00:00"
+    },
+    "worlds awards": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:18+00:00"
+    },
+    "jane simmonds - gojanego jane simmonds": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:18+00:00"
+    },
+    "the woman changing the worlds awards": {
+      "times_seen": 7,
+      "first_seen": "2026-05-23T04:24:46+00:00",
+      "last_seen": "2026-05-23T04:39:18+00:00"
+    },
+    "incredible moment": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:47+00:00",
+      "last_seen": "2026-05-23T04:39:21+00:00"
+    },
+    "dedication": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:47+00:00",
+      "last_seen": "2026-05-23T04:39:21+00:00"
+    },
+    "belief": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:47+00:00",
+      "last_seen": "2026-05-23T04:39:21+00:00"
+    },
+    "strength": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:49+00:00",
+      "last_seen": "2026-05-23T04:39:22+00:00"
+    },
+    "milestone": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:50+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "meet jane simmonds": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:50+00:00",
+      "last_seen": "2026-05-23T04:39:23+00:00"
+    },
+    "beautiful organisation": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:24+00:00"
+    },
+    "women": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:24+00:00"
+    },
+    "world south africa awards": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:24+00:00"
+    },
+    "the women changing the world south africa awards": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:24+00:00"
+    },
+    "room": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "portale": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "tap": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "explore jane portale": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "finalist": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "humanities impact category": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:51+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "the woman changing the world awards": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:52+00:00",
+      "last_seen": "2026-05-23T04:39:25+00:00"
+    },
+    "true agent": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:53+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "household": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:53+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "big visible way": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:53+00:00",
+      "last_seen": "2026-05-23T04:39:27+00:00"
+    },
+    "exactly": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:54+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "link": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:54+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "https://lnkd.in/dxhvxsmf https://lnkd.in/dkyjwtc2": {
+      "times_seen": 8,
+      "first_seen": "2026-05-23T04:24:54+00:00",
+      "last_seen": "2026-05-23T04:39:28+00:00"
+    },
+    "rifle": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:28+00:00",
+      "last_seen": "2026-05-23T04:27:28+00:00"
+    },
+    "sad": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:28+00:00",
+      "last_seen": "2026-05-23T04:27:28+00:00"
+    },
+    "forester": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:28+00:00",
+      "last_seen": "2026-05-23T04:27:28+00:00"
+    },
+    "tree": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:28+00:00",
+      "last_seen": "2026-05-23T04:27:28+00:00"
+    },
+    "frog": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:29+00:00",
+      "last_seen": "2026-05-23T04:27:29+00:00"
+    },
+    "young vixen playing": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:30+00:00",
+      "last_seen": "2026-05-23T04:27:30+00:00"
+    },
+    "see": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:30+00:00",
+      "last_seen": "2026-05-23T04:27:30+00:00"
+    },
+    "young": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:30+00:00",
+      "last_seen": "2026-05-23T04:27:30+00:00"
+    },
+    "vixen": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:30+00:00",
+      "last_seen": "2026-05-23T04:27:30+00:00"
+    },
+    "playing": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:30+00:00",
+      "last_seen": "2026-05-23T04:27:30+00:00"
+    },
+    "little star": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:43+00:00",
+      "last_seen": "2026-05-23T04:27:43+00:00"
+    },
+    "nursery rhyme": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:43+00:00",
+      "last_seen": "2026-05-23T04:27:43+00:00"
+    },
+    "baby": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:43+00:00",
+      "last_seen": "2026-05-23T04:27:43+00:00"
+    },
+    "toddler": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:43+00:00",
+      "last_seen": "2026-05-23T04:27:43+00:00"
+    },
+    "star": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:44+00:00",
+      "last_seen": "2026-05-23T04:27:44+00:00"
+    },
+    "special": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:44+00:00",
+      "last_seen": "2026-05-23T04:27:44+00:00"
+    },
+    "wiggles": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:44+00:00",
+      "last_seen": "2026-05-23T04:27:44+00:00"
+    },
+    "greg": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:27:44+00:00",
+      "last_seen": "2026-05-23T04:27:44+00:00"
+    },
+    "speed": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:28:21+00:00",
+      "last_seen": "2026-05-23T04:28:21+00:00"
+    },
+    "light": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:28:21+00:00",
+      "last_seen": "2026-05-23T04:28:21+00:00"
+    },
+    "vacuum": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:28:21+00:00",
+      "last_seen": "2026-05-23T04:28:21+00:00"
+    },
+    "planet": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:28:32+00:00",
+      "last_seen": "2026-05-23T04:39:15+00:00"
+    },
+    "solar system": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:28:32+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "order": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:28:32+00:00",
+      "last_seen": "2026-05-23T04:28:36+00:00"
+    },
+    "unable": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:15+00:00",
+      "last_seen": "2026-05-23T04:30:15+00:00"
+    },
+    "access": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:15+00:00",
+      "last_seen": "2026-05-23T04:30:15+00:00"
+    },
+    "fresh fruit": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:30:16+00:00",
+      "last_seen": "2026-05-23T04:30:20+00:00"
+    },
+    "fresh": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:16+00:00",
+      "last_seen": "2026-05-23T04:30:16+00:00"
+    },
+    "fruit": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:16+00:00",
+      "last_seen": "2026-05-23T04:30:16+00:00"
+    },
+    "keep": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:16+00:00",
+      "last_seen": "2026-05-23T04:30:16+00:00"
+    },
+    "long": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:16+00:00",
+      "last_seen": "2026-05-23T04:30:16+00:00"
+    },
+    "main cause": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:20+00:00",
+      "last_seen": "2026-05-23T04:30:20+00:00"
+    },
+    "scurvy": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:20+00:00",
+      "last_seen": "2026-05-23T04:30:20+00:00"
+    },
+    "lack": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:20+00:00",
+      "last_seen": "2026-05-23T04:30:20+00:00"
+    },
+    "vegetable": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:30:20+00:00",
+      "last_seen": "2026-05-23T04:30:20+00:00"
+    },
+    "round": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:31+00:00",
+      "last_seen": "2026-05-23T04:35:59+00:00"
+    },
+    "oval": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:31+00:00",
+      "last_seen": "2026-05-23T04:35:59+00:00"
+    },
+    "flatten": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:31+00:00",
+      "last_seen": "2026-05-23T04:35:59+00:00"
+    },
+    "specie": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:35+00:00",
+      "last_seen": "2026-05-23T04:36:00+00:00"
+    },
+    "egg shell": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:35+00:00",
+      "last_seen": "2026-05-23T04:36:00+00:00"
+    },
+    "common colour": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:37+00:00",
+      "last_seen": "2026-05-23T04:36:00+00:00"
+    },
+    "butterfly": {
+      "times_seen": 5,
+      "first_seen": "2026-05-23T04:30:37+00:00",
+      "last_seen": "2026-05-23T04:36:00+00:00"
+    },
+    "cause": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:54+00:00",
+      "last_seen": "2026-05-23T04:35:54+00:00"
+    },
+    "mechanism": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:54+00:00",
+      "last_seen": "2026-05-23T04:35:54+00:00"
+    },
+    "new view": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:55+00:00",
+      "last_seen": "2026-05-23T04:35:55+00:00"
+    },
+    "good explanation": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:55+00:00",
+      "last_seen": "2026-05-23T04:35:55+00:00"
+    },
+    "step": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:55+00:00",
+      "last_seen": "2026-05-23T04:35:55+00:00"
+    },
+    "instance": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:55+00:00",
+      "last_seen": "2026-05-23T04:35:55+00:00"
+    },
+    "want": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:35:55+00:00",
+      "last_seen": "2026-05-23T04:35:55+00:00"
+    },
+    "comic": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:36:10+00:00",
+      "last_seen": "2026-05-23T04:39:32+00:00"
+    },
+    "calvin": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:36:11+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "powerful imagination": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:36:11+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "think": {
+      "times_seen": 4,
+      "first_seen": "2026-05-23T04:36:11+00:00",
+      "last_seen": "2026-05-23T04:39:33+00:00"
+    },
+    "body": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:37:01+00:00",
+      "last_seen": "2026-05-23T04:37:01+00:00"
+    },
+    "emotion": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:37:01+00:00",
+      "last_seen": "2026-05-23T04:37:01+00:00"
+    },
+    "improv": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:37:01+00:00",
+      "last_seen": "2026-05-23T04:37:01+00:00"
+    },
+    "version": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:37:01+00:00",
+      "last_seen": "2026-05-23T04:37:01+00:00"
+    },
+    "chicago": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:37:01+00:00",
+      "last_seen": "2026-05-23T04:37:01+00:00"
+    },
+    "sun influence": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:38:55+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "sun’s": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:38:55+00:00",
+      "last_seen": "2026-05-23T04:38:55+00:00"
+    },
+    "moon": {
+      "times_seen": 2,
+      "first_seen": "2026-05-23T04:38:56+00:00",
+      "last_seen": "2026-05-23T04:39:15+00:00"
+    },
+    "the solar system": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:38:56+00:00",
+      "last_seen": "2026-05-23T04:38:56+00:00"
+    },
+    "thousand": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:38:57+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "space rock": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:38:57+00:00",
+      "last_seen": "2026-05-23T04:38:57+00:00"
+    },
+    "seventh planet": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:03+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "neptune": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:03+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "ice giant": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:03+00:00",
+      "last_seen": "2026-05-23T04:39:03+00:00"
+    },
+    "large planet": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:04+00:00",
+      "last_seen": "2026-05-23T04:39:04+00:00"
+    },
+    "extraterrestrial object": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:15+00:00",
+      "last_seen": "2026-05-23T04:39:15+00:00"
+    },
+    "weight": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:16+00:00",
+      "last_seen": "2026-05-23T04:39:16+00:00"
+    },
+    "object": {
+      "times_seen": 1,
+      "first_seen": "2026-05-23T04:39:16+00:00",
+      "last_seen": "2026-05-23T04:39:16+00:00"
+    }
+  },
+  "top5_history": [
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "woman",
+      "child",
+      "gogo",
+      "story"
+    ],
+    [
+      "gogogogo",
+      "solar system",
+      "planet",
+      "child",
+      "gogo"
+    ],
+    [
+      "gogogogo",
+      "solar system",
+      "planet",
+      "child",
+      "gogo"
+    ]
+  ]
+}

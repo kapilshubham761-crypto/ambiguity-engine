@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from typing import NamedTuple
 
+import torch  # must be first — prevents circular import via sentence_transformers → transformers → logits_process
 import spacy
 from sentence_transformers import SentenceTransformer
 

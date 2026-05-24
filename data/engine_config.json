@@ -1,0 +1,73 @@
+{
+  "learning": {
+    "cycle_time": 60,
+    "n_workers": 10,
+    "topics_per_cycle": 30,
+    "min_sentences": 8,
+    "fetch_timeout": 10,
+    "search_timeout": 30,
+    "checkin_every": 1800,
+    "feed_max": 200
+  },
+  "energy": {
+    "total": 1.0,
+    "replenish_per_tick": 0.08,
+    "cost_simulation": 0.04,
+    "cost_exploration": 0.1,
+    "cost_region_switch": 0.1,
+    "cost_abstraction": 0.14
+  },
+  "identity": {
+    "drift_rate": 0.044
+  },
+  "evolver": {
+    "adapt_every": 30,
+    "max_delta": 0.05
+  },
+  "attention": {
+    "bias_strength": 0.15,
+    "novelty_strength": 0.35
+  },
+  "meta_state": {
+    "decay_rate": 0.97,
+    "reinforce_gain": 0.25,
+    "fatigue_k": 0.2,
+    "cooling_alpha": 0.5
+  },
+  "goals": {
+    "reduce_uncertainty": 0.1,
+    "increase_novelty": 0.75,
+    "resolve_contradiction": 0.25,
+    "maintain_stability": 0.35,
+    "expand_regions": 0.45
+  },
+  "egos": {
+    "soma": {
+      "identity": {
+        "drift_rate": 0.044
+      },
+      "evolver": {
+        "adapt_every": 30,
+        "max_delta": 0.05
+      },
+      "meta_state": {
+        "decay_rate": 0.97,
+        "reinforce_gain": 0.25,
+        "fatigue_k": 0.2,
+        "cooling_alpha": 0.5
+      },
+      "goals": {
+        "reduce_uncertainty": 0.1,
+        "increase_novelty": 0.75,
+        "resolve_contradiction": 0.25,
+        "maintain_stability": 0.35,
+        "expand_regions": 0.45
+      },
+      "attention": {
+        "bias_strength": 0.15,
+        "novelty_strength": 0.35
+      }
+    }
+  },
+  "active_ego": "soma"
+}

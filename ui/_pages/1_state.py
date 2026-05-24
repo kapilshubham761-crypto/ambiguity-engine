@@ -203,9 +203,9 @@ def _ev_age(ts_str: str) -> str:
         dt = datetime.fromisoformat(ts_str)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
-        return dt.strftime('%H:%M:%S')
+        return dt.strftime('%m-%d  %H:%M:%S')
     except Exception:
-        return '——:——:——'
+        return '——-——  ——:——:——'
 
 def _ev_dim(ts_str: str) -> str:
     try:

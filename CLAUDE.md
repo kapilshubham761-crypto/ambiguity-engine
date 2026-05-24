@@ -1,114 +1,200 @@
-# Ambiguity Engine — Project Context
+# Ambiguity Engine — Project Context for LLMs
 
 ## What This Is
-A local, autonomous AI learning system that teaches itself by fetching real content from the internet, extracting semantic concepts, and building a knowledge graph — like a child progressing through school.
 
-No cloud AI. No paid APIs. Runs entirely on the user's machine.
+A fully autonomous, local AI learning system that teaches itself by continuously fetching real content from the internet, extracting semantic concepts, and building a knowledge graph. No human review required. No cloud AI. No paid APIs. Runs entirely on the user's machine.
+
+**Python 3.14 · torch 2.12.0+cpu · Streamlit · spaCy · SentenceTransformers · Ollama**
+
+---
 
 ## How It Works (end-to-end)
-1. **Teacher** (`src/teacher.py`) runs a background thread 24/7
-2. It fetches lessons from Wikipedia, arXiv, Gutenberg, Reddit, OpenAlex, web
-3. Content is filtered by Flesch readability score (age-appropriate per curriculum stage)
-4. User reviews lessons in the **Learn** page — Accept feeds sentences into the graph, Reject discards
-5. Sentences → concept extraction (`src/extractor.py`) → semantic graph (`src/graph.py`)
-6. Every 3 hours: automatic report card assessment (`src/report_card.py`)
-7. Overlay (`overlay.py`) shows live CPU/RAM/engine stats always-on-top
 
-## Tech Stack
-- **Backend**: Python, NetworkX (graph), spaCy (NLP), SQLite (graph persistence)
-- **Frontend**: Streamlit multi-page app (`ui/app.py` + `ui/_pages/`)
-- **Content sources**: Wikipedia, Simple Wikipedia, arXiv, Gutenberg, Reddit, OpenAlex, DuckDuckGo+trafilatura
-- **Overlay**: tkinter, psutil
-- **Virtual env**: `.venv/` — always use `.venv/Scripts/python` or `.venv/Scripts/streamlit`
+1. **AutoLearner** (`src/learner.py`) runs background threads 24/7 — 10s cycles, 8 workers, 12 topics/cycle
+2. Fetches from Wikipedia (3× weighted), arXiv, Gutenberg, Reddit, OpenAlex, Web
+3. Extracts concepts via spaCy + MiniLM 384-dim embeddings (`src/extractor.py`)
+4. Updates semantic graph (`src/graph.py` — NetworkX + SQLite), memory, meta-state, contradiction registry, world model, ecology
+5. Every 3 hours: abstractor clusters concepts into abstract nodes; worldview takes longitudinal snapshot
+6. **Runner page** (`ui/_pages/3_runner.py`): manual prompt → full pipeline → LLM via Ollama → response fed back into engine
+7. **Overlay** (`overlay.py`): always-on-top tkinter window with CPU/RAM/GPU/graph stats
+
+---
 
 ## Project Structure
+
 ```
 ambiguity-engine/
 ├── src/
-│   ├── teacher.py        # Core: background fetch loop, queue, pause/resume, stage mgmt
-│   ├── discover.py       # Multi-source search + fetch (Wikipedia, arXiv, etc.)
-│   ├── auto_discover.py  # CURRICULUM (8 stages) + STAGE_CONFIG (per-stage sources/readability)
-│   ├── graph.py          # SemanticGraph — NetworkX + SQLite persistence
-│   ├── extractor.py      # Concept extraction from sentences
-│   ├── detector.py       # Ambiguity detection + logging
-│   ├── report_card.py    # Periodic assessment of graph knowledge
-│   └── maintenance.py    # Daily graph decay + pruning
+│   ├── learner.py         AutoLearner — main background loop (replaces old Teacher)
+│   ├── sources.py         Multi-source search + fetch
+│   ├── extractor.py       spaCy NLP + SentenceTransformer embeddings (import torch FIRST)
+│   ├── detector.py        3-metric ambiguity scoring (variance/cluster/bridge)
+│   ├── modulator.py       Graph-aware prompt builder + Ollama LLM call
+│   ├── graph.py           SemanticGraph — NetworkX + SQLite (graph.db)
+│   ├── episodes.py        Episode log + directed transition graph
+│   ├── predictor.py       Anticipatory pre-activation from transitions
+│   ├── abstractor.py      Co-occurrence clusters → abstract concepts (3h)
+│   ├── meta_state.py      MetaState — 500-concept attention pool + decay
+│   ├── memory.py          TemporalMemory — 3-layer store (working/episodic/semantic)
+│   ├── contradiction.py   ContradictionRegistry — bidirectional conflict detection
+│   ├── world_model.py     WorldModel — directed causal edges
+│   ├── novelty.py         NoveltyTracker — exposure count + anti-loop
+│   ├── tension.py         TensionTracker — cross-cutting ambiguity pressure
+│   ├── stability.py       StabilityMonitor — Shannon entropy → 5 cognitive modes
+│   ├── goals.py           GoalEngine — 5 competing intrinsic drives
+│   ├── energy.py          EnergyBudget — finite energy pool
+│   ├── self_model.py      SelfModel — recursive self-prediction accuracy
+│   ├── identity.py        IdentityTracker — 5 drifting personality traits
+│   ├── worldview.py       Worldview — longitudinal identity (3h)
+│   ├── reflection.py      ReflectionMonitor — self-report + pathology detection
+│   ├── meta_learning.py   MetaLearner — strategy scoring
+│   ├── evolver.py         Evolver — hill-climbing parameter adaptation
+│   ├── ecology.py         CognitiveEcology — orchestration heartbeat (13 subsystems)
+│   └── config.py          Config — live config reader with mtime cache
 ├── ui/
-│   ├── app.py            # Streamlit entry point — sidebar, status dot, navigation
-│   └── _pages/           # Pages (underscore prefix = NOT auto-discovered by Streamlit)
-│       ├── 1_state.py    # Current graph state
-│       ├── 2_graph.py    # 3D graph visualisation
-│       ├── 3_runner.py   # Manual runner
-│       ├── 4_timeline.py # Snapshot timeline
-│       ├── 5_ab.py       # A/B testing
-│       ├── 6_discover.py # Learn page — lesson queue, batch accept/reject
-│       ├── 7_learnings.py# Accepted lessons log
-│       └── 9_report_card.py # Assessment history
-├── data/                 # Runtime files (gitignored)
-│   ├── graph.db          # SQLite graph
-│   ├── teacher_queue.json# Pre-fetched lesson queue (includes full sentences)
-│   ├── teacher_stats.json# Session history, totals
-│   ├── fetch_status.json # Live fetch progress (started_at, fetching bool)
-│   ├── discovery_stage.json # Current curriculum stage index
-│   ├── search_prefs.json # Region + year filter preferences
-│   ├── paused.txt        # "1" = paused, "0" = running (cross-process sync)
-│   └── report_cards.json # Assessment history
-├── overlay.py            # Always-on-top stats overlay (tkinter)
-├── launch.bat            # ONE-CLICK launcher: kills old → clears cache → starts overlay + Streamlit → opens browser
-├── restart.bat           # Quick restart (no overlay, no browser open)
-├── overlay.bat           # Launch overlay only (uses pythonw — no console)
-└── CLAUDE.md             # This file
+│   ├── app.py             Streamlit entry point — boot splash, sidebar, nav, global CSS
+│   ├── .streamlit/
+│   │   └── config.toml    fileWatcherType=none (prevents WinError 206 from torch DLLs)
+│   ├── assets/logo.png
+│   ├── components/status.py
+│   └── _pages/            Pages use underscore prefix — NOT auto-discovered by Streamlit
+│       ├── 1_state.py     Core — Cognitive Core Panel (main dashboard, auto-refresh 4s)
+│       ├── 3_runner.py    Runner — manual pipeline + LLM
+│       ├── 0_meta_state.py Meta-State — concept activation pool
+│       ├── 10_cognition.py Cognition — 8-tab deep cognitive view
+│       └── 11_config.py   Settings — live params, egos, Cloudflare tunnel
+├── data/                  Runtime files (gitignored) — see Data Files below
+├── overlay.py             Always-on-top tkinter stats (CPU/RAM/GPU/graph/mode/goal)
+├── launch.bat             Kill old → clear caches → start overlay + Streamlit → open browser
+├── restart.bat            Quick restart (no overlay, no browser)
+├── overlay.bat            Launch overlay only (pythonw, no console)
+├── config.yaml            LLM config (model name, Ollama endpoint)
+├── CLAUDE.md              This file
+└── ARCHITECTURE.md        Full architecture with layer diagrams, module ref, data files
 ```
 
+---
+
 ## Key Conventions
+
 - **Always use `.venv/Scripts/python`** — not system python
-- **Pages must be in `ui/_pages/`** (underscore prefix) — `ui/pages/` would be auto-discovered by Streamlit and create duplicate nav
-- **Paused state** is `data/paused.txt` — write "1" to pause, "0" to resume; Teacher reads it every cycle AND `is_paused` property reads it live on every call
-- **Queue saves full lessons** including sentences — never strip sentences on save (caused KeyError bug before)
-- **fetch_status.json** is written by `_refill()` at start/end and cleared when paused — used by sidebar for elapsed time display
-- **No coding features in the Streamlit app** — no git panels, terminals, or code editors (user codes in VS Code)
+- **Pages must be in `ui/_pages/`** — underscore prefix prevents Streamlit auto-discovery
+- **paused.txt** — write `"1"` to pause everything, `"0"` to resume; read live on every call
+- **import torch FIRST** in `extractor.py` — prevents sentence_transformers → transformers → torch circular import
+- **Deferred imports in runner.py** — all ML imports (`from extractor import extract` etc.) are after `st.stop()` guard so they only load when Run button is clicked
+- **Global CSS in `st.markdown()`** not `st.sidebar.markdown()` — sidebar CSS must be in main page context or it won't apply when sidebar is collapsed
+- **fileWatcherType = none** in `ui/.streamlit/config.toml` — code changes require Streamlit restart (run restart.bat)
+- **No coding features in the Streamlit app** — no git panels, terminals, code editors. User codes in VS Code
+- **launch.bat does NOT open** any HTML tracker files
+- **cupy-cuda12x is uninstalled** — it was breaking imports (needed pytest which wasn't installed). Do not reinstall.
 
-## Curriculum Stages (8 total)
-| Stage | Label | Readability |
-|-------|-------|-------------|
-| 0 | Ages 1–5 | ≥75 (Simple Wiki + children's Gutenberg only) |
-| 1 | Year 1 (Early School) | ≥65 |
-| 2 | Year 2–3 | ≥55 |
-| 3 | Year 4–6 (Primary) | ≥45 |
-| 4 | Middle School | ≥35 |
-| 5 | High School | ≥25 |
-| 6 | Undergraduate | ≥15 |
-| 7 | Graduate/Research | 0 (arXiv, OpenAlex unlocked) |
+---
 
-## Launching the App
+## Data Files (all in `data/`)
+
+| File | Written by | Contains |
+|---|---|---|
+| graph.db | SemanticGraph | SQLite — nodes + edges (primary knowledge store) |
+| live_feed.jsonl | AutoLearner | Last 200 activity entries (UI event stream) |
+| learner_stats.json | AutoLearner | total_sentences, total_concepts, session history |
+| fetch_status.json | AutoLearner | {fetching, started_at} for sidebar elapsed timer |
+| cog_status.json | AutoLearner | {mode, goal} — written each cycle, read by overlay + sidebar |
+| paused.txt | UI buttons | "1" paused / "0" running — cross-process sync |
+| engine_config.json | Settings page | All live params + ego presets (max 3) |
+| meta_state.json | MetaState | 500-concept activation pool snapshot |
+| memory.json | TemporalMemory | 3-layer memory snapshot |
+| energy.json | EnergyBudget | Current pool level + spent count |
+| identity.json | IdentityTracker | 5 personality trait values |
+| contradictions.json | ContradictionRegistry | Open + resolved contradictions |
+| world_model.json | WorldModel | Causal edge registry |
+| novelty.json | NoveltyTracker | Exposure counts + escape concepts |
+| self_model.json | SelfModel | Prediction accuracy history |
+| worldview.json | Worldview | Longitudinal identity snapshot (3h) |
+| reflection.json | ReflectionMonitor | Last self-report |
+| meta_learning.json | MetaLearner | Strategy scores |
+| evolved_params.json | Evolver | Adapted hill-climbed parameters |
+| episodes.jsonl | EpisodeStore | Concept co-occurrence episode log |
+| transitions.json | EpisodeStore | Directed transition weights |
+| abstractions.json | Abstractor | Abstract concept hierarchy L0/L1/L2 |
+
+---
+
+## UI Design System
+
+All pages inject a consistent CSS block. The reference design is `1_state.py`.
+
+```
+Background:  #070709 (page)  #09090f (sidebar)  #0a0a12 (panels)
+Borders:     #222238 (primary)  #1a1a28 (subtle)
+Font:        Consolas, Courier New, monospace (!important everywhere)
+             Material Icons font restored for [data-testid="stExpanderToggleIcon"]
+
+Text:
+  #b0b0d8  body / primary values
+  #9898c8  secondary values
+  #7878a8  dim values
+  #6868a0  keys / labels
+  #505078  section headers (12px uppercase letter-spacing:0.2em)
+  #4a4a70  separators
+
+Accents:
+  #4a9eff  blue  (active, links, expand button)
+  #44ff88  green (running / ok)
+  #ff4444  red   (paused / error)
+  #f59e0b  amber (focused mode)
+  #8b5cf6  purple (meta / abstractions)
+
+Page title:  22px, uppercase, letter-spacing:0.2em, color:#b0b0d8, font-weight:400
+Sections h2: 12px, uppercase, letter-spacing:0.2em, color:#505078, border-bottom:#222238
+Streamlit header hidden: header[data-testid="stHeader"] { display:none !important }
+No emojis anywhere in the UI.
+```
+
+---
+
+## Launching
+
 ```
 # Full launch (recommended):
 double-click launch.bat
+  → kills old processes
+  → clears __pycache__
+  → starts overlay (pythonw)
+  → starts Streamlit on port 8501
+  → polls until healthy
+  → opens http://localhost:8501
 
-# Manual:
+# Manual Streamlit only:
 cd ui
 ..\.venv\Scripts\streamlit run app.py
 
 # Overlay only:
 double-click overlay.bat
+
+# Quick restart (no overlay, no browser):
+double-click restart.bat
 ```
 
-## Current Status
-All 8 phases complete and running. Recent work:
-- Unified Discover + Teacher into single Learn page
-- Age-appropriate content filtering (Flesch score + per-stage source lists)
-- Location filter (12-region spherical grid) + year range filter
-- Batch lesson selection (☑ All / Accept N / Reject N)
-- Always-on-top overlay with CPU/RAM/graph stats
-- Sidebar animated status dot with fetch elapsed time + thinking line
-- Stop/Resume button visible on all pages (writes paused.txt directly)
-- Per-fetch 20s timeout — hung sources are skipped automatically
-- Paused state syncs instantly across all pages (reads file on every call)
+---
 
-## Pending / Known Issues
-- Graph visualisation (2_graph.py) doesn't auto-refresh — manual reload needed
-- No GPU monitoring in overlay yet
-- Report card assessment is rule-based (coverage %) not LLM-powered
+## Current State (as of 2026-05-24)
+
+**What works:**
+- Fully autonomous learning — AutoLearner runs 24/7, no human review
+- 4,473+ nodes, 18,410+ edges in graph.db
+- All 9 cognitive layers active (learner → ecology heartbeat)
+- Cognitive Core Panel (1_state.py) — real-time machine state monitor
+- 5-page navigation: Core / Runner / Meta-State / Cognition / Settings
+- Ego system (up to 3 personality presets)
+- Cloudflare tunnel in Settings (optional public URL)
+- GPU monitoring in overlay via pynvml
+
+**Known issues:**
+- Sidebar expand/collapse button styling: CSS must be in main page `st.markdown()` not sidebar context
+- torch circular import: fully resolved via import ordering + cupy uninstall
+- fileWatcherType=none: must restart Streamlit manually after code changes
+
+---
 
 ## GitHub
 https://github.com/kapilshubham761-crypto/ambiguity-engine

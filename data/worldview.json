@@ -1,0 +1,282 @@
+{
+  "region_visits": {},
+  "goal_mode_log": [
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779567616.964742
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779569331.7547483
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779569677.7116368
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779570295.1147103
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779593631.336143
+    },
+    {
+      "goal": "reduce_uncertainty",
+      "mode": "reflective",
+      "ts": 1779595434.0259497
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779595755.1225817
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779597262.9114897
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779598705.926367
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779600049.2047126
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779600398.5885258
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779600562.525349
+    },
+    {
+      "goal": "maintain_stability",
+      "mode": "reflective",
+      "ts": 1779603783.4848964
+    }
+  ],
+  "update_count": 13,
+  "persistent_concepts": [
+    {
+      "concept": "information theory",
+      "semantic_value": 0.829
+    },
+    {
+      "concept": "pathway",
+      "semantic_value": 0.6951
+    },
+    {
+      "concept": "information",
+      "semantic_value": 0.6758
+    },
+    {
+      "concept": "enzyme",
+      "semantic_value": 0.547
+    },
+    {
+      "concept": "amino acid",
+      "semantic_value": 0.5037
+    },
+    {
+      "concept": "isbn",
+      "semantic_value": 0.4725
+    },
+    {
+      "concept": "cell",
+      "semantic_value": 0.4725
+    },
+    {
+      "concept": "atp",
+      "semantic_value": 0.4725
+    },
+    {
+      "concept": "pmid",
+      "semantic_value": 0.4562
+    },
+    {
+      "concept": "entropy",
+      "semantic_value": 0.4561
+    },
+    {
+      "concept": "gogo",
+      "semantic_value": 0.456
+    },
+    {
+      "concept": "system",
+      "semantic_value": 0.4489
+    },
+    {
+      "concept": "child",
+      "semantic_value": 0.4384
+    },
+    {
+      "concept": "product",
+      "semantic_value": 0.422
+    },
+    {
+      "concept": "metabolic pathway",
+      "semantic_value": 0.422
+    },
+    {
+      "concept": "nadh",
+      "semantic_value": 0.422
+    },
+    {
+      "concept": "state",
+      "semantic_value": 0.4166
+    },
+    {
+      "concept": "bit",
+      "semantic_value": 0.4152
+    },
+    {
+      "concept": "reaction",
+      "semantic_value": 0.4042
+    },
+    {
+      "concept": "glycolysis",
+      "semantic_value": 0.4042
+    },
+    {
+      "concept": "body",
+      "semantic_value": 0.3618
+    },
+    {
+      "concept": "symbol",
+      "semantic_value": 0.3466
+    },
+    {
+      "concept": "brain",
+      "semantic_value": 0.3416
+    },
+    {
+      "concept": "dream",
+      "semantic_value": 0.3062
+    },
+    {
+      "concept": "shannon",
+      "semantic_value": 0.3061
+    },
+    {
+      "concept": "woman",
+      "semantic_value": 0.306
+    },
+    {
+      "concept": "rate",
+      "semantic_value": 0.3041
+    },
+    {
+      "concept": "original",
+      "semantic_value": 0.3013
+    },
+    {
+      "concept": "gogogogo",
+      "semantic_value": 0.2847
+    },
+    {
+      "concept": "ai",
+      "semantic_value": 0.2847
+    },
+    {
+      "concept": "building block",
+      "semantic_value": 0.2847
+    },
+    {
+      "concept": "measure",
+      "semantic_value": 0.2846
+    },
+    {
+      "concept": "method",
+      "semantic_value": 0.284
+    },
+    {
+      "concept": "journal",
+      "semantic_value": 0.2816
+    },
+    {
+      "concept": "principle",
+      "semantic_value": 0.2802
+    },
+    {
+      "concept": "water",
+      "semantic_value": 0.2752
+    },
+    {
+      "concept": "change",
+      "semantic_value": 0.2733
+    },
+    {
+      "concept": "environment",
+      "semantic_value": 0.2626
+    },
+    {
+      "concept": "concentration",
+      "semantic_value": 0.2626
+    },
+    {
+      "concept": "rem",
+      "semantic_value": 0.2625
+    },
+    {
+      "concept": "pdf",
+      "semantic_value": 0.2625
+    },
+    {
+      "concept": "ieee transactions",
+      "semantic_value": 0.2625
+    },
+    {
+      "concept": "grandmother",
+      "semantic_value": 0.2624
+    },
+    {
+      "concept": "oxygen",
+      "semantic_value": 0.2621
+    },
+    {
+      "concept": "work",
+      "semantic_value": 0.2572
+    },
+    {
+      "concept": "year",
+      "semantic_value": 0.2569
+    },
+    {
+      "concept": "community",
+      "semantic_value": 0.2564
+    },
+    {
+      "concept": "track",
+      "semantic_value": 0.2398
+    },
+    {
+      "concept": "gene",
+      "semantic_value": 0.2398
+    },
+    {
+      "concept": "g3p",
+      "semantic_value": 0.2398
+    }
+  ],
+  "chronic_contradictions": [],
+  "surviving_goals": [],
+  "home_regions": [],
+  "foundational_abstractions": [],
+  "semantic_biases": {
+    "unknown": 1.0
+  },
+  "identity_summary": "Anchored in: information theory, pathway, information",
+  "last_updated": "2026-05-24T06:23:03+00:00"
+}

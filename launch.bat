@@ -9,34 +9,26 @@ echo  ============================================
 echo.
 
 :: Kill any existing instance
-echo  [1/5] Stopping old instances...
+echo  [1/4] Stopping old instances...
 taskkill /F /IM python.exe 2>nul && echo        Killed. || echo        Nothing running.
 timeout /t 1 /nobreak >nul
 
 :: Wipe stale caches
-echo  [2/5] Clearing caches...
+echo  [2/4] Clearing caches...
 rd /s /q "%~dp0src\__pycache__" 2>nul
 rd /s /q "%~dp0ui\__pycache__" 2>nul
 rd /s /q "%~dp0ui\_pages\__pycache__" 2>nul
 echo        Done.
 
 :: Suppress Streamlit email prompt
-echo  [3/5] Configuring Streamlit...
+echo  [3/4] Configuring Streamlit...
 if not exist "%USERPROFILE%\.streamlit" mkdir "%USERPROFILE%\.streamlit"
 echo [general]> "%USERPROFILE%\.streamlit\credentials.toml"
 echo email = "">> "%USERPROFILE%\.streamlit\credentials.toml"
 echo        Done.
 
-:: Start overlay (silent — no console window)
-echo  [4/5] Starting stats overlay...
-start "" "%~dp0.venv\Scripts\pythonw.exe" "%~dp0overlay.py"
-echo        Done.
-
-:: Open tracker HTML
-start "" "%~dp0ambiguity-engine-tracker.html"
-
 :: Start Streamlit
-echo  [5/5] Starting engine...
+echo  [4/4] Starting engine...
 set PYTHONDONTWRITEBYTECODE=1
 start "" cmd /k "cd /d "%~dp0ui" && ..\.venv\Scripts\streamlit run app.py --server.port 8501 --server.headless true"
 

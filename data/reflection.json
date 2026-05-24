@@ -1,0 +1,25 @@
+{
+  "ts": "2026-05-24T06:49:16+00:00",
+  "current_mode": "reflective",
+  "entropy": 0.0,
+  "mean_entropy": 0.0,
+  "is_stable": true,
+  "active_concept_count": 500,
+  "dominant_region": "region_32",
+  "region_count": 44,
+  "novelty_balance": 0.0,
+  "repetition_rate": 0.0,
+  "ambiguity_load": 0.8111,
+  "hot_count": 10,
+  "open_contradictions": 50,
+  "total_contradictions": 50,
+  "semantic_depth": 1046,
+  "episodic_count": 6230,
+  "working_count": 3654,
+  "goal": "maintain_stability",
+  "drive_scores": {},
+  "flags": [
+    "over_fixating",
+    "stuck"
+  ]
+}

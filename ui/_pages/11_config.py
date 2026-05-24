@@ -53,8 +53,49 @@ def _stop_tunnel():
     try: _CF_PID.unlink()
     except Exception: pass
 
-st.title("Settings")
-st.caption("Changes take effect within one learner cycle (~10 s). No restart needed unless noted.")
+st.markdown("""
+<style>
+#MainMenu, footer, header[data-testid="stHeader"] { display: none !important; }
+body, .stApp { background: #070709 !important; }
+.block-container { padding: 1.5rem 2rem 3rem !important; max-width: 100% !important; }
+*, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
+[data-testid="stExpanderToggleIcon"],
+[data-testid="stExpanderToggleIcon"] *,
+[data-baseweb="icon"], [data-baseweb="icon"] *,
+.material-icons, .material-symbols-rounded,
+[class*="MaterialIcon"], [class*="materialIcon"] {
+    font-family: 'Material Symbols Rounded','Material Icons Rounded','Material Icons',sans-serif !important;
+}
+h2, h3 {
+    font-size: 12px !important; letter-spacing: 0.2em !important;
+    text-transform: uppercase !important; color: #505078 !important;
+    font-weight: 400 !important; border-bottom: 1px solid #222238 !important;
+    padding-bottom: 6px !important; margin-top: 28px !important;
+}
+p, .stMarkdown p { color: #9898c8 !important; font-size: 14px !important; }
+strong { color: #b0b0d8 !important; }
+caption, .stCaption { color: #505078 !important; font-size: 12px !important; letter-spacing: 0.06em !important; }
+hr { border-color: #222238 !important; margin: 20px 0 !important; }
+[data-testid="stExpander"] { border: 1px solid #1a1a28 !important; background: #0a0a10 !important; }
+[data-testid="stExpanderDetails"] { background: #07070a !important; }
+summary[data-testid="stExpanderToggle"] span { color: #6868a0 !important; font-size: 13px !important; }
+[data-testid="stAlert"] { background: #0a0a12 !important; border-color: #222238 !important; }
+textarea, input[type="text"], input[type="number"] {
+    background: #0a0a12 !important; border: 1px solid #222238 !important;
+    color: #b0b0d8 !important; font-size: 13px !important;
+}
+[data-baseweb="select"] > div { background: #0a0a12 !important; border-color: #222238 !important; color: #9898c8 !important; }
+[data-testid="stSlider"] > div > div { background: #222238 !important; }
+label { color: #6868a0 !important; font-size: 12px !important; letter-spacing: 0.08em !important; }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="padding:16px 0 4px;border-bottom:1px solid #222238;margin-bottom:20px">
+  <div style="font-size:22px;letter-spacing:0.2em;text-transform:uppercase;color:#b0b0d8;font-weight:400">SETTINGS</div>
+  <div style="font-size:12px;color:#505078;letter-spacing:0.06em;margin-top:4px">changes apply within one learner cycle (~10 s) · no restart needed unless noted</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Public Access (Cloudflare Tunnel) ─────────────────────────────────────────
 st.subheader("Public Access")

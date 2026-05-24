@@ -10,13 +10,24 @@ Node position in the UI tree:
 """
 
 import os
+import sys
 import json
 import time
 import streamlit as st
 from datetime import datetime, timezone
 
-import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'components'))
+
+# Pre-initialize torch in the main thread before any page code runs.
+# Without this, the Runner page triggers torch's first import mid-execution
+# which causes an internal circular import (torch/__init__.py → torch.export
+# → torch._higher_order_ops → torch.utils._debug_mode → torch.library not
+# yet set). Importing here ensures torch is fully ready before pg.run().
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+    import torch
+except Exception:
+    pass
 
 
 # ======================================================================== #
@@ -116,6 +127,100 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
+# Global CSS — injected from main page so it always applies
+st.markdown("""
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<style>
+body, .stApp { background: #070709 !important; }
+*, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
+
+/* Restore Material Symbols font — must beat * with higher specificity + liga enabled */
+.material-symbols-rounded,
+.material-symbols-outlined,
+.material-icons,
+span[class*="material-symbols"],
+span[class*="material-icons"],
+[data-testid="stExpanderToggleIcon"] span,
+[data-testid="stExpanderToggleIcon"] > *,
+[data-testid="stSidebarCollapseButton"] span,
+[data-baseweb="icon"] span {
+    font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    font-feature-settings: 'liga' !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* Sidebar — always visible, no collapse */
+[data-testid="stSidebar"] {
+    background: #09090f !important;
+    border-right: 1px solid #2a2a48 !important;
+    min-width: 240px !important;
+    transform: none !important;
+    visibility: visible !important;
+}
+[data-testid="stSidebarContent"] { background: #09090f !important; }
+
+/* Hide the collapse/expand toggle button — cover all Streamlit versions */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"],
+section[data-testid="stSidebarCollapsedControl"],
+button[data-testid="stBaseButton-headerNoPadding"],
+button[title="Close sidebar"],
+button[title="Open sidebar"],
+button[aria-label="Close sidebar"],
+button[aria-label="Open sidebar"],
+[data-testid="stSidebar"] > div:first-child > button {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Nav links */
+[data-testid="stSidebarNav"] { padding: 4px 0 !important; }
+[data-testid="stSidebarNavLink"] {
+    border-radius: 3px !important;
+    margin: 1px 8px !important;
+    padding: 7px 12px !important;
+    color: #6868a0 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+    background: transparent !important;
+    text-decoration: none !important;
+}
+[data-testid="stSidebarNavLink"]:hover {
+    background: #111128 !important;
+    color: #9898c8 !important;
+}
+[data-testid="stSidebarNavLink"][aria-current="page"] {
+    background: #14142a !important;
+    color: #b0b0d8 !important;
+    border-left: 2px solid #4a9eff !important;
+}
+[data-testid="stSidebarNavLink"] span { color: inherit !important; font-size: 13px !important; }
+
+/* Sidebar buttons */
+[data-testid="stSidebar"] button {
+    background: #0a0a18 !important;
+    border: 1px solid #222238 !important;
+    color: #7878a8 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+}
+[data-testid="stSidebar"] button:hover { border-color: #4a4a70 !important; color: #b0b0d8 !important; }
+[data-testid="stSidebar"] button[kind="primary"] {
+    background: #0d1a2a !important; border-color: #4a9eff !important; color: #4a9eff !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # ======================================================================== #
 # Status detection — delegated to ui/components/status.py                  #
@@ -158,12 +263,12 @@ _paused_file = os.path.join(_ROOT, 'data', 'paused.txt')
 
 with st.sidebar:
     if _paused:
-        if st.button("▶️ Resume", width='stretch', type="primary"):
+        if st.button("Resume", width='stretch', type="primary"):
             with open(_paused_file, 'w') as _f:
                 _f.write('0')
             st.rerun()
     else:
-        if st.button("⏹ Stop all", width='stretch'):
+        if st.button("Stop all", width='stretch'):
             os.makedirs(os.path.dirname(_paused_file), exist_ok=True)
             with open(_paused_file, 'w') as _f:
                 _f.write('1')
@@ -281,11 +386,11 @@ if _goal_html:
 # ======================================================================== #
 
 pages = [
-    st.Page("_pages/1_state.py",       title="Core",        icon="🧬"),
-    st.Page("_pages/3_runner.py",      title="Runner",      icon="▶️"),
-    st.Page("_pages/0_meta_state.py",  title="Meta-State",  icon="🧠"),
-    st.Page("_pages/10_cognition.py",  title="Cognition",   icon="💡"),
-    st.Page("_pages/11_config.py",     title="Settings",    icon="⚙️"),
+    st.Page("_pages/1_state.py",       title="Core"),
+    st.Page("_pages/3_runner.py",      title="Runner"),
+    st.Page("_pages/0_meta_state.py",  title="Meta-State"),
+    st.Page("_pages/10_cognition.py",  title="Cognition"),
+    st.Page("_pages/11_config.py",     title="Settings"),
 ]
 
 pg = st.navigation(pages)

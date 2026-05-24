@@ -1,343 +1,198 @@
 # Ambiguity Engine — Cognitive Architecture
-
-## Overview
-
-8 layers · 24 modules · 20 data files  
-Closed loop: raw text → concepts → graph → working memory → reasoning → stability → goals → identity → adaptation
-
-**LLM:** Qwen 2.5 via Ollama (`localhost:11434`) — wired into Runner page  
-**Graph layout:** UMAP on 384-dim embeddings (semantic proximity, not spiral)  
-**GPU monitoring:** pynvml overlay (load % · VRAM · temp)  
-**Ego system:** up to 3 named personality presets, saved in engine_config.json
+*Last updated: 2026-05-24*
 
 ---
 
-## Quick Process Map (as shown on Dashboard)
+## What It Is
+
+A fully autonomous, local AI that teaches itself by continuously fetching real content from the internet, extracting semantic concepts, building a knowledge graph, and evolving its own personality traits — with no human review required.
+
+- No cloud AI. No paid APIs. Runs entirely on one machine.
+- Python 3.14 · torch 2.12.0+cpu · Streamlit 1.x
+- LLM (optional): Qwen 2.5 / Llama 3.2 via Ollama at localhost:11434
+
+---
+
+## End-to-End Flow
 
 ```
- SOURCES          EXTRACTION          KNOWLEDGE            COGNITION             OUTPUT
- ───────          ──────────          ─────────            ─────────             ──────
- Wikipedia  ─┐                       SemanticGraph        MetaState             Runner
- arXiv      ─┤                       (NetworkX +          (attention pool)  ──► (Qwen /
- Gutenberg  ─┼─► fetch ─► sentences ─► SQLite)    ──────► TemporalMemory        Ollama)
- Reddit     ─┤    10s                 nodes merge          (3 layers)
- OpenAlex   ─┤    cycle               cosine≥0.85          Contradiction    ─┐
- Web        ─┘                                             WorldModel        │
-                  spaCy NLP                                NoveltyTracker    │  graph.db
-                  (noun chunks)      episodes.jsonl        StabilityMonitor  │  grows each
-                  MiniLM embed  ───► transitions.json ───► GoalEngine   ─────┘  cycle
-                  384-dim            Abstractor (3h)       EnergyBudget
-                                                           SelfModel
-                                                           IdentityTracker
-                                                           Evolver  (adapt)
-                                                           Reflection
-                                                           CognitiveEcology
+INTERNET SOURCES
+  Wikipedia · arXiv · Gutenberg · Reddit · OpenAlex · Web
+        │
+        ▼
+  [learner.py] AutoLearner
+  Background thread · 10s cycles · 8 parallel workers · 12 topics/cycle
+  Wikipedia weighted 3× over other sources
+        │ sentences
+        ▼
+  [extractor.py]
+  spaCy (en_core_web_sm) → noun chunks + named entities
+  SentenceTransformer (all-MiniLM-L6-v2) → 384-dim embeddings
+        │ Concept(text, embedding, source)
+        ▼
+  [detector.py]
+  3-metric ambiguity score: variance · cluster · bridge
+        │
+        ├──► [graph.py] SemanticGraph
+        │    NetworkX (RAM) + SQLite (data/graph.db)
+        │    merge if cosine ≥0.85, edge reinforce ×1.10
+        │
+        ├──► [meta_state.py] MetaState
+        │    500-concept activation pool · exp decay
+        │
+        ├──► [memory.py] TemporalMemory
+        │    working → episodic → semantic (3 layers)
+        │
+        ├──► [episodes.py] EpisodeStore
+        │    transition graph (directed, weighted)
+        │
+        ├──► [contradiction.py] ContradictionRegistry
+        ├──► [world_model.py] WorldModel
+        └──► [ecology.py] CognitiveEcology
+             orchestrates all 13 subsystems per tick
+
+        Every 3h:
+        ├──► [abstractor.py] co-occurrence → abstract concepts
+        └──► [worldview.py] longitudinal identity snapshot
 ```
 
 ---
 
-## Structure Map
+## Architecture Layers
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                        AMBIGUITY ENGINE                                  ║
-║                    Cognitive Architecture Map                            ║
+║                        AMBIGUITY ENGINE v5                               ║
+║                    Cognitive Architecture — 9 Layers                     ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 0 — INPUT / DISCOVERY                                            │
-│                                                                         │
-│  [sources.py]                                                           │
-│  Wikipedia · arXiv · Gutenberg · Reddit · OpenAlex · Web               │
-│      │ raw text                                                         │
-│      ▼                                                                  │
-│  [learner.py] AutoLearner                                               │
-│  Background thread · 10s cycles · 4 parallel workers                   │
-│  Reads: TOPICS[46] → random search → fetch per source                  │
-│  Writes: live_feed.jsonl · learner_stats.json · fetch_status.json       │
-│          growth_log.jsonl · paused.txt                                  │
+│  LAYER 0 — INPUT                                                         │
+│  [learner.py] AutoLearner                                                │
+│  · 10s cycle, 8 workers, 12 topics/cycle                                 │
+│  · TOPICS[46] flat list (no curriculum stages)                           │
+│  · Wikipedia 3× weighted over other sources                              │
+│  · Thread-safe _feed_append (Lock) — 8 workers write live_feed.jsonl     │
+│  · Writes cog_status.json after each cycle (mode + goal for UI/overlay)  │
+│  · paused.txt: "1" = pause everything, "0" = run                        │
+│  [sources.py] fetch_content() per source type                            │
 └───────────────────────────────┬─────────────────────────────────────────┘
-                                │ sentences
+                                │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 1 — EXTRACTION                                                   │
-│                                                                         │
-│  [extractor.py]                                                         │
-│  spaCy en_core_web_sm → noun chunks + named entities                   │
-│  → normalise/lemmatise → deduplicate                                    │
-│  → SentenceTransformer (all-MiniLM-L6-v2, 384-dim)                     │
-│  Output: list[Concept(text, embedding, source)]                         │
-│                                                                         │
-│  [detector.py]                                                          │
-│  3-metric ambiguity score on concept embeddings:                        │
-│   • variance  (pairwise cosine distance)                                │
-│   • cluster   (k=2 centroid separation)                                 │
-│   • bridge    (graph neighbourhood pull)                                │
-│  → feeds tension.TensionTracker · novelty.NoveltyTracker                │
-│  Writes: logs/ambiguity_scores.jsonl                                    │
+│  LAYER 1 — EXTRACTION                                                    │
+│  [extractor.py]                                                          │
+│  · import torch FIRST (prevents sentence_transformers circular import)   │
+│  · spaCy en_core_web_sm → noun chunks + named entities → normalise       │
+│  · SentenceTransformer all-MiniLM-L6-v2 → 384-dim embeddings            │
+│  · In-memory session cache (concept text → embedding)                    │
+│                                                                          │
+│  [detector.py]                                                           │
+│  · variance: pairwise cosine distance across concept embeddings          │
+│  · cluster:  k=2 centroid separation                                     │
+│  · bridge:   graph neighbourhood pull                                    │
+│  · feeds TensionTracker · NoveltyTracker                                 │
 └───────────────────────────────┬─────────────────────────────────────────┘
-                                │ concepts + embeddings
+                                │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 2 — KNOWLEDGE STORE                                              │
-│                                                                         │
-│  [graph.py] SemanticGraph                                               │
-│  NetworkX (in-memory) + SQLite (data/graph.db)                         │
-│  • update(concepts) — merge if cosine ≥0.85, else new node             │
-│  • edge reinforce (weight × 1.10 on co-occurrence)                     │
-│  • daily snapshots → snapshots/*.json                                   │
-│                                                                         │
-│  [episodes.py] EpisodeStore                                             │
-│  • record(concepts) → data/episodes.jsonl                              │
-│  • transition graph (directed, weighted) → data/transitions.json        │
-│  • cooccurrence_matrix / strongest_paths for abstractor                │
-└──────────┬──────────────────────────┬───────────────────────────────────┘
-           │                          │
-           ▼                          ▼
-┌──────────────────┐     ┌────────────────────────────┐
-│  [predictor.py]  │     │  [abstractor.py]  (3h)     │
-│  Predictor       │     │  Co-occurrence clusters →   │
-│  transitions →   │     │  abstract concepts L0/L1/L2 │
-│  pre-activates   │     │  Writes: abstractions.json  │
-│  next concepts   │     └────────────────────────────┘
+│  LAYER 2 — KNOWLEDGE STORE                                               │
+│  [graph.py] SemanticGraph                                                │
+│  · NetworkX (in-memory) + SQLite data/graph.db                          │
+│  · merge node if cosine ≥0.85, else new node                            │
+│  · edge weight ×1.10 on co-occurrence                                   │
+│  · daily snapshots → snapshots/*.json                                    │
+│                                                                          │
+│  [episodes.py] EpisodeStore                                              │
+│  · record(concepts) → data/episodes.jsonl                               │
+│  · directed transition graph → data/transitions.json                    │
+│  · cooccurrence_matrix() feeds Abstractor                                │
+└──────────┬─────────────────────────┬────────────────────────────────────┘
+           │                         │
+           ▼                         ▼
+┌──────────────────┐    ┌────────────────────────────┐
+│  [predictor.py]  │    │  [abstractor.py]  (3h)      │
+│  Predictor       │    │  Co-occurrence clusters →    │
+│  transitions →   │    │  abstract concepts L0/L1/L2  │
+│  pre-activates   │    │  data/abstractions.json      │
+│  next concepts   │    └────────────────────────────┘
 └────────┬─────────┘
-         │ pre-activation
+         │
          ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 3 — ATTENTION / WORKING MEMORY                                   │
-│                                                                         │
-│  [meta_state.py] MetaState                                              │
-│  500-concept activation pool · exp decay                                │
-│   A1: sigmoid saturation                                                │
-│   A2: fatigue (repetition penalty)                                      │
-│   A3: hot-concept cooling                                               │
-│   C:  regional spatial pools                                            │
-│   D1: normalisation                                                     │
-│  Writes: data/meta_state.json                                           │
-│                                                                         │
-│  [memory.py] TemporalMemory                                             │
-│  Three-layer store:                                                     │
-│   working  (decay 0.97)   ──threshold──▶  episodic (0.9997)            │
-│   episodic                ──threshold──▶  semantic (0.99997)           │
-│  Writes: data/memory.json                                               │
+│  LAYER 3 — ATTENTION / WORKING MEMORY                                    │
+│  [meta_state.py] MetaState                                               │
+│  · 500-concept activation pool                                           │
+│  · A1: sigmoid saturation · A2: fatigue (repetition penalty)             │
+│  · A3: hot-concept cooling · C: regional spatial pools                   │
+│  · data/meta_state.json                                                  │
+│                                                                          │
+│  [memory.py] TemporalMemory                                              │
+│  · working  (decay 0.97/min)  → episodic on repeated hit                │
+│  · episodic (decay 0.9997/min) → semantic on sustained activation        │
+│  · semantic (decay 0.99997/min) = permanent long-term store              │
+│  · data/memory.json                                                      │
 └────────────┬────────────────────────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 4 — REASONING                                                    │
-│                                                                         │
-│  [contradiction.py] ContradictionRegistry                               │
-│  Bidirectional conflict detection between active concepts               │
-│  Writes: data/contradictions.json                                       │
-│                                                                         │
-│  [world_model.py] WorldModel                                            │
-│  Directed causal edges: causes|suppresses|predicts|depends_on           │
-│  Confidence decay; max 2000 edges                                       │
-│  Writes: data/world_model.json                                          │
-│                                                                         │
-│  [novelty.py] NoveltyTracker                                            │
-│  score = 1/log(times_seen + e)                                          │
-│  Anti-loop: Jaccard overlap check → escape_concepts                     │
-│  Writes: data/novelty.json                                              │
-│                                                                         │
-│  [tension.py] TensionTracker                                            │
-│  Cross-cutting signal (conflict load, ambiguity pressure)               │
-│  Read by: MetaState, Stability, Goals, Contradiction, Detector          │
+│  LAYER 4 — REASONING                                                     │
+│  [contradiction.py]  bidirectional conflict detection  contradictions.json│
+│  [world_model.py]    causal edges (causes|predicts|…)  world_model.json  │
+│  [novelty.py]        score=1/log(seen+e), anti-loop     novelty.json     │
+│  [tension.py]        cross-cutting ambiguity pressure   (in-memory)      │
 └────────────┬────────────────────────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 5 — STABILITY / MODE                                             │
-│                                                                         │
-│  [stability.py] StabilityMonitor                                        │
-│  Shannon entropy over MetaState activation pool                         │
-│  5 cognitive modes:                                                     │
-│   focused      — low entropy, stable                                    │
-│   exploitative — medium entropy, repeating                              │
-│   exploratory  — high entropy, searching                                │
-│   associative  — mid entropy, bridging                                  │
-│   reflective   — low entropy, self-checking                             │
-│  Mode weights → modulate goal drives                                    │
+│  LAYER 5 — STABILITY / MODE                                              │
+│  [stability.py] StabilityMonitor                                         │
+│  Shannon entropy over MetaState pool → 5 cognitive modes:                │
+│  focused · exploitative · exploratory · associative · reflective         │
 └────────────┬────────────────────────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 6 — GOAL / DRIVE                                                 │
-│                                                                         │
-│  [goals.py] GoalEngine                                                  │
-│  5 competing drives (configurable weights):                             │
-│   reduce_uncertainty    0.30  ← tension + contradiction load            │
-│   increase_novelty      0.25  ← novelty tracker                        │
-│   resolve_contradiction 0.20  ← contradiction registry                 │
-│   maintain_stability    0.15  ← stability entropy                      │
-│   expand_regions        0.10  ← region coverage                        │
-│  argmax → current_goal                                                  │
-│                                                                         │
-│  [energy.py] EnergyBudget                                               │
-│  Pool: 1.0, replenish 0.08/tick                                         │
-│  Costs: simulation 0.04 · exploration 0.06 · abstraction 0.10          │
-│  Writes: data/energy.json                                               │
+│  LAYER 6 — GOAL / DRIVE                                                  │
+│  [goals.py] GoalEngine — 5 competing drives (argmax → current_goal):    │
+│  reduce_uncertainty 0.30 · increase_novelty 0.25                        │
+│  resolve_contradiction 0.20 · maintain_stability 0.15                   │
+│  expand_regions 0.10                                                     │
+│                                                                          │
+│  [energy.py] EnergyBudget                                                │
+│  pool 1.0, replenish 0.08/tick                                           │
+│  costs: sim 0.04 · explore 0.06 · abstract 0.10 · region_switch 0.05    │
+│  data/energy.json                                                        │
 └────────────┬────────────────────────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 7 — SELF-MODEL / IDENTITY                                        │
-│                                                                         │
-│  [self_model.py] SelfModel                                              │
-│  Recursive self-prediction (entropy mean-reversion)                     │
-│  Prediction vs actual at horizon 5 ticks → accuracy                    │
-│  Writes: data/self_model.json                                           │
-│                                                                         │
-│  [identity.py] IdentityTracker                                          │
-│  5 slowly-drifting personality traits (drift 0.02/observe):            │
-│   exploration_style · novelty_bias · stability_bias                     │
-│   abstraction_depth · contradiction_tolerance                           │
-│  Writes: data/identity.json                                             │
-│                                                                         │
-│  [worldview.py] Worldview  (3h refresh)                                 │
-│  5 longitudinal dimensions:                                             │
-│   concepts · contradictions · goals · home_regions · abstractions       │
-│  Writes: data/worldview.json                                            │
+│  LAYER 7 — SELF-MODEL / IDENTITY                                         │
+│  [self_model.py]   recursive self-prediction accuracy   self_model.json  │
+│  [identity.py]     5 slowly-drifting personality traits identity.json    │
+│    exploration_style · novelty_bias · stability_bias                     │
+│    abstraction_depth · contradiction_tolerance                           │
+│  [worldview.py]    longitudinal 5-dimension snapshot (3h) worldview.json │
 └────────────┬────────────────────────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LAYER 8 — META / ADAPTATION                                            │
-│                                                                         │
-│  [reflection.py] ReflectionMonitor                                      │
-│  Reads all subsystems (non-invasive)                                    │
-│  Detects: over_fixating · drifting · looping · stuck                   │
-│  Writes: data/reflection.json                                           │
-│                                                                         │
-│  [meta_learning.py] MetaLearner                                         │
-│  5 strategy scores via prediction accuracy windows                      │
-│  Writes: data/meta_learning.json                                        │
-│                                                                         │
-│  [evolver.py] Evolver                                                   │
-│  Hill-climbing on novelty_strength + bias_strength                      │
-│  Signals: entropy + repetition + ambiguity load                         │
-│  Writes: data/evolved_params.json                                       │
-│                                                                         │
-│  [ecology.py] CognitiveEcology                                          │
-│  Orchestration heartbeat — sequences all 13 subsystems per tick         │
+│  LAYER 8 — META / ADAPTATION                                             │
+│  [reflection.py]    unified self-report + pathology detection            │
+│  [meta_learning.py] strategy scores via prediction accuracy windows      │
+│  [evolver.py]       hill-climbing: novelty_strength + bias_strength      │
+│  [ecology.py]       orchestration heartbeat — sequences all 13 subsystems│
 └─────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  LLM LAYER — Runner page (manual / interactive)                         │
-│                                                                         │
-│  [modulator.py] Modulation Layer                                        │
-│  Reads ambiguity score → selects prompt regime:                         │
-│   low    → clean direct prompt                                          │
-│   medium → injects top-5 graph neighbours as context                   │
-│   high   → tension framing + 8 neighbours + meta-state pressure        │
-│                                                                         │
-│  Ollama (localhost:11434)                                               │
-│  Models: qwen2.5:3b-instruct · qwen2.5:7b-instruct · llama3.2:3b      │
-│  Default: qwen2.5:3b-instruct  (config.yaml)                           │
-│                                                                         │
-│  Step ⑤ — response fed back into engine:                               │
-│   extract concepts from LLM answer → graph update → memory →           │
-│   episodes → contradiction → world_model → ecology                     │
-│   (engine learns from its own answers)                                  │
+│  LLM LAYER — Runner page (manual / interactive)                          │
+│  [modulator.py] → Ollama (localhost:11434)                               │
+│  low    ambiguity → bare system prompt                                   │
+│  medium ambiguity → + top-5 graph neighbours injected                   │
+│  high   ambiguity → + tension framing + 8 neighbours + meta pressure     │
+│  Step 5: LLM response fed back into full pipeline                        │
+│  (engine learns from its own answers)                                    │
 └─────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Node Tree — Call Graph
-
-```
-AutoLearner.start()
-│
-├─── every 10s cycle ──────────────────────────────────────────────────────
-│    │
-│    ├── sources.*  (search + fetch)
-│    │
-│    ├── extractor.extract(sentence)
-│    │       └── spaCy.load('en_core_web_sm')
-│    │       └── SentenceTransformer.encode()     ← 384-dim MiniLM
-│    │
-│    ├── detector.detect_and_log(sentence, concepts, graph)
-│    │       ├── TensionTracker.push()
-│    │       └── NoveltyTracker.observe()
-│    │
-│    ├── SemanticGraph.update(concepts)
-│    │       └── SQLite write (graph.db)
-│    │
-│    ├── MetaState.reinforce(concepts)
-│    │       └── TensionTracker  (read)
-│    │
-│    ├── TemporalMemory.reinforce(concepts)
-│    │
-│    ├── ContradictionRegistry.observe(concepts)
-│    │       ├── TensionTracker.push()
-│    │       └── EpisodeStore.record()
-│    │
-│    ├── WorldModel.infer_from_context(concepts)
-│    │       └── EpisodeStore  (read transitions)
-│    │
-│    ├── CognitiveEcology.tick(concepts)
-│    │       ├── EnergyBudget.spend()
-│    │       ├── MetaLearner.tick()
-│    │       │       └── Evolver  (read)
-│    │       ├── Evolver.tick()
-│    │       │       └── ReflectionMonitor  (read)
-│    │       ├── SelfModel.tick()
-│    │       │       └── StabilityMonitor  (read)
-│    │       ├── IdentityTracker.observe()
-│    │       │       ├── NoveltyTracker  (read)
-│    │       │       ├── MetaState  (read)
-│    │       │       ├── StabilityMonitor  (read)
-│    │       │       ├── Abstractor  (read)
-│    │       │       └── ContradictionRegistry  (read)
-│    │       ├── GoalEngine.tick()
-│    │       │       ├── TensionTracker  (read)
-│    │       │       ├── NoveltyTracker  (read)
-│    │       │       ├── TemporalMemory  (read)
-│    │       │       ├── ContradictionRegistry  (read)
-│    │       │       ├── StabilityMonitor  (read)
-│    │       │       └── MetaState  (read)
-│    │       └── ReflectionMonitor.report()
-│    │               ├── StabilityMonitor  (read)
-│    │               ├── MetaState  (read)
-│    │               ├── NoveltyTracker  (read)
-│    │               ├── TemporalMemory  (read)
-│    │               ├── TensionTracker  (read)
-│    │               ├── ContradictionRegistry  (read)
-│    │               └── GoalEngine  (read)
-│    │
-│    ├── EpisodeStore.record(concepts)
-│    ├── Predictor.pre_activate(concepts, memory)
-│    ├── StabilityMonitor.tick(MetaState)
-│    ├── GoalEngine.tick()
-│    ├── ReflectionMonitor.report()
-│    ├── TemporalMemory.decay_to()
-│    ├── EnergyBudget.replenish()
-│    ├── SelfModel.tick()
-│    ├── IdentityTracker.observe()
-│    ├── MetaLearner.tick()
-│    ├── Evolver.tick()
-│    ├── NoveltyTracker.snapshot_top5(MetaState)
-│    └── MetaState.decay_to()
-│
-└─── every 3 hours ────────────────────────────────────────────────────────
-         ├── Abstractor.run()
-         │       ├── EpisodeStore.cooccurrence_matrix()
-         │       └── TemporalMemory  (read)
-         │
-         └── Worldview.update()
-                 ├── TemporalMemory · ContradictionRegistry · Abstractor
-                 ├── GoalEngine · StabilityMonitor · RegionIndex
-                 └── EpisodeStore
-
-Runner page (manual trigger)
-│
-├── extractor.extract(user_input)
-├── detector.detect_and_log()
-├── modulator.build_prompt()          ← graph neighbours + MetaState pressure
-├── call_llm() → Ollama → Qwen/Llama
-└── ⑤ extract(response) → full pipeline feedback loop
-        └── graph · memory · episodes · contradiction · world_model · ecology
 ```
 
 ---
@@ -346,31 +201,89 @@ Runner page (manual trigger)
 
 | Module | Class | Purpose | Data File |
 |---|---|---|---|
-| learner.py | AutoLearner | Main loop — search, fetch, orchestrate | live_feed.jsonl, learner_stats.json, fetch_status.json, growth_log.jsonl |
-| sources.py | — | Multi-source search + fetch | — (external APIs) |
-| extractor.py | Concept | spaCy NLP + MiniLM embeddings | — (in-memory cache) |
+| learner.py | AutoLearner | Main loop — search, fetch, orchestrate | live_feed.jsonl, learner_stats.json, fetch_status.json, cog_status.json |
+| sources.py | — | Multi-source search + fetch per source type | — |
+| extractor.py | Concept | spaCy NLP + MiniLM 384-dim embeddings | — (session cache) |
 | detector.py | AmbiguityResult | 3-metric ambiguity scoring | logs/ambiguity_scores.jsonl |
-| modulator.py | ModulationResult | Graph-aware prompt builder + LLM call | logs/ab_log.jsonl |
-| graph.py | SemanticGraph | NetworkX + SQLite knowledge store | graph.db, snapshots/*.json |
-| episodes.py | EpisodeStore | Episode log + transition graph | episodes.jsonl, transitions.json |
-| predictor.py | Predictor | Anticipatory pre-activation | — |
-| abstractor.py | Abstractor | Co-occurrence → abstract concepts L0/L1/L2 | abstractions.json |
-| meta_state.py | MetaState | 500-concept working attention pool | meta_state.json |
-| memory.py | TemporalMemory | Three-layer temporal store | memory.json |
+| modulator.py | ModulationResult | Graph-aware prompt builder + Ollama call | — |
+| graph.py | SemanticGraph | NetworkX + SQLite knowledge store | graph.db |
+| episodes.py | EpisodeStore | Episode log + directed transition graph | episodes.jsonl, transitions.json |
+| predictor.py | Predictor | Anticipatory pre-activation from transitions | — |
+| abstractor.py | Abstractor | Co-occurrence clusters → abstract concepts | abstractions.json |
+| meta_state.py | MetaState | 500-concept attention pool + decay | meta_state.json |
+| memory.py | TemporalMemory | 3-layer temporal memory store | memory.json |
 | contradiction.py | ContradictionRegistry | Bidirectional conflict detection | contradictions.json |
 | world_model.py | WorldModel | Directed causal edge registry | world_model.json |
 | novelty.py | NoveltyTracker | Exposure count + anti-loop detection | novelty.json |
-| tension.py | TensionTracker | Cross-cutting conflict/ambiguity pressure | — (in-memory) |
+| tension.py | TensionTracker | Cross-cutting ambiguity/conflict pressure | in-memory |
 | stability.py | StabilityMonitor | Shannon entropy → 5 cognitive modes | — |
 | goals.py | GoalEngine | 5 competing intrinsic drives | — |
 | energy.py | EnergyBudget | Finite energy pool per activity | energy.json |
 | self_model.py | SelfModel | Recursive self-prediction accuracy | self_model.json |
 | identity.py | IdentityTracker | 5 slowly-drifting personality traits | identity.json |
-| worldview.py | Worldview | Longitudinal identity (5 dimensions) | worldview.json |
+| worldview.py | Worldview | Longitudinal identity (5 dimensions, 3h) | worldview.json |
 | reflection.py | ReflectionMonitor | Unified self-report + pathology detection | reflection.json |
 | meta_learning.py | MetaLearner | Strategy scoring via prediction accuracy | meta_learning.json |
 | evolver.py | Evolver | Hill-climbing parameter adaptation | evolved_params.json |
 | ecology.py | CognitiveEcology | Orchestration heartbeat (13 subsystems) | — |
+| config.py | Config | Live config reader with mtime cache | engine_config.json |
+
+---
+
+## UI Pages
+
+All pages use underscore prefix (`ui/_pages/`) — never `ui/pages/` (Streamlit would auto-discover them and create duplicate nav).
+
+| File | Nav Title | Purpose |
+|---|---|---|
+| 1_state.py | Core | Cognitive Core Panel — real-time machine state monitor. Custom HTML/CSS layout. Auto-refreshes every 4s. Boots AutoLearner via st.cache_resource. |
+| 3_runner.py | Runner | Manual prompt pipeline: extract → detect → modulate → LLM → feed back. Heavy imports (extractor, torch) deferred after st.stop() guard to prevent circular import on page load. |
+| 0_meta_state.py | Meta-State | Live concept activation pool — bars, mood, decay health. Auto-refresh 30s. |
+| 10_cognition.py | Cognition | 8-tab deep dive: Live · Memory · Episodes · Predictions · Contradictions · Abstractions · Simulate · Worldview |
+| 11_config.py | Settings | Live-editable engine params, ego presets (max 3), Cloudflare tunnel toggle. |
+
+### app.py (entry point)
+- `st.set_page_config(layout="wide", initial_sidebar_state="expanded")`
+- Boot splash: 4s animated overlay, `sessionStorage` key prevents replay
+- Status detection: reads `cog_status.json`, `fetch_status.json`, `paused.txt`
+- Sidebar: Stop/Resume button (writes paused.txt), animated status dot, thinking line, goal/mode chip
+- Global CSS injected from **main page context** (not sidebar.markdown) so it applies even when sidebar is collapsed
+- Pre-loads `torch` at startup to prevent circular import in Runner page
+- `st.navigation(pages)` — explicit nav, no icons (clean)
+
+---
+
+## Design System
+
+Applied consistently across all pages via injected `<style>` blocks.
+
+```
+Background:   #070709  (page)  /  #09090f (sidebar)  /  #0a0a12 (panels)
+Borders:      #222238  (primary)  /  #1a1a28 (subtle)
+Font:         Consolas, Courier New, monospace — applied to * via !important
+              Material Icons font restored for expander icons
+
+Text colors:
+  #b0b0d8   body / primary values
+  #9898c8   secondary values
+  #7878a8   dim values
+  #6868a0   keys / labels
+  #505078   section headers / captions (12px uppercase, letter-spacing 0.2em)
+  #606090   timestamps / metadata
+  #4a4a70   separators
+
+Accent colors:
+  #4a9eff   blue  (status, links, active nav, expand button)
+  #44ff88   green (running, ok)
+  #ff4444   red   (paused, error, high ambiguity)
+  #f59e0b   amber (focused mode)
+  #8b5cf6   purple (abstractions, meta)
+  #10b981   teal  (reflective mode)
+
+Page title:   22px, letter-spacing 0.2em, uppercase, #b0b0d8, font-weight 400
+Section h2:   12px, letter-spacing 0.2em, uppercase, #505078, border-bottom #222238
+Streamlit header hidden: header[data-testid="stHeader"] { display: none !important }
+```
 
 ---
 
@@ -378,116 +291,114 @@ Runner page (manual trigger)
 
 ```
 data/
-├── graph.db               ← SemanticGraph  (SQLite — nodes + edges)
-├── episodes.jsonl         ← EpisodeStore   (concept co-occurrence log)
-├── transitions.json       ← EpisodeStore   (directed transition weights)
-├── live_feed.jsonl        ← AutoLearner    (last 200 activity entries)
-├── learner_stats.json     ← AutoLearner    (total_sentences, total_concepts)
-├── fetch_status.json      ← AutoLearner    (fetching bool + started_at)
-├── growth_log.jsonl       ← AutoLearner    (node/edge count per cycle)
-├── paused.txt             ← AutoLearner    ("1" paused / "0" running)
-├── engine_config.json     ← Config         (all params + ego presets)
-├── meta_state.json        ← MetaState      (activation pool snapshot)
-├── memory.json            ← TemporalMemory (3-layer memory snapshot)
-├── contradictions.json    ← ContradictionRegistry
-├── world_model.json       ← WorldModel     (causal edge registry)
-├── novelty.json           ← NoveltyTracker (exposure counts)
-├── energy.json            ← EnergyBudget   (current pool level)
-├── self_model.json        ← SelfModel      (prediction accuracy history)
-├── identity.json          ← IdentityTracker (5 personality traits)
-├── worldview.json         ← Worldview      (longitudinal identity)
-├── reflection.json        ← ReflectionMonitor (last self-report)
-├── meta_learning.json     ← MetaLearner    (strategy scores)
-├── evolved_params.json    ← Evolver        (adapted parameters)
-└── abstractions.json      ← Abstractor     (abstract concept hierarchy)
+├── graph.db               SemanticGraph   — SQLite (nodes + edges, primary knowledge store)
+├── live_feed.jsonl        AutoLearner     — last 200 activity entries (UI event stream)
+├── learner_stats.json     AutoLearner     — total_sentences, total_concepts, session history
+├── fetch_status.json      AutoLearner     — {fetching: bool, started_at: ISO}
+├── cog_status.json        AutoLearner     — {mode, goal} written each cycle (sidebar chip, overlay)
+├── paused.txt             cross-process   — "1" = paused, "0" = running
+├── engine_config.json     Config          — all live params + ego presets
+├── meta_state.json        MetaState       — activation pool snapshot
+├── memory.json            TemporalMemory  — 3-layer memory snapshot
+├── energy.json            EnergyBudget    — current pool level + spent count
+├── identity.json          IdentityTracker — 5 personality trait values
+├── contradictions.json    ContradictionRegistry
+├── world_model.json       WorldModel      — causal edge registry
+├── novelty.json           NoveltyTracker  — exposure counts + escape concepts
+├── self_model.json        SelfModel       — prediction accuracy history
+├── worldview.json         Worldview       — longitudinal identity snapshot
+├── reflection.json        ReflectionMonitor — last self-report
+├── meta_learning.json     MetaLearner     — strategy scores
+├── evolved_params.json    Evolver         — adapted hill-climbed parameters
+├── episodes.jsonl         EpisodeStore    — concept co-occurrence episode log
+├── transitions.json       EpisodeStore    — directed transition weights
+└── abstractions.json      Abstractor      — abstract concept hierarchy L0/L1/L2
 
-snapshots/
-└── *.json                 ← SemanticGraph  (daily node+edge snapshots)
-
+snapshots/  — SemanticGraph daily node+edge snapshots (*.json)
 logs/
-├── ambiguity_scores.jsonl ← detector.py   (per-sentence ambiguity log)
-└── ab_log.jsonl           ← modulator.py  (A/B LLM response log)
+├── ambiguity_scores.jsonl — detector.py per-sentence ambiguity log
+└── (ab_log.jsonl removed — A/B testing feature removed)
+```
+
+---
+
+## AutoLearner Detail
+
+```python
+# learner.py key constants (overridable via engine_config.json)
+CYCLE_TIME       = 10      # seconds between cycles
+N_WORKERS        = 8       # ThreadPoolExecutor size
+TOPICS_PER_CYCLE = 12      # topics sampled per cycle
+FETCH_TIMEOUT    = 12      # per-fetch timeout (seconds)
+SEARCH_TIMEOUT   = 7       # per-search timeout (seconds)
+FEED_MAX         = 200     # max entries in live_feed.jsonl
+CHECKIN_EVERY    = 10800   # 3h subsystem checkin interval
+
+# Source weighting
+_src_weights = [3 if s == 'wikipedia' else 1 for s in all_sources]
+src = random.choices(all_sources, weights=_src_weights, k=1)[0]
+
+# Thread safety
+self._feed_lock = threading.Lock()  # prevents 8 workers corrupting live_feed.jsonl
+
+# After each cycle, writes:
+data/cog_status.json  → {mode, goal}  (read by sidebar chip + overlay)
+```
+
+---
+
+## Overlay (overlay.py)
+
+Always-on-top tkinter window. Launched separately via `overlay.bat` or `launch.bat`.
+
+```
+Sections: SYSTEM (CPU/RAM/GPU/TEMP) · GRAPH (nodes/edges/sentences/growth)
+          COGNITION (mode/goal from cog_status.json)
+Sizes:    FULL_H=290 (expanded) · COMPACT_H=28 (collapsed, click to toggle)
+GPU:      pynvml — load% · VRAM used · temperature
 ```
 
 ---
 
 ## LLM Integration (Ollama)
 
-```
-config.yaml
-  model:
-    name:     qwen2.5:3b-instruct
-    endpoint: http://localhost:11434/api/generate
-    stream:   false
+```yaml
+# config.yaml
+model:
+  name:     qwen2.5:3b-instruct
+  endpoint: http://localhost:11434/api/generate
+  stream:   false
 
-Available models (installed):
-  qwen2.5:3b-instruct    ← default, fast
-  qwen2.5:7b-instruct    ← smarter, slower
-  llama3.2:3b            ← alternative
-
-Modulation regimes:
-  low    ambiguity → bare system prompt
-  medium ambiguity → + top-5 graph neighbours injected
-  high   ambiguity → + tension framing + 8 neighbours + meta-state pressure
+# Available models:
+qwen2.5:3b-instruct    — default, fast
+qwen2.5:7b-instruct    — smarter, slower
+llama3.2:3b            — alternative
 ```
 
 ---
 
-## Ego System (Settings page)
+## Ego System
 
 ```
-Max 3 named personality presets stored in engine_config.json under "egos"
-Each ego captures: identity · evolver · meta_state · goals · attention
+Max 3 named personality presets stored in engine_config.json["egos"]
+Each ego captures 5 sections: identity · evolver · meta_state · goals · attention
+UI: dropdown → Load / Delete  ·  text input → Save Ego
+Reset to defaults preserves egos.
 
 engine_config.json structure:
 {
   "active_ego": "Curious",
   "egos": {
-    "Curious":  { "identity": {...}, "evolver": {...}, "meta_state": {...}, ... },
-    "Stable":   { ... },
-    "Wild":     { ... }
+    "Curious": { "identity": {...}, "evolver": {...}, "meta_state": {...}, ... }
   },
-  "learning": { ... },
-  ...
+  "learning":   { "cycle_time": 10, "n_workers": 8, ... },
+  "energy":     { "replenish_per_tick": 0.08, ... },
+  "identity":   { "drift_rate": 0.02 },
+  "evolver":    { "adapt_every": 30, "max_delta": 0.05 },
+  "attention":  { "bias_strength": 0.0, "novelty_strength": 0.0 },
+  "meta_state": { "decay_rate": 0.97, "reinforce_gain": 0.25, ... },
+  "goals":      { "reduce_uncertainty": 0.30, ... }
 }
-
-UI: dropdown → Load / Delete · text input → Save Ego
-Reset to defaults preserves egos.
-```
-
----
-
-## Graph Visualisation
-
-```
-Layout: UMAP (umap-learn)
-  Input:  384-dim MiniLM embeddings per node
-  Output: 2D coordinates — semantic proximity = spatial proximity
-  Params: n_neighbors=15, min_dist=0.1, metric=cosine
-  Cache:  st.cache_data keyed on node ID tuple
-
-Colour coding:
-  Blue   (#4a9eff) — Left-brain  (logic, math, science, structure)
-  Red    (#ff6b6b) — Right-brain (emotion, art, music, metaphor)
-  Orange (#f5a623) — Bridge      (both hemispheres)
-  Grey   (#555566) — Uncategorised
-```
-
----
-
-## Scaling Projections
-
-```
-Safe zone     <50k nodes    — <1 GB RAM, everything fast
-Manageable    50–120k nodes — 1–3 GB RAM, startup slows
-Danger zone   >150k nodes   — RAM pressure, prune aggressively
-Hard limit    ~300k nodes   — process OOM risk
-
-Bottlenecks:
-  1. NetworkX full graph in RAM         → use SQLite-only queries where possible
-  2. episodes.jsonl unbounded           → add rolling 30-day window
-  3. Embedding cache unbounded dict     → cap at 50k entries with LRU
-  4. SQLite cold load at 100k+ nodes    → 3–5s startup penalty
 ```
 
 ---
@@ -502,32 +413,35 @@ Bottlenecks:
 | associative | mid, bridging | Connecting distant concept clusters |
 | reflective | low, self-checking | Internal audit — runs ReflectionMonitor |
 
-## Goal Drives
-
-| Drive | Default Weight | Signal Source |
-|---|---|---|
-| reduce_uncertainty | 0.30 | TensionTracker + ContradictionRegistry |
-| increase_novelty | 0.25 | NoveltyTracker |
-| resolve_contradiction | 0.20 | ContradictionRegistry |
-| maintain_stability | 0.15 | StabilityMonitor entropy |
-| expand_regions | 0.10 | RegionIndex coverage |
-
 ## Memory Layers
 
-| Layer | Decay Rate | Promotion |
+| Layer | Decay Rate | Promotion Condition |
 |---|---|---|
-| working | 0.97 | → episodic on repeated reinforcement |
-| episodic | 0.9997 | → semantic on sustained activation |
-| semantic | 0.99997 | permanent long-term store |
+| working | 0.97/min | Repeated reinforcement hits |
+| episodic | 0.9997/min | Sustained activation over time |
+| semantic | 0.99997/min | Permanent long-term store |
 
-## Dashboard Metrics
+## Scaling
 
-| Metric | Source | Meaning |
-|---|---|---|
-| Nodes | SQLite COUNT(*) | Total concepts in graph |
-| Edges | SQLite COUNT(*) | Total co-occurrence links |
-| Sentences | learner_stats.json | Total sentences processed |
+```
+Safe zone     <50k nodes    <1 GB RAM, everything fast
+Manageable    50–120k nodes 1–3 GB RAM, startup slows
+Danger zone   >150k nodes   RAM pressure, prune aggressively
+Hard limit    ~300k nodes   process OOM risk
+
+Bottlenecks:
+  NetworkX full graph in RAM     → use SQLite queries where possible
+  episodes.jsonl unbounded       → add rolling 30-day window
+  embedding cache unbounded dict → cap at 50k LRU
+```
 
 ---
 
-*Updated 2026-05-24*
+## Known Issues / Gotchas
+
+- **torch circular import**: Fixed by (1) `import torch` at top of `extractor.py`, (2) pre-loading torch in `app.py` main thread before `pg.run()`, (3) deferring all ML imports in `runner.py` to after `st.stop()` guard. Root cause was `cupy-cuda12x` installed without `pytest` — uninstalled.
+- **fileWatcherType = none**: Set in `ui/.streamlit/config.toml` (must be in `ui/` dir, not root). Prevents WinError 206 from torch DLL paths exceeding Windows 260-char MAX_PATH limit. Code changes require manual Streamlit restart.
+- **Sidebar CSS**: Must be injected from `st.markdown()` (main page), NOT `st.sidebar.markdown()`. When sidebar is collapsed, sidebar DOM is not rendered, so CSS in sidebar.markdown never reaches the page.
+- **Page icons**: `st.Page()` icon arg requires a real emoji or None. `st.set_page_config(page_icon=)` accepts arbitrary strings. Current nav uses no icons (clean text only).
+- **No coding features**: Never add git panels, terminals, or code editors to the Streamlit app. User codes in VS Code.
+- **launch.bat**: Does NOT open `ambiguity-engine-tracker.html` — that line was removed.

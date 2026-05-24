@@ -22,75 +22,82 @@ import pandas as pd
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 
-# ── shared CSS ────────────────────────────────────────────────────────────────
+# ── Design system + component CSS ────────────────────────────────────────────
 st.markdown("""
 <style>
+#MainMenu, footer, header[data-testid="stHeader"] { display: none !important; }
+body, .stApp { background: #070709 !important; }
+.block-container { padding: 1.5rem 2rem 3rem !important; max-width: 100% !important; }
+*, *::before, *::after { font-family: 'Consolas', 'Courier New', monospace !important; }
+[data-testid="stExpanderToggleIcon"],
+[data-testid="stExpanderToggleIcon"] *,
+[data-baseweb="icon"], [data-baseweb="icon"] *,
+.material-icons, .material-symbols-rounded,
+[class*="MaterialIcon"], [class*="materialIcon"] {
+    font-family: 'Material Symbols Rounded','Material Icons Rounded','Material Icons',sans-serif !important;
+}
+h2, h3 {
+    font-size: 12px !important; letter-spacing: 0.2em !important;
+    text-transform: uppercase !important; color: #505078 !important;
+    font-weight: 400 !important; border-bottom: 1px solid #222238 !important;
+    padding-bottom: 6px !important; margin-top: 24px !important;
+}
+p, .stMarkdown p { color: #9898c8 !important; font-size: 14px !important; }
+caption, .stCaption { color: #505078 !important; font-size: 12px !important; letter-spacing: 0.06em !important; }
+hr { border-color: #222238 !important; margin: 20px 0 !important; }
+[data-testid="stExpander"] { border: 1px solid #1a1a28 !important; background: #0a0a10 !important; }
+[data-testid="stExpanderDetails"] { background: #07070a !important; }
+summary[data-testid="stExpanderToggle"] span { color: #6868a0 !important; font-size: 13px !important; }
+[data-testid="stMetric"] { background: #0a0a12; border: 1px solid #1a1a28; border-radius: 4px; padding: 10px 14px; }
+[data-testid="stMetricLabel"] p { color: #505078 !important; font-size: 11px !important; letter-spacing: 0.15em !important; text-transform: uppercase !important; }
+[data-testid="stMetricValue"] { color: #9898c8 !important; font-size: 28px !important; }
+[data-testid="stAlert"] { background: #0a0a12 !important; border-color: #222238 !important; }
+textarea, input[type="text"] {
+    background: #0a0a12 !important; border: 1px solid #222238 !important;
+    color: #b0b0d8 !important; font-size: 13px !important;
+}
+[data-testid="stTabs"] [data-baseweb="tab"] {
+    font-size: 12px !important; letter-spacing: 0.1em !important;
+    color: #505078 !important; padding: 6px 14px !important;
+}
+[data-testid="stTabs"] [aria-selected="true"] { color: #9898c8 !important; }
+
+/* Component cards */
 .cog-card {
-    background: #0f1117;
-    border: 1px solid #1e2130;
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.8rem;
+    background: #0a0a12; border: 1px solid #1a1a28;
+    border-radius: 4px; padding: 14px 18px; margin-bottom: 10px;
 }
 .cog-pill {
-    display: inline-block;
-    padding: 3px 11px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    margin: 2px;
+    display: inline-block; padding: 2px 10px;
+    border-radius: 3px; font-size: 12px; margin: 2px;
+    letter-spacing: 0.06em;
 }
-.cog-flag {
-    background: #ff444422;
-    border: 1px solid #ff4444;
-    color: #ff7777;
-}
-.cog-ok {
-    background: #44ff8822;
-    border: 1px solid #44ff88;
-    color: #44ff88;
-}
-.cog-mode {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-}
+.cog-flag { background: #ff444418; border: 1px solid #ff444488; color: #ff7777; }
+.cog-ok   { background: #44ff8818; border: 1px solid #44ff8888; color: #44ff88; }
+.cog-mode { font-size: 22px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; }
 .ep-row {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 5px 0; border-bottom: 1px solid #1e2130;
-    font-size: 0.82rem; color: #bbb;
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; border-bottom: 1px solid #1a1a28;
+    font-size: 13px; color: #7878a8;
 }
 .ep-row:last-child { border-bottom: none; }
-.ep-concept {
-    background: #1a1f2e; color: #7eb8ff;
-    padding: 2px 8px; border-radius: 4px;
-    font-size: 0.78rem; font-family: monospace;
-}
-.ep-arrow { color: #555; }
-.abs-card {
-    border: 1px solid #2a2a3e;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-    background: #0d0f1a;
-}
-.abs-name { font-size: 1rem; font-weight: 600; color: #a78bfa; }
-.abs-meta { font-size: 0.75rem; color: #666; }
-.sim-step {
-    border-left: 3px solid #4a9eff;
-    padding: 8px 14px;
-    margin-bottom: 6px;
-    background: #0a0e1a;
-    border-radius: 0 6px 6px 0;
-}
-.sim-step-n { font-size: 0.75rem; color: #4a9eff; font-weight: 700; margin-bottom: 4px; }
-.sim-new { color: #44ff88; font-size: 0.78rem; }
+.ep-concept { background: #0d0d18; color: #9898c8; padding: 2px 8px; font-size: 12px; }
+.ep-arrow { color: #4a4a70; }
+.abs-card { border: 1px solid #1a1a28; padding: 10px 14px; margin-bottom: 6px; background: #0a0a12; }
+.abs-name { font-size: 14px; color: #8b5cf6; letter-spacing: 0.06em; }
+.abs-meta { font-size: 12px; color: #505078; margin-top: 3px; }
+.sim-step { border-left: 2px solid #4a9eff; padding: 8px 14px; margin-bottom: 6px; background: #09090f; }
+.sim-step-n { font-size: 11px; color: #4a9eff; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+.sim-new { color: #44ff88; font-size: 13px; }
 </style>
 """, unsafe_allow_html=True)
 
-
-st.title("🧠 Cognition")
-st.caption("V3 deep-memory & reasoning layer — live view of all cognitive subsystems")
+st.markdown("""
+<div style="padding:16px 0 4px;border-bottom:1px solid #222238;margin-bottom:20px">
+  <div style="font-size:22px;letter-spacing:0.2em;text-transform:uppercase;color:#b0b0d8;font-weight:400">COGNITION</div>
+  <div style="font-size:12px;color:#505078;letter-spacing:0.06em;margin-top:4px">deep-memory &amp; reasoning layer · all cognitive subsystems</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── load singletons (lazy, non-crashing) ─────────────────────────────────────
 @st.cache_resource(show_spinner=False)
@@ -136,8 +143,8 @@ def _stability():
 
 # ── tab layout ────────────────────────────────────────────────────────────────
 tab_live, tab_mem, tab_ep, tab_pred, tab_contra, tab_abs, tab_sim, tab_wv = st.tabs([
-    "🌡 Live", "🧩 Memory", "🔗 Episodes",
-    "⚡ Predictions", "💬 Contradictions", "🔷 Abstractions", "🔮 Simulate", "🪞 Worldview"
+    "Live", "Memory", "Episodes",
+    "Predictions", "Contradictions", "Abstractions", "Simulate", "Worldview"
 ])
 
 
@@ -177,7 +184,7 @@ with tab_live:
         st.markdown(f"""
         <div class="cog-card">
           <div style="font-size:0.75rem;color:#888;margin-bottom:6px">COGNITIVE MODE</div>
-          <div class="cog-mode" style="color:{mc}">{'◉ ' + mode.upper()}</div>
+          <div class="cog-mode" style="color:{mc}">{mode.upper()}</div>
           <div style="font-size:0.8rem;color:#999;margin-top:6px">entropy {entropy:.3f}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -214,7 +221,7 @@ with tab_live:
         flag_html = ' '.join(f'<span class="cog-pill cog-flag">{f}</span>' for f in flags)
         st.markdown(flag_html, unsafe_allow_html=True)
     else:
-        st.markdown('<span class="cog-pill cog-ok">✓ healthy</span>', unsafe_allow_html=True)
+        st.markdown('<span class="cog-pill cog-ok">healthy</span>', unsafe_allow_html=True)
 
     # Describe line
     st.markdown(f"<div style='color:#888;font-size:0.85rem;margin-top:12px'>{desc}</div>",
@@ -226,7 +233,7 @@ with tab_live:
     if region or r_count:
         st.caption(f"Active region: {region or 'none'} · {r_count} total regions")
 
-    if st.button("🔄 Refresh", key="live_refresh"):
+    if st.button("Refresh", key="live_refresh"):
         st.cache_resource.clear()
         st.rerun()
 
@@ -426,7 +433,7 @@ with tab_abs:
     c1.metric("Abstract concepts", ab_snap.get('total', 0))
     c2.metric("Stable (≥0.7)",     ab_snap.get('stable', 0))
 
-    if st.button("🔄 Run abstractor now", key="run_abs"):
+    if st.button("Run abstractor now", key="run_abs"):
         with st.spinner("Detecting clusters…"):
             ab.run()
         st.rerun()
@@ -483,7 +490,7 @@ with tab_sim:
     )
     n_steps = st.slider("Propagation steps", min_value=1, max_value=5, value=3)
 
-    if st.button("▶ Run simulation", type="primary", key="run_sim"):
+    if st.button("Run simulation", type="primary", key="run_sim"):
         seeds = [c.strip() for c in seeds_input.split(',') if c.strip()]
         if not seeds:
             st.warning("Enter at least one seed concept.")
