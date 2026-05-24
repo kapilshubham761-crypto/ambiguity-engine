@@ -423,8 +423,9 @@ class AutoLearner:
         _fstatus_write(True)
 
         tc0 = time.perf_counter()
-        with ThreadPoolExecutor(max_workers=n_workers) as pool:
-            for fut in as_completed([pool.submit(_search, t) for t in topics],
+        _search_pool = ThreadPoolExecutor(max_workers=n_workers)
+        try:
+            for fut in as_completed([_search_pool.submit(_search, t) for t in topics],
                                     timeout=search_timeout * 2):
                 try:
                     for item in fut.result():
@@ -434,6 +435,10 @@ class AutoLearner:
                             self._known_urls.add(url)
                 except Exception:
                     pass
+        except Exception:
+            log.debug('search phase timed out')
+        finally:
+            _search_pool.shutdown(wait=False, cancel_futures=True)
         t_search = time.perf_counter() - tc0
 
         if len(self._known_urls) > 5000:
@@ -441,9 +446,10 @@ class AutoLearner:
 
         n_ok = 0
         tp0 = time.perf_counter()
-        with ThreadPoolExecutor(max_workers=n_workers) as pool:
-            futs = {pool.submit(self._process, item): item
-                    for item in items_to_process}
+        _process_pool = ThreadPoolExecutor(max_workers=n_workers)
+        futs = {_process_pool.submit(self._process, item): item
+                for item in items_to_process}
+        try:
             for fut in as_completed(futs, timeout=fetch_timeout * 3):
                 if self.is_paused:
                     break
@@ -456,6 +462,10 @@ class AutoLearner:
                                  entry['title'], entry['source'], entry['concepts'])
                 except Exception:
                     pass
+        except Exception:
+            log.debug('process phase timed out after %ds', fetch_timeout * 3)
+        finally:
+            _process_pool.shutdown(wait=False, cancel_futures=True)
         t_process = time.perf_counter() - tp0
 
         _fstatus_write(False)

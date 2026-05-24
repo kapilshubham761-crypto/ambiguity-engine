@@ -293,16 +293,23 @@ def fetch_openalex(url: str, item: dict | None = None) -> list[str]:
 
 def search_web(query: str, max_results: int = 10) -> list[dict]:
     from ddgs import DDGS
-    results = []
-    with DDGS() as ddgs:
-        for r in ddgs.text(query, max_results=max_results):
-            results.append({
-                'title':   r.get('title', ''),
-                'url':     r.get('href', ''),
-                'snippet': r.get('body', ''),
-                'source':  'web',
-            })
-    return results
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as _TE
+    def _do():
+        results = []
+        with DDGS() as ddgs:
+            for r in ddgs.text(query, max_results=max_results):
+                results.append({
+                    'title':   r.get('title', ''),
+                    'url':     r.get('href', ''),
+                    'snippet': r.get('body', ''),
+                    'source':  'web',
+                })
+        return results
+    with ThreadPoolExecutor(max_workers=1) as ex:
+        try:
+            return ex.submit(_do).result(timeout=10)
+        except (_TE, Exception):
+            return []
 
 
 def _fetch_url_safe(url: str, timeout: int = 12) -> str | None:
