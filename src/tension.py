@@ -70,6 +70,8 @@ class TensionTracker:
         self._hot_threshold  = float(cfg.get('hot_threshold', 0.60))
         self._hot_min_obs    = int(cfg.get('hot_min_observations', 5))
         self._windows: dict[str, deque] = {}
+        self._dirty = 0          # observations since last save
+        self._SAVE_EVERY = 50    # flush to disk every N observations
         self._load()
 
     # ------------------------------------------------------------------ #
@@ -109,7 +111,16 @@ class TensionTracker:
         if concept not in self._windows:
             self._windows[concept] = deque(maxlen=self._window_size)
         self._windows[concept].append(float(score))
-        self._save()
+        self._dirty += 1
+        if self._dirty >= self._SAVE_EVERY:
+            self._save()
+            self._dirty = 0
+
+    def flush(self) -> None:
+        """Force an immediate write — call before process exit."""
+        if self._dirty > 0:
+            self._save()
+            self._dirty = 0
 
     def hot(self, n: int = 5) -> list[str]:
         """

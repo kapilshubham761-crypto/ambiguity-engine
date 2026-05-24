@@ -171,6 +171,9 @@ class MetaState:
         self._active_region: Optional[str]          = None
         self._dormant: dict[str, dict]              = {}   # region_id: summary
         self._region_index = None                          # injected via set_region_index()
+        # Mood score-spread cache — avoids reading ambiguity_scores.jsonl every snapshot
+        self._score_spread_cache: float = 0.0
+        self._score_spread_ts: float    = 0.0   # monotonic seconds of last read
         self._load()
 
     @classmethod
@@ -521,17 +524,25 @@ class MetaState:
         if n == 0:
             return 'drifting', 0.8
         import numpy as np
+        import time as _time
         avg = float(np.mean(vals))
-        score_log = os.path.join(_ROOT, 'logs', 'ambiguity_scores.jsonl')
-        spread = 0.0
-        if os.path.exists(score_log):
-            try:
-                lines = open(score_log, encoding='utf-8').readlines()
-                sc    = [json.loads(l)['score'] for l in lines[-100:]]
-                if len(sc) > 1:
-                    spread = float(np.std(sc))
-            except Exception:
-                pass
+        # Read ambiguity_scores.jsonl at most once per 60s
+        t = _time.monotonic()
+        if t - self._score_spread_ts > 60.0:
+            score_log = os.path.join(_ROOT, 'logs', 'ambiguity_scores.jsonl')
+            spread = 0.0
+            if os.path.exists(score_log):
+                try:
+                    with open(score_log, encoding='utf-8') as _f:
+                        lines = _f.readlines()
+                    sc = [json.loads(l)['score'] for l in lines[-100:]]
+                    if len(sc) > 1:
+                        spread = float(np.std(sc))
+                except Exception:
+                    pass
+            self._score_spread_cache = spread
+            self._score_spread_ts    = t
+        spread = self._score_spread_cache
         if spread > 0.22:
             return 'conflicted', min(spread / 0.30, 1.0)
         if 2 <= n <= 8 and avg > 0.55:

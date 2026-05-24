@@ -13,6 +13,7 @@ Writes:
 
 from __future__ import annotations
 import json, os, random, sys, threading, time
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -137,6 +138,13 @@ class AutoLearner:
         self._perf_samples: list[dict] = []   # per-article timings (last 50)
         self._subsys_buf:  list[str]   = []   # texts queued for background subsystems
         self._subsys_lock  = threading.Lock()
+        # Feed buffer — in-memory deque, flushed every 5 appends
+        try:
+            existing = _FEED_PATH.read_text(encoding='utf-8').splitlines() if _FEED_PATH.exists() else []
+            self._feed_buf: deque[str] = deque(existing[-FEED_MAX:], maxlen=FEED_MAX)
+        except Exception:
+            self._feed_buf = deque(maxlen=FEED_MAX)
+        self._feed_dirty = 0
 
     def _ensure_graph(self) -> None:
         if self._graph is None:
@@ -162,9 +170,21 @@ class AutoLearner:
     def _feed_append(self, entry: dict) -> None:
         try:
             with self._feed_lock:
-                existing = _FEED_PATH.read_text(encoding='utf-8').splitlines() if _FEED_PATH.exists() else []
-                existing.append(json.dumps(entry, ensure_ascii=False))
-                _FEED_PATH.write_text('\n'.join(existing[-FEED_MAX:]), encoding='utf-8')
+                self._feed_buf.append(json.dumps(entry, ensure_ascii=False))
+                self._feed_dirty += 1
+                if self._feed_dirty >= 5:
+                    _FEED_PATH.write_text('\n'.join(self._feed_buf), encoding='utf-8')
+                    self._feed_dirty = 0
+        except Exception:
+            pass
+
+    def _feed_flush(self) -> None:
+        """Force write the feed buffer — call at end of each cycle."""
+        try:
+            with self._feed_lock:
+                if self._feed_dirty > 0:
+                    _FEED_PATH.write_text('\n'.join(self._feed_buf), encoding='utf-8')
+                    self._feed_dirty = 0
         except Exception:
             pass
 
@@ -470,6 +490,9 @@ class AutoLearner:
             __import__('meta_state').MetaState.get()))
         _t(lambda: __import__('meta_state').MetaState.get().decay_to())
         t_ticks = time.perf_counter() - tt0
+
+        # Flush feed buffer so UI sees all entries from this cycle
+        self._feed_flush()
 
         # Write performance profile
         self._write_perf_profile({
