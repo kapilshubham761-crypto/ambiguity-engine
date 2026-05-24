@@ -12,7 +12,7 @@ Writes:
 """
 
 from __future__ import annotations
-import json, os, random, sys, threading, time
+import json, os, random, re, sys, threading, time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -99,6 +99,40 @@ def _is_code_content(item: dict) -> bool:
     """Return True if this item is about programming/code and should be skipped."""
     text = (item.get('title', '') + ' ' + item.get('snippet', '')).lower()
     return any(kw in text for kw in _CODE_KEYWORDS)
+
+
+# Stopwords for keyword extraction (MetaState needs short repeatable terms)
+_STOPWORDS = {
+    'the','a','an','is','are','was','were','be','been','being','have','has','had',
+    'do','does','did','will','would','could','should','may','might','can','shall',
+    'to','of','in','on','at','by','for','with','from','that','this','these','those',
+    'it','its','which','who','what','when','where','how','if','and','or','but','not',
+    'no','as','so','than','then','also','into','through','over','between','out','up',
+    'about','such','more','most','some','any','all','each','both','very','just','only',
+    'other','after','before','first','last','much','many','well','even','still','way',
+    'while','here','there','their','they','them','he','she','we','you','i','me','my',
+    'our','your','his','her','its','been','being','make','made','new','used','use',
+    'two','one','three','four','five','six','seven','eight','nine','ten','however',
+    'although','because','since','though','whereas','whether','within','without',
+}
+
+def _keywords_from_sentences(sentences: list[str]) -> list[str]:
+    """Extract short repeatable keyword terms from sentences for MetaState."""
+    seen: set[str] = set()
+    result: list[str] = []
+    for sent in sentences:
+        words = re.findall(r'\b[a-zA-Z]{4,}\b', sent.lower())
+        words = [w for w in words if w not in _STOPWORDS]
+        for w in words:
+            if w not in seen:
+                seen.add(w)
+                result.append(w)
+        for i in range(len(words) - 1):
+            bg = f'{words[i]} {words[i+1]}'
+            if bg not in seen:
+                seen.add(bg)
+                result.append(bg)
+    return result
 
 
 def _fstatus_write(fetching: bool) -> None:
@@ -239,7 +273,9 @@ class AutoLearner:
             def _s(fn):
                 try: fn()
                 except Exception: pass
-            _s(lambda: __import__('meta_state').MetaState.get().reinforce(texts))
+            # MetaState needs short repeatable keyword terms, not full sentences
+            _kw = _keywords_from_sentences(texts)
+            _s(lambda: __import__('meta_state').MetaState.get().reinforce(_kw))
             _s(lambda: __import__('memory').TemporalMemory.get().reinforce(texts))
             _s(lambda: __import__('contradiction').ContradictionRegistry.get().observe(texts))
             _s(lambda: __import__('world_model').WorldModel.get().infer_from_context(texts))

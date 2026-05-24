@@ -96,7 +96,8 @@ for k, v in ms_entries.items():
 top_concepts.sort(key=lambda x: -x[1])
 top5 = top_concepts[:5]
 
-coherence  = round(sum(v for _, v in top5) / max(len(top5), 1), 2) if top5 else 0.0
+_coh_raw   = sum(v for _, v in top5) / max(len(top5), 1) if top5 else 0.0
+coherence  = round(_coh_raw, 4)   # keep full precision; display rounds below
 ambiguity  = round(exploration * 0.6 + (1 - stability) * 0.4, 2)
 volatility = round(exploration, 2)
 pressure   = 'HIGH' if energy_val < 0.3 else 'MED' if energy_val < 0.6 else 'LOW'
@@ -479,7 +480,7 @@ st.markdown(f"""
   <span class="ae-sb-sep">│</span>
   <span class="ae-sb-dim">energy</span>&nbsp;<span class="ae-sb-val">{energy_val:.2f}</span>
   <span class="ae-sb-sep">│</span>
-  <span class="ae-sb-dim">coherence</span>&nbsp;<span class="ae-sb-val">{coherence:.2f}</span>
+  <span class="ae-sb-dim">coherence</span>&nbsp;<span class="ae-sb-val">{coherence:.4f}</span>
   <span class="ae-sb-sep">│</span>
   <span class="ae-sb-dim">nodes</span>&nbsp;<span class="ae-sb-val">{n_nodes:,}</span>
   <span class="ae-sb-sep">│</span>
@@ -502,7 +503,7 @@ st.markdown(f"""
   <div class="ae-diag">
     <div class="ae-diag-cell">
       <span class="ae-diag-label">coherence</span>
-      <span class="ae-diag-val">{coherence:.2f}</span>
+      <span class="ae-diag-val">{coherence:.4f}</span>
     </div>
     <div class="ae-diag-cell">
       <span class="ae-diag-label">ambiguity</span>
