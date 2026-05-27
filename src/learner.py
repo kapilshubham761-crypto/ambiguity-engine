@@ -499,6 +499,12 @@ class AutoLearner:
                         GoalGraph.get().tick(snap, reg.mode, reg.goal)
                     except Exception as ge:
                         log.debug('goal_graph tick error: %s', ge)
+                    # Record goal/mode into worldview every tick (not just every 3h)
+                    try:
+                        from worldview import Worldview
+                        Worldview.get().record_goal(reg.goal, reg.mode)
+                    except Exception as we:
+                        log.debug('worldview record_goal error: %s', we)
             except Exception as e:
                 log.debug('regulation error: %s', e)
             time.sleep(60)

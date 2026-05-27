@@ -82,7 +82,7 @@ _SINGLETON: Optional['Worldview'] = None
 # Thresholds
 _CONCEPT_PERSIST_THRESHOLD = 0.05     # min semantic value to count as persistent
 _CHRONIC_CONTRA_HOURS      = 24.0     # hours before a contradiction is "chronic"
-_GOAL_SURVIVAL_MIN_MODES   = 2        # distinct modes a goal must fire in to "survive"
+_GOAL_SURVIVAL_MIN_MODES   = 1        # distinct modes a goal must fire in to "survive"
 _HOME_REGION_MIN_VISITS    = 3        # min visits for a region to be "home"
 _FOUNDATION_MIN_STABILITY  = 0.65
 _FOUNDATION_MIN_REUSE      = 3
