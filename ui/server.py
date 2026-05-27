@@ -1710,181 +1710,456 @@ pre.rc{background:#07070a;border:1px solid #1a1a28;padding:10px;font-size:10px;
 </div>
 
 <!-- GRAPH: knowledge graph visualizer -->
+<style>
+#graph-toolbar select,#graph-toolbar button{background:#07070f;border:1px solid #222238;color:#7878a8;font-family:Consolas,monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:2px}
+#graph-toolbar select:hover,#graph-toolbar button:hover{border-color:#4a9eff;color:#b0b0d8}
+#view-btns button{background:#07070f;border:1px solid #222238;color:#505078;font-family:Consolas,monospace;font-size:10px;padding:3px 8px;cursor:pointer;border-radius:2px;letter-spacing:.08em}
+#view-btns button.active{border-color:#4a9eff;color:#4a9eff}
+</style>
 <div id="page-graph" class="page" style="padding:0;overflow:hidden;position:relative">
-  <div id="graph-toolbar" style="position:absolute;top:8px;left:12px;z-index:10;display:flex;gap:8px;align-items:center">
-    <span style="font-size:10px;color:#505078;letter-spacing:0.15em">GRAPH</span>
-    <span id="graph-stats" style="font-size:10px;color:#4a4a70"></span>
-    <button onclick="loadGraph()" style="background:#0a0a12;border:1px solid #222238;color:#7878a8;font-family:Consolas,monospace;font-size:10px;padding:2px 8px;cursor:pointer">REFRESH</button>
-    <select id="graph-n" onchange="loadGraph()" style="background:#0a0a12;border:1px solid #222238;color:#7878a8;font-family:Consolas,monospace;font-size:10px;padding:2px 4px">
+  <div id="graph-toolbar" style="position:absolute;top:8px;left:12px;z-index:10;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <div id="view-btns" style="display:flex;gap:4px">
+      <button id="vbtn-3d"    class="active" onclick="setView('3d')">3D</button>
+      <button id="vbtn-force" onclick="setView('force')">FORCE</button>
+      <button id="vbtn-2d"    onclick="setView('2d')">SPIRAL</button>
+    </div>
+    <select id="graph-color" onchange="setColor(this.value)" title="Color by">
+      <option value="activation">color: activation</option>
+      <option value="novelty">color: novelty</option>
+      <option value="tension">color: tension</option>
+      <option value="coherence">color: coherence</option>
+      <option value="ambiguity">color: ambiguity</option>
+      <option value="momentum">color: momentum</option>
+      <option value="stability">color: stability</option>
+      <option value="persistence">color: persistence</option>
+    </select>
+    <select id="graph-size" onchange="setSize(this.value)" title="Size by">
+      <option value="activation">size: activation</option>
+      <option value="novelty">size: novelty</option>
+      <option value="tension">size: tension</option>
+      <option value="coherence">size: coherence</option>
+      <option value="persistence">size: persistence</option>
+    </select>
+    <select id="graph-n" onchange="loadGraph()" style="padding:3px 7px">
       <option value="200" selected>200 nodes</option>
       <option value="500">500 nodes</option>
       <option value="1000">1k nodes</option>
       <option value="2000">2k nodes</option>
     </select>
+    <button onclick="loadGraph()">REFRESH</button>
+    <span id="graph-stats" style="font-size:10px;color:#4a4a70;margin-left:4px"></span>
+    <span style="font-size:10px;color:#303048;margin-left:8px">scroll=zoom · drag=pan/rotate · mouse=fade</span>
   </div>
   <div id="graph-hover" style="position:absolute;bottom:16px;left:12px;z-index:10;pointer-events:none;display:none;background:rgba(7,7,9,0.96);border:1px solid #222238;border-radius:5px;padding:10px 14px;min-width:220px;max-width:320px;font-family:Consolas,'Courier New',monospace"></div>
-  <canvas id="graph-canvas" style="width:100%;height:calc(100vh - 40px);background:#050508;display:block"></canvas>
+  <canvas id="graph-canvas" style="width:100%;height:100vh;background:#030305;display:block"></canvas>
 </div>
 <script>
 (function(){
-  let _nodes=[], _links=[], _anim=null;
-  window._graphLoaded = false;
-  let _scale=1, _ox=0, _oy=0, _drag=null, _dragging=null, _hover=null;
+'use strict';
+// ── State ──────────────────────────────────────────────────────────────────────
+let _nodes=[], _links=[], _anim=null;
+window._graphLoaded=false;
+let _scale=1, _ox=0, _oy=0;
+let _drag=null, _dragging=null, _hover=null;
+let _mouse={x:-9999,y:-9999};
+let _view='3d';         // '3d' | 'force' | '2d'
+let _colorBy='activation';
+let _sizeBy='activation';
+let _rot={x:0.25, y:0.1};   // 3D euler angles (radians)
+let _rotDrag=null;
+let _forceReady=false;
+let _forceRunning=false;
 
-  function _canvasSize(){
-    const c = document.getElementById('graph-canvas');
-    // Use actual rendered size; fall back to window if hidden (offsetWidth=0)
-    const W = c.offsetWidth  || window.innerWidth  || 1200;
-    const H = c.offsetHeight || window.innerHeight - 40 || 700;
-    if(c.width!==W||c.height!==H){ c.width=W; c.height=H; }
-    return {W,H};
-  }
+// ── Color palette per metric ───────────────────────────────────────────────────
+const _PALETTE={
+  activation: [74,158,255],
+  novelty:    [68,255,136],
+  tension:    [255,68,68],
+  coherence:  [139,92,246],
+  ambiguity:  [245,158,11],
+  momentum:   [6,182,212],
+  stability:  [152,152,200],
+  persistence:[52,211,153],
+};
 
-  window.loadGraph = function(){
-    const n = document.getElementById('graph-n').value;
-    document.getElementById('graph-stats').textContent = 'loading…';
-    fetch('/api/graph3d?n='+n).then(r=>r.json()).then(d=>{
-      // Normalise nodes — server gives {id, label, x, y, size, activation, ...}
-      _nodes = (d.nodes||[]).map(n=>({
-        id:          n.id,
-        text:        n.label||String(n.id),
-        x:           n.x||0,
-        y:           n.y||0,
-        size:        n.size||3,
-        _x:          n.x||0,
-        _y:          n.y||0,
-        activation:  n.activation  ?? null,
-        ambiguity:   n.ambiguity   ?? null,
-        tension:     n.tension     ?? null,
-        coherence:   n.coherence   ?? null,
-        novelty:     n.novelty     ?? null,
-        momentum:    n.momentum    ?? null,
-        stability:   n.stability   ?? null,
-        persistence: n.persistence ?? null,
-      }));
-      // Build id→node map — use String(id) as key so 0 works correctly
-      const nodeMap = {};
-      _nodes.forEach(n=>{ nodeMap[String(n.id)] = n; });
-      // Normalise links — source/target are numeric rank ids
-      _links = (d.links||[]).map(l=>{
-        const si = String(l.source?.id ?? l.source);
-        const ti = String(l.target?.id ?? l.target);
-        return {_s: nodeMap[si], _t: nodeMap[ti]};
-      }).filter(l=>l._s&&l._t);
-      window._graphLoaded = true;
-      document.getElementById('graph-stats').textContent =
-        _nodes.length+' nodes · '+_links.length+' edges · '+d.total_nodes+' total';
-      _startDraw();
-    }).catch(e=>{ document.getElementById('graph-stats').textContent='error: '+e; });
-  };
+function _nodeColor(n, metric, alpha){
+  const v=Math.max(0,Math.min(1,n[metric]??0));
+  const [r,g,b]=_PALETTE[metric]||_PALETTE.activation;
+  const a=(alpha??1)*(0.25+v*0.75);
+  return `rgba(${r},${g},${b},${Math.min(1,a)})`;
+}
 
-  function _startDraw(){
-    if(_anim) cancelAnimationFrame(_anim);
-    function frame(){ _draw(); _anim=requestAnimationFrame(frame); }
-    _anim = requestAnimationFrame(frame);
-  }
+// ── Distance fade from mouse ───────────────────────────────────────────────────
+// Nodes close to the pointer are at full brightness; distant nodes fade to ~8%
+function _fade(screenX, screenY){
+  const dx=screenX-_mouse.x, dy=screenY-_mouse.y;
+  const d=Math.sqrt(dx*dx+dy*dy);
+  // Sigmoid-style: full within 120px, fades to 0.08 at 600px
+  return Math.max(0.08, 1/(1+Math.pow(d/180,1.8)));
+}
 
-  function _draw(){
-    const {W,H} = _canvasSize();
-    const canvas = document.getElementById('graph-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
-    ctx.save();
-    ctx.translate(W/2+_ox, H/2+_oy);
-    ctx.scale(_scale, _scale);
+// ── Canvas sizing ──────────────────────────────────────────────────────────────
+function _canvasSize(){
+  const c=document.getElementById('graph-canvas');
+  const W=c.clientWidth||window.innerWidth||1200;
+  const H=c.clientHeight||window.innerHeight||700;
+  if(c.width!==W||c.height!==H){c.width=W;c.height=H;}
+  return {W,H};
+}
 
-    // Edges — very faint so nodes stay readable
-    ctx.strokeStyle='rgba(50,50,100,0.22)'; ctx.lineWidth=0.6/Math.max(_scale,0.1);
-    ctx.beginPath();
-    _links.forEach(l=>{
-      ctx.moveTo(l._s.x, l._s.y); ctx.lineTo(l._t.x, l._t.y);
-    });
-    ctx.stroke();
-
-    // Nodes — no on-canvas labels; hover tooltip goes to #graph-hover div
-    _nodes.forEach(n=>{
-      const isHover = n===_hover;
-      const r = isHover ? n.size+2 : n.size;
-      let col;
-      if(isHover)       col='#44ff88';
-      else if(n.size>7) col='#4a9eff';
-      else if(n.size>5) col='#2a5090';
-      else if(n.size>3) col='#1e2a50';
-      else              col='#141428';
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, r, 0, Math.PI*2);
-      ctx.fillStyle=col; ctx.fill();
-      if(isHover){ ctx.strokeStyle='#44ff8866'; ctx.lineWidth=1.5/_scale; ctx.stroke(); }
-    });
-
-    // Labels only when zoomed in enough — top nodes only
-    if(_scale > 1.8){
-      ctx.font=`${10/_scale}px Consolas,monospace`;
-      ctx.fillStyle='#9898c8';
-      const visible = _nodes.filter(n=>{
-        const sx=(n.x*_scale)+(W/2+_ox), sy=(n.y*_scale)+(H/2+_oy);
-        return sx>-50&&sx<W+50&&sy>-20&&sy<H+20;
-      });
-      visible.forEach(n=>{
-        if(n.size>5||n===_hover){
-          ctx.fillText(n.text.slice(0,32), n.x+n.size+2, n.y+3/_scale);
-        }
-      });
-    }
-    ctx.restore();
-  }
-
-  function _toGraph(ex,ey){
-    const {W,H}=_canvasSize();
-    return {x:(ex-(W/2+_ox))/_scale, y:(ey-(H/2+_oy))/_scale};
-  }
-
-  document.addEventListener('DOMContentLoaded',function(){
-    const canvas=document.getElementById('graph-canvas');
-    canvas.addEventListener('mousedown',e=>{
-      _drag={ex:e.clientX,ey:e.clientY,ox:_ox,oy:_oy};
-      const g=_toGraph(e.clientX,e.clientY);
-      _dragging=_nodes.find(n=>Math.hypot(n.x-g.x,n.y-g.y)<12)||null;
-    });
-    canvas.addEventListener('mousemove',e=>{
-      if(_drag&&!_dragging){ _ox=_drag.ox+(e.clientX-_drag.ex); _oy=_drag.oy+(e.clientY-_drag.ey); }
-      if(_dragging){ const g=_toGraph(e.clientX,e.clientY); _dragging.x=g.x; _dragging.y=g.y; }
-      const g=_toGraph(e.clientX,e.clientY);
-      _hover=_nodes.find(n=>Math.hypot(n.x-g.x,n.y-g.y)<Math.max(14,n.size*1.5))||null;
-      const hd=document.getElementById('graph-hover');
-      if(!_hover){ hd.style.display='none'; return; }
-      const n=_hover;
-      function bar(val,color){
-        if(val===null) return '<span style="color:#4a4a70">—</span>';
-        const pct=Math.round(val*100);
-        return `<span style="display:inline-block;width:72px;height:6px;background:#111120;border-radius:2px;vertical-align:middle;margin-left:6px"><span style="display:block;width:${pct}%;height:100%;background:${color};border-radius:2px"></span></span><span style="color:#6868a0;font-size:10px;margin-left:4px">${pct}</span>`;
-      }
-      function row(label,val,color){
-        return `<div style="display:flex;justify-content:space-between;align-items:center;margin:3px 0"><span style="color:#505078;font-size:10px;letter-spacing:.1em;text-transform:uppercase;min-width:80px">${label}</span>${bar(val,color)}</div>`;
-      }
-      hd.innerHTML=`
-        <div style="color:#b0b0d8;font-size:12px;font-weight:500;margin-bottom:8px;white-space:normal;line-height:1.4;word-break:break-word">${n.text}</div>
-        <div style="border-top:1px solid #1a1a28;padding-top:7px">
-          ${row('activation', n.activation,  '#4a9eff')}
-          ${row('novelty',    n.novelty,     '#44ff88')}
-          ${row('tension',    n.tension,     '#ff4444')}
-          ${row('coherence',  n.coherence,   '#8b5cf6')}
-          ${row('ambiguity',  n.ambiguity,   '#f59e0b')}
-          ${row('momentum',   n.momentum,    '#06b6d4')}
-          ${row('stability',  n.stability,   '#9898c8')}
-          ${row('persistence',n.persistence, '#34d399')}
-        </div>`;
-      hd.style.display='block';
-    });
-    canvas.addEventListener('mouseup',()=>{ _drag=null; _dragging=null; });
-    canvas.addEventListener('wheel',e=>{
-      e.preventDefault();
-      const f=e.deltaY>0?0.85:1.18;
-      _scale=Math.max(0.05,Math.min(20,_scale*f));
-    },{passive:false});
-    window.addEventListener('resize',()=>_canvasSize());
+// ── 3D Fibonacci sphere placement ─────────────────────────────────────────────
+function _placeSphere(nodes, R){
+  const n=nodes.length, gr=(1+Math.sqrt(5))/2;
+  nodes.forEach((nd,i)=>{
+    const th=Math.acos(1-2*(i+.5)/n);
+    const ph=2*Math.PI*i/gr;
+    nd.sx=R*Math.sin(th)*Math.cos(ph);
+    nd.sy=R*Math.sin(th)*Math.sin(ph);
+    nd.sz=R*Math.cos(th);
   });
+}
+
+// ── 3D → screen projection ────────────────────────────────────────────────────
+function _project(nd, W, H){
+  let {sx,sy,sz}=nd;
+  // Rotate Y
+  const cy=Math.cos(_rot.y),sy2=Math.sin(_rot.y);
+  let x1=cy*sx+sy2*sz, z1=-sy2*sx+cy*sz;
+  // Rotate X
+  const cx=Math.cos(_rot.x),sx2=Math.sin(_rot.x);
+  let y1=cx*sy-sx2*z1, z2=sx2*sy+cx*z1;
+  const fov=700, persp=fov/(fov+z2+400);
+  return {
+    px:W/2+x1*persp*_scale+_ox,
+    py:H/2+y1*persp*_scale+_oy,
+    depth:z2, persp,
+  };
+}
+
+// ── Force layout ──────────────────────────────────────────────────────────────
+const _REPEL=3000, _SPRING_LEN=60, _SPRING_K=0.04, _DAMP=0.82;
+
+function _forceInit(nodes, W, H){
+  nodes.forEach(nd=>{
+    if(nd.fx==null){
+      nd.fx=nd.x||(Math.random()-0.5)*400;
+      nd.fy=nd.y||(Math.random()-0.5)*400;
+    }
+    nd.vx=nd.vy=0;
+  });
+}
+
+function _forceStep(nodes, links){
+  const n=nodes.length;
+  // Barnes-Hut approximation skipped for simplicity — sample repulsion
+  const SAMPLE=Math.min(n,300);
+  for(let i=0;i<SAMPLE;i++){
+    for(let j=i+1;j<SAMPLE;j++){
+      const dx=nodes[j].fx-nodes[i].fx, dy=nodes[j].fy-nodes[i].fy;
+      const d2=dx*dx+dy*dy+1;
+      const f=_REPEL/d2;
+      const fx=dx/Math.sqrt(d2)*f, fy=dy/Math.sqrt(d2)*f;
+      nodes[i].vx-=fx; nodes[i].vy-=fy;
+      nodes[j].vx+=fx; nodes[j].vy+=fy;
+    }
+  }
+  links.forEach(l=>{
+    if(!l._s||!l._t)return;
+    const dx=l._t.fx-l._s.fx, dy=l._t.fy-l._s.fy;
+    const d=Math.max(Math.sqrt(dx*dx+dy*dy),1);
+    const f=(d-_SPRING_LEN)*_SPRING_K;
+    const fx=dx/d*f, fy=dy/d*f;
+    if(!l._s._pinned){l._s.vx+=fx;l._s.vy+=fy;}
+    if(!l._t._pinned){l._t.vx-=fx;l._t.vy-=fy;}
+  });
+  nodes.forEach(nd=>{
+    if(nd._pinned)return;
+    nd.vx*=_DAMP; nd.vy*=_DAMP;
+    nd.fx+=nd.vx; nd.fy+=nd.vy;
+  });
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────────────
+function _draw(){
+  const {W,H}=_canvasSize();
+  const canvas=document.getElementById('graph-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#030305'; ctx.fillRect(0,0,W,H);
+
+  if(_view==='3d'){
+    _draw3d(ctx,W,H);
+  } else if(_view==='force'){
+    if(_forceRunning) _forceStep(_nodes,_links);
+    _draw2d(ctx,W,H,'force');
+  } else {
+    _draw2d(ctx,W,H,'spiral');
+  }
+}
+
+function _draw3d(ctx,W,H){
+  // Project all nodes
+  const proj=_nodes.map(nd=>({nd,... _project(nd,W,H)}));
+  // Sort back-to-front by depth
+  proj.sort((a,b)=>a.depth-b.depth);
+
+  // Draw edges (only for nodes in front half)
+  ctx.lineWidth=0.5;
+  _links.forEach(l=>{
+    if(!l._s||!l._t)return;
+    const pa=_project(l._s,W,H), pb=_project(l._t,W,H);
+    const fa=_fade(pa.px,pa.py)*0.25, fb=_fade(pb.px,pb.py)*0.25;
+    const f=Math.min(fa,fb);
+    if(f<0.03)return;
+    ctx.strokeStyle=`rgba(50,60,120,${f})`;
+    ctx.beginPath(); ctx.moveTo(pa.px,pa.py); ctx.lineTo(pb.px,pb.py); ctx.stroke();
+  });
+
+  // Draw nodes front-to-back (reversed so closer ones render on top)
+  proj.reverse().forEach(({nd,px,py,persp,depth})=>{
+    const f=_fade(px,py);
+    const v=Math.max(0,Math.min(1,nd[_sizeBy]??nd.size/9??0.3));
+    const r=Math.max(1.5, (2+v*7)*persp*_scale*0.6);
+    const isHov=nd===_hover;
+
+    // Glow for hot nodes
+    if((v>0.6||isHov) && f>0.3){
+      const [R2,G2,B2]=_PALETTE[_colorBy]||_PALETTE.activation;
+      const g=ctx.createRadialGradient(px,py,0,px,py,r*2.5);
+      g.addColorStop(0,`rgba(${R2},${G2},${B2},${f*0.35})`);
+      g.addColorStop(1,`rgba(${R2},${G2},${B2},0)`);
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(px,py,r*2.5,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+    ctx.fillStyle=isHov?`rgba(68,255,136,${f})`:_nodeColor(nd,_colorBy,f);
+    ctx.fill();
+
+    if(isHov){ctx.strokeStyle=`rgba(68,255,136,${f*0.6})`;ctx.lineWidth=1.2;ctx.stroke();}
+
+    // Label near mouse or big nodes
+    if(f>0.7&&(v>0.7||isHov)){
+      ctx.font=`${Math.max(9,10*persp)}px Consolas,monospace`;
+      ctx.fillStyle=`rgba(176,176,216,${f})`;
+      ctx.fillText(nd.text.slice(0,28),px+r+3,py+3);
+    }
+  });
+}
+
+function _draw2d(ctx,W,H,mode){
+  const toSx = nd=> mode==='force'
+    ? W/2+nd.fx*_scale+_ox
+    : W/2+nd.x*_scale+_ox;
+  const toSy = nd=> mode==='force'
+    ? H/2+nd.fy*_scale+_oy
+    : H/2+nd.y*_scale+_oy;
+
+  // Edges
+  ctx.lineWidth=0.5;
+  _links.forEach(l=>{
+    if(!l._s||!l._t)return;
+    const ax=toSx(l._s),ay=toSy(l._s),bx=toSx(l._t),by=toSy(l._t);
+    const f=Math.min(_fade(ax,ay),_fade(bx,by))*0.3;
+    if(f<0.02)return;
+    ctx.strokeStyle=`rgba(50,60,120,${f})`;
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+  });
+
+  // Nodes
+  _nodes.forEach(nd=>{
+    const sx=toSx(nd),sy=toSy(nd);
+    const f=_fade(sx,sy);
+    const v=Math.max(0,Math.min(1,nd[_sizeBy]??nd.size/9??0.3));
+    const r=Math.max(1.5,(2+v*7)*_scale*0.6);
+    const isHov=nd===_hover;
+
+    if((v>0.6||isHov)&&f>0.3){
+      const [R2,G2,B2]=_PALETTE[_colorBy]||_PALETTE.activation;
+      const g=ctx.createRadialGradient(sx,sy,0,sx,sy,r*2.5);
+      g.addColorStop(0,`rgba(${R2},${G2},${B2},${f*0.3})`);
+      g.addColorStop(1,`rgba(${R2},${G2},${B2},0)`);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(sx,sy,r*2.5,0,Math.PI*2);ctx.fill();
+    }
+
+    ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);
+    ctx.fillStyle=isHov?`rgba(68,255,136,${f})`:_nodeColor(nd,_colorBy,f);
+    ctx.fill();
+
+    if(isHov){ctx.strokeStyle=`rgba(68,255,136,${f*0.6})`;ctx.lineWidth=1.2;ctx.stroke();}
+    if(f>0.7&&(v>0.7||isHov)){
+      ctx.font=`${10/_scale}px Consolas,monospace`;
+      ctx.fillStyle=`rgba(176,176,216,${f})`;
+      ctx.fillText(nd.text.slice(0,28),sx+r+3,sy+3);
+    }
+  });
+}
+
+// ── Hover card ────────────────────────────────────────────────────────────────
+function _showHover(nd){
+  const hd=document.getElementById('graph-hover');
+  if(!nd){hd.style.display='none';return;}
+  function bar(val,color){
+    if(val===null||val===undefined)return '<span style="color:#4a4a70">—</span>';
+    const pct=Math.round(val*100);
+    return `<span style="display:inline-flex;align-items:center;gap:4px">
+      <span style="display:inline-block;width:64px;height:5px;background:#111120;border-radius:2px">
+        <span style="display:block;width:${pct}%;height:100%;background:${color};border-radius:2px"></span>
+      </span>
+      <span style="color:#6868a0;font-size:10px">${pct}</span>
+    </span>`;
+  }
+  function row(lbl,val,col){
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0">
+      <span style="color:#505078;font-size:10px;letter-spacing:.08em;text-transform:uppercase;min-width:78px">${lbl}</span>
+      ${bar(val,col)}
+    </div>`;
+  }
+  hd.innerHTML=`
+    <div style="color:#b0b0d8;font-size:11px;font-weight:500;margin-bottom:7px;white-space:normal;line-height:1.4;word-break:break-word">${nd.text}</div>
+    <div style="border-top:1px solid #1a1a28;padding-top:6px">
+      ${row('activation', nd.activation,  '#4a9eff')}
+      ${row('novelty',    nd.novelty,     '#44ff88')}
+      ${row('tension',    nd.tension,     '#ff4444')}
+      ${row('coherence',  nd.coherence,   '#8b5cf6')}
+      ${row('ambiguity',  nd.ambiguity,   '#f59e0b')}
+      ${row('momentum',   nd.momentum,    '#06b6d4')}
+      ${row('stability',  nd.stability,   '#9898c8')}
+      ${row('persistence',nd.persistence, '#34d399')}
+    </div>`;
+  hd.style.display='block';
+}
+
+// ── Load graph data ────────────────────────────────────────────────────────────
+window.loadGraph=function(){
+  const n=document.getElementById('graph-n').value;
+  document.getElementById('graph-stats').textContent='loading…';
+  fetch('/api/graph3d?n='+n).then(r=>r.json()).then(d=>{
+    _nodes=(d.nodes||[]).map(nd=>({
+      id:nd.id, text:nd.label||String(nd.id),
+      x:nd.x||0, y:nd.y||0, size:nd.size||3,
+      activation:nd.activation??0, novelty:nd.novelty??0,
+      tension:nd.tension??0, coherence:nd.coherence??0,
+      ambiguity:nd.ambiguity??0, momentum:nd.momentum??0,
+      stability:nd.stability??0, persistence:nd.persistence??0,
+      sx:0,sy:0,sz:0, fx:null,fy:null,vx:0,vy:0,
+    }));
+    const nodeMap={};
+    _nodes.forEach(nd=>{nodeMap[String(nd.id)]=nd;});
+    _links=(d.links||[]).map(l=>{
+      const s=nodeMap[String(l.source?.id??l.source)];
+      const t=nodeMap[String(l.target?.id??l.target)];
+      return {_s:s,_t:t};
+    }).filter(l=>l._s&&l._t);
+    window._graphLoaded=true;
+    document.getElementById('graph-stats').textContent=
+      _nodes.length+' nodes · '+_links.length+' edges · '+d.total_nodes+' total';
+
+    const {W,H}=_canvasSize();
+    const R=Math.min(W,H)*0.36;
+    _placeSphere(_nodes,R);
+    _forceInit(_nodes,W,H);
+    _forceReady=true;
+    _forceRunning=(_view==='force');
+    if(!_anim){ (function frame(){_draw();_anim=requestAnimationFrame(frame);})(); }
+  }).catch(e=>{document.getElementById('graph-stats').textContent='error: '+e;});
+};
+
+// ── View / color / size controls ──────────────────────────────────────────────
+window.setView=function(v){
+  _view=v;
+  _forceRunning=(v==='force');
+  ['3d','force','2d'].forEach(k=>{
+    const b=document.getElementById('vbtn-'+k);
+    if(b) b.className=k===v?'active':'';
+  });
+};
+window.setColor=function(v){_colorBy=v;};
+window.setSize=function(v){_sizeBy=v;};
+
+// ── Input events ──────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  const canvas=document.getElementById('graph-canvas');
+
+  canvas.addEventListener('mousemove',e=>{
+    _mouse.x=e.clientX; _mouse.y=e.clientY;
+
+    // Pan / rotate / drag node
+    if(_drag){
+      if(_dragging){
+        // Move node in current view
+        if(_view==='force'){
+          _dragging.fx+=e.clientX-_drag.ex;
+          _dragging.fy+=e.clientY-_drag.ey;
+          _dragging.vx=_dragging.vy=0;
+          _drag.ex=e.clientX; _drag.ey=e.clientY;
+        } else if(_view==='2d'){
+          const {W,H}=_canvasSize();
+          _dragging.x=(e.clientX-W/2-_ox)/_scale;
+          _dragging.y=(e.clientY-H/2-_oy)/_scale;
+        }
+      } else if(_view==='3d'){
+        // Rotate sphere
+        _rot.y+=(e.clientX-_drag.ex)*0.005;
+        _rot.x+=(e.clientY-_drag.ey)*0.005;
+        _drag.ex=e.clientX; _drag.ey=e.clientY;
+      } else {
+        // Pan
+        _ox=_drag.ox+(e.clientX-_drag.ex);
+        _oy=_drag.oy+(e.clientY-_drag.ey);
+      }
+    }
+
+    // Hover detection
+    const {W,H}=_canvasSize();
+    let best=null, bestD=999;
+    _nodes.forEach(nd=>{
+      let sx,sy;
+      if(_view==='3d'){
+        const p=_project(nd,W,H);
+        sx=p.px;sy=p.py;
+      } else if(_view==='force'){
+        sx=W/2+nd.fx*_scale+_ox;sy=H/2+nd.fy*_scale+_oy;
+      } else {
+        sx=W/2+nd.x*_scale+_ox;sy=H/2+nd.y*_scale+_oy;
+      }
+      const d=Math.hypot(sx-e.clientX,sy-e.clientY);
+      if(d<bestD&&d<22){bestD=d;best=nd;}
+    });
+    _hover=best;
+    _showHover(_hover);
+  });
+
+  canvas.addEventListener('mousedown',e=>{
+    _drag={ex:e.clientX,ey:e.clientY,ox:_ox,oy:_oy};
+    const {W,H}=_canvasSize();
+    _dragging=null;
+    _nodes.forEach(nd=>{
+      let sx,sy;
+      if(_view==='3d'){const p=_project(nd,W,H);sx=p.px;sy=p.py;}
+      else if(_view==='force'){sx=W/2+nd.fx*_scale+_ox;sy=H/2+nd.fy*_scale+_oy;}
+      else{sx=W/2+nd.x*_scale+_ox;sy=H/2+nd.y*_scale+_oy;}
+      if(Math.hypot(sx-e.clientX,sy-e.clientY)<14){
+        _dragging=nd;nd._pinned=true;
+      }
+    });
+  });
+
+  canvas.addEventListener('mouseup',()=>{
+    if(_dragging){_dragging._pinned=false;}
+    _drag=null;_dragging=null;
+  });
+
+  canvas.addEventListener('mouseleave',()=>{
+    _mouse.x=-9999;_mouse.y=-9999;_hover=null;_showHover(null);
+  });
+
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    _scale=Math.max(0.04,Math.min(30,_scale*(e.deltaY>0?0.88:1.14)));
+  },{passive:false});
+
+  window.addEventListener('resize',()=>_canvasSize());
+});
 })();
 </script>
 
