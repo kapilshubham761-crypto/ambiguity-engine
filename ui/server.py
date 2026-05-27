@@ -160,7 +160,16 @@ def api_state():
         'feed': feed[:50], 'perf': perf, 'currently_reading': cr,
         'now': datetime.now().strftime('%H:%M:%S'),
         'date': datetime.now().strftime('%Y-%m-%d'),
+        'browser': _browser_status(),
     }
+
+
+def _browser_status() -> dict:
+    try:
+        from browser_source import AutonomousBrowser
+        return AutonomousBrowser.get().snapshot()
+    except Exception:
+        return {'available': False, 'active': False}
 
 
 def api_field():
@@ -383,13 +392,12 @@ def api_graph3d(max_nodes: int = 5000) -> dict:
         display_limit = min(max_nodes, HARD_CAP)
 
         # Get top-N texts by JAM field activation (or just index order if field unavailable)
-        field_data: dict = {}
+        field_data: dict = {}    # text → full props dict
         try:
             from jam_field import JamField
             field = JamField.get()
-            # top() reads stored activation directly — avoids decay^elapsed for 20K nodes
             for text, props in field.top(display_limit, by='activation'):
-                field_data[text] = props.get('activation', 0.0)
+                field_data[text] = props
         except Exception:
             pass
 
@@ -398,7 +406,7 @@ def api_graph3d(max_nodes: int = 5000) -> dict:
 
         if field_data:
             ranked = sorted(
-                [(t, field_data.get(t, 0.0)) for t in all_texts],
+                [(t, field_data.get(t, {}).get('activation', 0.0)) for t in all_texts],
                 key=lambda x: -x[1]
             )[:display_limit]
         else:
@@ -413,15 +421,23 @@ def api_graph3d(max_nodes: int = 5000) -> dict:
             t      = rank / max(n - 1, 1)
             angle  = t * 2 * _math.pi * max(3, n // 50)
             radius = scale * (0.1 + 0.9 * t)
-            # Keep sizes small — large nodes were rendering as huge unreadable discs
             size   = max(2, min(9, _math.log1p(max(act, 0.001)) * 3 + 2))
             label  = text if len(text) <= 40 else text[:39] + '…'
+            props  = field_data.get(text, {})
             nodes.append({
-                'id':    rank,
-                'label': label,
-                'x':     round(radius * _math.cos(angle), 1),
-                'y':     round(radius * _math.sin(angle), 1),
-                'size':  round(size, 1),
+                'id':         rank,
+                'label':      label,
+                'x':          round(radius * _math.cos(angle), 1),
+                'y':          round(radius * _math.sin(angle), 1),
+                'size':       round(size, 1),
+                'activation': round(float(props.get('activation',  act)),  3),
+                'ambiguity':  round(float(props.get('ambiguity',   0.0)),  3),
+                'tension':    round(float(props.get('tension',     0.0)),  3),
+                'coherence':  round(float(props.get('coherence',   0.0)),  3),
+                'novelty':    round(float(props.get('novelty',     0.0)),  3),
+                'momentum':   round(float(props.get('momentum',    0.0)),  3),
+                'stability':  round(float(props.get('stability',   0.0)),  3),
+                'persistence':round(float(props.get('persistence', 0.0)),  3),
             })
 
         # Build edges from k-NN similarity — only between displayed nodes
@@ -1706,7 +1722,7 @@ pre.rc{background:#07070a;border:1px solid #1a1a28;padding:10px;font-size:10px;
       <option value="2000">2k nodes</option>
     </select>
   </div>
-  <div id="graph-hover" style="position:absolute;bottom:16px;left:12px;z-index:10;font-size:11px;color:#b0b0d8;pointer-events:none;background:rgba(5,5,8,0.85);padding:2px 8px;border-radius:3px;max-width:60vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+  <div id="graph-hover" style="position:absolute;bottom:16px;left:12px;z-index:10;pointer-events:none;display:none;background:rgba(7,7,9,0.96);border:1px solid #222238;border-radius:5px;padding:10px 14px;min-width:220px;max-width:320px;font-family:Consolas,'Courier New',monospace"></div>
   <canvas id="graph-canvas" style="width:100%;height:calc(100vh - 40px);background:#050508;display:block"></canvas>
 </div>
 <script>
@@ -1728,15 +1744,23 @@ pre.rc{background:#07070a;border:1px solid #1a1a28;padding:10px;font-size:10px;
     const n = document.getElementById('graph-n').value;
     document.getElementById('graph-stats').textContent = 'loading…';
     fetch('/api/graph3d?n='+n).then(r=>r.json()).then(d=>{
-      // Normalise nodes — server gives {id, label, x, y, size}
+      // Normalise nodes — server gives {id, label, x, y, size, activation, ...}
       _nodes = (d.nodes||[]).map(n=>({
-        id:   n.id,
-        text: n.label||String(n.id),
-        x:    n.x||0,
-        y:    n.y||0,
-        size: n.size||3,
-        _x:   n.x||0,   // mutable draw pos (pan/zoom happen via transform)
-        _y:   n.y||0,
+        id:          n.id,
+        text:        n.label||String(n.id),
+        x:           n.x||0,
+        y:           n.y||0,
+        size:        n.size||3,
+        _x:          n.x||0,
+        _y:          n.y||0,
+        activation:  n.activation  ?? null,
+        ambiguity:   n.ambiguity   ?? null,
+        tension:     n.tension     ?? null,
+        coherence:   n.coherence   ?? null,
+        novelty:     n.novelty     ?? null,
+        momentum:    n.momentum    ?? null,
+        stability:   n.stability   ?? null,
+        persistence: n.persistence ?? null,
       }));
       // Build id→node map — use String(id) as key so 0 works correctly
       const nodeMap = {};
@@ -1829,8 +1853,29 @@ pre.rc{background:#07070a;border:1px solid #1a1a28;padding:10px;font-size:10px;
       const g=_toGraph(e.clientX,e.clientY);
       _hover=_nodes.find(n=>Math.hypot(n.x-g.x,n.y-g.y)<Math.max(14,n.size*1.5))||null;
       const hd=document.getElementById('graph-hover');
-      hd.textContent=_hover?_hover.text:'';
-      hd.style.display=_hover?'block':'none';
+      if(!_hover){ hd.style.display='none'; return; }
+      const n=_hover;
+      function bar(val,color){
+        if(val===null) return '<span style="color:#4a4a70">—</span>';
+        const pct=Math.round(val*100);
+        return `<span style="display:inline-block;width:72px;height:6px;background:#111120;border-radius:2px;vertical-align:middle;margin-left:6px"><span style="display:block;width:${pct}%;height:100%;background:${color};border-radius:2px"></span></span><span style="color:#6868a0;font-size:10px;margin-left:4px">${pct}</span>`;
+      }
+      function row(label,val,color){
+        return `<div style="display:flex;justify-content:space-between;align-items:center;margin:3px 0"><span style="color:#505078;font-size:10px;letter-spacing:.1em;text-transform:uppercase;min-width:80px">${label}</span>${bar(val,color)}</div>`;
+      }
+      hd.innerHTML=`
+        <div style="color:#b0b0d8;font-size:12px;font-weight:500;margin-bottom:8px;white-space:normal;line-height:1.4;word-break:break-word">${n.text}</div>
+        <div style="border-top:1px solid #1a1a28;padding-top:7px">
+          ${row('activation', n.activation,  '#4a9eff')}
+          ${row('novelty',    n.novelty,     '#44ff88')}
+          ${row('tension',    n.tension,     '#ff4444')}
+          ${row('coherence',  n.coherence,   '#8b5cf6')}
+          ${row('ambiguity',  n.ambiguity,   '#f59e0b')}
+          ${row('momentum',   n.momentum,    '#06b6d4')}
+          ${row('stability',  n.stability,   '#9898c8')}
+          ${row('persistence',n.persistence, '#34d399')}
+        </div>`;
+      hd.style.display='block';
     });
     canvas.addEventListener('mouseup',()=>{ _drag=null; _dragging=null; });
     canvas.addEventListener('wheel',e=>{

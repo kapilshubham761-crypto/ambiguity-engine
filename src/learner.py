@@ -664,6 +664,44 @@ class AutoLearner:
             except Exception:
                 pass
 
+            # ── Autonomous browser session (every ~5 min) ───────────────────
+            try:
+                from browser_source import AutonomousBrowser
+                ab = AutonomousBrowser.get()
+                if ab.is_available() and not ab._active:
+                    since_last = time.time() - ab._last_session_ts
+                    if since_last > 300:   # at most once per 5 minutes
+                        # Pick topic from JAM field top active concepts
+                        topic = ''
+                        concepts = []
+                        if self._field is not None:
+                            top = self._field.top(10, by='activation')
+                            if top:
+                                # Pick a medium-activation node (not the most stale top-1)
+                                idx = min(3, len(top) - 1)
+                                topic    = top[idx][0]
+                                concepts = [t for t, _ in top[:8]]
+                        if topic:
+                            def _browser_session():
+                                results = ab.session(topic, concepts)
+                                if results and self._index is not None:
+                                    for r in results:
+                                        try:
+                                            from extractor import extract
+                                            cs = extract(r['text'][:3000])
+                                            if cs:
+                                                self._index.update(cs)
+                                                if self._field:
+                                                    node_ids = [c.text for c in cs]
+                                                    self._field.ingest(cs, node_ids)
+                                        except Exception:
+                                            pass
+                            threading.Thread(target=_browser_session, daemon=True,
+                                             name='browser').start()
+                            log.info('browser session started: topic="%s"', topic[:50])
+            except Exception as _be:
+                log.debug('browser subsys error: %s', _be)
+
     # ── Background cache pre-warmer ───────────────────────────────────────────
 
     def _prefetch_worker(self) -> None:
